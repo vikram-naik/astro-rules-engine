@@ -2,10 +2,13 @@ from fastapi import FastAPI
 from core.db import create_db_and_tables
 from api.routes_rules import router as rules_router
 from api.routes_eval import router as eval_router
+from core.logger import setup_logger, LoggingMiddleware
+
+logger = setup_logger("INFO")
 
 
 app = FastAPI(title="Astro Rules Engine")
-
+app.add_middleware(LoggingMiddleware, logger=logger)
 
 @app.on_event("startup")
 def on_startup():

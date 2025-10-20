@@ -1,4 +1,6 @@
 from fastapi import APIRouter
+from backend.app.core.config import Settings
+from backend.app.core.market_data import MarketDataProvider
 from core.db import get_session
 from core.models import RuleModel
 from core.schemas import EvaluateRequest, RuleCreate, Condition, Outcome
@@ -9,6 +11,8 @@ from core.rules_engine import AstroRulesEngine
 
 
 router = APIRouter()
+mdp = MarketDataProvider()
+
 
 
 @router.post("/")
@@ -37,4 +41,11 @@ def evaluate(req: EvaluateRequest):
                 evs = engine.evaluate_rule(r, dt)
                 events.extend(evs)
                 d = d + timedelta(days=1)
-    return {"count": len(events), "events": events}
+
+    market_df = mdp.fetch_sector_data(Settings.default_sector_ticker, start, end)
+    overall_return = mdp.compute_return_window(market_df, start, end)
+    return {
+        "count": len(events),
+        "events": events,
+        "market_return": round(overall_return * 100, 2)
+    }
