@@ -19,12 +19,12 @@ def evaluate(req: EvaluateRequest):
         return {"error": "end_date must be >= start_date"}
     with get_session() as session:
         models = session.exec(select(RuleModel).where(RuleModel.enabled == True)).all()
-        rules = []
-        for m in models:
-            conds = [Condition(**c) for c in json.loads(m.conditions_json or "[]")]
-            outs = [Outcome(**o) for o in json.loads(m.outcomes_json or "[]")]
-            rules.append(RuleCreate(rule_id=m.rule_id, name=m.name, description=m.description,
-            conditions=conds, outcomes=outs, enabled=m.enabled, confidence=m.confidence))
+    rules = []
+    for m in models:
+        conds = [Condition(**c) for c in json.loads(m.conditions_json or "[]")]
+        outs = [Outcome(**o) for o in json.loads(m.outcomes_json or "[]")]
+        rules.append(RuleCreate(rule_id=m.rule_id, name=m.name, description=m.description,
+        conditions=conds, outcomes=outs, enabled=m.enabled, confidence=m.confidence))
 
 
         provider = AstroProvider()
