@@ -10,3 +10,4 @@ __pycache__/
 backend.zip
 data_cache/
 backend/scripts/restructure_core.sh
+backend/Observations.txt
