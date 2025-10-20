@@ -5,8 +5,8 @@ Verifies that get_provider() dynamically loads and instantiates
 the correct provider classes via importlib.
 """
 
-from app.core.factories.provider_factory import get_provider
-from app.core.interfaces.i_astro_provider import IAstroProvider
+from core.astro.factories.provider_factory import get_provider
+from core.astro.interfaces.i_astro_provider import IAstroProvider
 import pytest
 
 

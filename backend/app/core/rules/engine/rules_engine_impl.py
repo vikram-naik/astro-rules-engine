@@ -1,8 +1,8 @@
 from datetime import datetime
 from typing import List, Dict, Any
-from core.interfaces.i_rules_engine import IRulesEngine
-from core.interfaces.i_astro_provider import IAstroProvider
-from core.schemas import RuleCreate, Condition, Relation
+from core.rules.interfaces.i_rules_engine import IRulesEngine
+from core.astro.interfaces.i_astro_provider import IAstroProvider
+from core.common.schemas import RuleCreate, Condition, Relation
 
 class RulesEngineImpl(IRulesEngine):
     """Concrete rules engine depending on IAstroProvider abstraction."""

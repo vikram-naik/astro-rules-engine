@@ -1,14 +1,14 @@
 import importlib
 import logging
 from typing import Type
-from app.core.interfaces.i_astro_provider import IAstroProvider
+from core.astro.interfaces.i_astro_provider import IAstroProvider
 
 logger = logging.getLogger("astro.factory")
 
 # Mapping of short names to fully qualified provider classes
 PROVIDER_MAP = {
-    "stub": "app.core.providers.stub_provider.StubProvider",
-    "swisseph": "app.core.providers.swisseph_provider.SwissEphemProvider",
+    "stub": "app.core.astro.providers.stub_provider.StubProvider",
+    "swisseph": "app.core.astro.providers.swisseph_provider.SwissEphemProvider",
     # add others like "skyfield": "core.providers.skyfield_provider.SkyfieldProvider"
 }
 

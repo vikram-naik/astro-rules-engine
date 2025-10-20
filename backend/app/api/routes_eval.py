@@ -1,51 +1,91 @@
-from fastapi import APIRouter
-from backend.app.core.config import Settings
-from backend.app.core.market_data import MarketDataProvider
-from core.db import get_session
-from core.models import RuleModel
-from core.schemas import EvaluateRequest, RuleCreate, Condition, Outcome
-import json
+from fastapi import APIRouter, HTTPException
 from datetime import datetime, timedelta
-from core.astro_provider import AstroProvider
-from core.rules_engine import AstroRulesEngine
+import json
+from sqlmodel import select
 
+# --- Common imports
+from app.core.common.db import get_session
+from app.core.common.config import settings
+from app.core.common.logger import setup_logger
+
+# --- ORM Models
+from app.core.common.models import RuleModel
+
+# --- Astro & Rules Engine
+from app.core.astro.factories.provider_factory import get_provider as get_astro_provider
+from app.core.rules.engine.rules_engine_impl import RulesEngineImpl
+
+# --- Market Data
+from app.core.market.factories.provider_factory import get_market_provider
+
+# --- Schemas
+from app.core.common.schemas import EvaluateRequest, Condition, Outcome, RuleCreate
+
+logger = setup_logger(settings.log_level)
 
 router = APIRouter()
-mdp = MarketDataProvider()
-
-
 
 @router.post("/")
 def evaluate(req: EvaluateRequest):
-    start = datetime.fromisoformat(req.start_date).date()
-    end = datetime.fromisoformat(req.end_date).date()
+    """Run all enabled astro rules for a date range and augment with market returns."""
+    try:
+        start = datetime.fromisoformat(req.start_date).date()
+        end = datetime.fromisoformat(req.end_date).date()
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD.")
+
     if end < start:
-        return {"error": "end_date must be >= start_date"}
+        raise HTTPException(status_code=400, detail="end_date must be >= start_date")
+
+    # --- Load rules from DB
     with get_session() as session:
         models = session.exec(select(RuleModel).where(RuleModel.enabled == True)).all()
-    rules = []
-    for m in models:
-        conds = [Condition(**c) for c in json.loads(m.conditions_json or "[]")]
-        outs = [Outcome(**o) for o in json.loads(m.outcomes_json or "[]")]
-        rules.append(RuleCreate(rule_id=m.rule_id, name=m.name, description=m.description,
-        conditions=conds, outcomes=outs, enabled=m.enabled, confidence=m.confidence))
 
+    if not models:
+        return {"message": "No enabled rules found."}
 
-        provider = AstroProvider()
-        engine = AstroRulesEngine(provider)
-        events = []
-        d = start
-        while d <= end:
-            dt = datetime.combine(d, datetime.min.time())
-            for r in rules:
-                evs = engine.evaluate_rule(r, dt)
-                events.extend(evs)
-                d = d + timedelta(days=1)
+    # --- Initialize providers
+    astro_provider = get_astro_provider(settings.provider_type)
+    rules_engine = RulesEngineImpl(astro_provider)
+    market_provider = get_market_provider(settings.market_provider_type)
 
-    market_df = mdp.fetch_sector_data(Settings.default_sector_ticker, start, end)
-    overall_return = mdp.compute_return_window(market_df, start, end)
+    events = []
+    current_date = start
+    while current_date <= end:
+        dt = datetime.combine(current_date, datetime.min.time())
+        for model in models:
+            conds = [Condition(**c) for c in json.loads(model.conditions_json or "[]")]
+            outs = [Outcome(**o) for o in json.loads(model.outcomes_json or "[]")]
+            rule = RuleCreate(
+                rule_id=model.rule_id,
+                name=model.name,
+                description=model.description,
+                conditions=conds,
+                outcomes=outs,
+                enabled=model.enabled,
+                confidence=model.confidence
+            )
+            evs = rules_engine.evaluate_rule(rule, dt)
+            events.extend(evs)
+        current_date += timedelta(days=1)
+
+    # --- Market data overlay
+    try:
+        market_df = market_provider.fetch_data(settings.default_sector_ticker, start, end)
+        market_return = market_provider.compute_return(market_df, start, end)
+    except Exception as e:
+        logger.error(f"Market data fetch failed: {e}")
+        market_return = None
+
+    logger.info(f"Evaluated {len(events)} events between {start} and {end}")
+
     return {
         "count": len(events),
         "events": events,
-        "market_return": round(overall_return * 100, 2)
+        "market": {
+            "ticker": settings.default_sector_ticker,
+            "start": start.isoformat(),
+            "end": end.isoformat(),
+            "return_pct": round(market_return * 100, 2) if market_return is not None else None
+        }
     }

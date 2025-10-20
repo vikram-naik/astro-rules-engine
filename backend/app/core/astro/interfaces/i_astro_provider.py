@@ -1,4 +1,4 @@
-# backend/app/core/interfaces/i_astro_provider.py
+# backend/app/core/astro/interfaces/i_astro_provider.py
 from abc import ABC, abstractmethod
 from datetime import datetime
 

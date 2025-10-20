@@ -1,7 +1,7 @@
-# backend/app/core/providers/stub_provider.py
+# backend/app/core/astro/providers/stub_provider.py
 from datetime import datetime
 import math
-from app.core.interfaces.i_astro_provider import IAstroProvider
+from core.astro.interfaces.i_astro_provider import IAstroProvider
 
 class StubProvider(IAstroProvider):
     """Deterministic stub provider for tests and local development."""

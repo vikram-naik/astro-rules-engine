@@ -1,8 +1,8 @@
-# backend/app/core/interfaces/i_rules_engine.py
+# backend/app/core/rules/interfaces/i_rules_engine.py
 from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import List, Dict, Any
-from ..schemas import RuleCreate
+from core.common.schemas import RuleCreate
 
 class IRulesEngine(ABC):
     """Abstract interface for rules engine implementations."""
