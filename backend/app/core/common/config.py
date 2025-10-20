@@ -6,7 +6,7 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
     provider_type: str = "swisseph"
     market_provider_type: str = "yahoo"
-    default_sector_ticker: str = "^GSPC"
+    default_sector_ticker: str = "^NSEI"
 
     class Config:
         env_file = ".env"
