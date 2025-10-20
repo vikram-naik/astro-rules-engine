@@ -1,7 +1,7 @@
 from typing import List, Dict, Any
 from datetime import datetime
 from .astro_provider import AstroProvider
-from .schemas import Condition, RuleCreate, Outcome
+from .schemas import Condition, Relation, RuleCreate
 
 
 class AstroRulesEngine:
