@@ -9,3 +9,5 @@ pytest
 pydantic-settings
 httpx
 tabulate
+jinja2
+python-multipart

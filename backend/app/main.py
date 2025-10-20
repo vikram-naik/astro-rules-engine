@@ -7,6 +7,8 @@ and modular routers for rules, evaluation, and correlation.
 """
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+
 from contextlib import asynccontextmanager
 
 from app.core.common.config import settings
@@ -17,6 +19,7 @@ from app.core.common.logger import setup_logger
 from app.api.routes_rules import router as rules_router
 from app.api.routes_eval import router as eval_router
 from app.api.routes_correlation import router as corr_router
+from app.api.routes_ui import router as ui_router
 
 # Setup logger
 logger = setup_logger(settings.log_level)
@@ -46,7 +49,8 @@ app = FastAPI(
 app.include_router(rules_router)
 app.include_router(eval_router)
 app.include_router(corr_router)
-
+app.include_router(ui_router)
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 @app.get("/", tags=["root"])
 def root():
