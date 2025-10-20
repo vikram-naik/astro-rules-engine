@@ -9,7 +9,7 @@ app = FastAPI(title="Astro Rules Engine")
 
 @app.on_event("startup")
 def on_startup():
-create_db_and_tables()
+    create_db_and_tables()
 
 
 app.include_router(rules_router, prefix="/rules", tags=["rules"])
