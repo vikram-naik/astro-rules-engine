@@ -1,7 +1,7 @@
 import importlib
 import logging
 from typing import Type
-from core.market.interfaces.i_market_data_provider import IMarketDataProvider
+from app.core.market.interfaces.i_market_data_provider import IMarketDataProvider
 
 logger = logging.getLogger("astro.market.factory")
 

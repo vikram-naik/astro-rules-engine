@@ -1,7 +1,8 @@
+from typing import List
 from fastapi import APIRouter, HTTPException
-from core.db import get_session
-from core.models import RuleModel, Sector
-from core.schemas import RuleCreate, RuleRead
+from app.core.common.db import get_session
+from app.core.common.models import RuleModel, Sector
+from app.core.common.schemas import RuleCreate, RuleRead
 import json
 
 

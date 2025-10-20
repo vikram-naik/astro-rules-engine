@@ -1,5 +1,5 @@
-from core.market.factories.provider_factory import get_market_provider
-from core.market.interfaces.i_market_data_provider import IMarketDataProvider
+from app.core.market.factories.provider_factory import get_market_provider
+from app.core.market.interfaces.i_market_data_provider import IMarketDataProvider
 from datetime import date
 
 def test_yahoo_provider_instantiation():

@@ -7,7 +7,7 @@ Requires: pip install pyswisseph
 from datetime import datetime
 import math
 import logging
-from core.astro.interfaces.i_astro_provider import IAstroProvider
+from app.core.astro.interfaces.i_astro_provider import IAstroProvider
 
 logger = logging.getLogger("astro.swisseph")
 

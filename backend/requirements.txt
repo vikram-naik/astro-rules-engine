@@ -6,3 +6,4 @@ yfinance
 pyswisseph
 skyfield
 pytest
+pydantic-settings

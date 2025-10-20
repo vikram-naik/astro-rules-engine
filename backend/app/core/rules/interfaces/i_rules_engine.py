@@ -2,7 +2,7 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import List, Dict, Any
-from core.common.schemas import RuleCreate
+from app.core.common.schemas import RuleCreate
 
 class IRulesEngine(ABC):
     """Abstract interface for rules engine implementations."""

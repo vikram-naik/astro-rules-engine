@@ -3,7 +3,7 @@ import pandas as pd
 from datetime import date
 import logging
 import os
-from core.market.interfaces.i_market_data_provider import IMarketDataProvider
+from app.core.market.interfaces.i_market_data_provider import IMarketDataProvider
 
 logger = logging.getLogger("astro.market.yahoo")
 

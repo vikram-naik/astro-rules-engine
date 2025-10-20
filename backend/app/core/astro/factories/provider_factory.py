@@ -1,7 +1,7 @@
 import importlib
 import logging
 from typing import Type
-from core.astro.interfaces.i_astro_provider import IAstroProvider
+from app.core.astro.interfaces.i_astro_provider import IAstroProvider
 
 logger = logging.getLogger("astro.factory")
 

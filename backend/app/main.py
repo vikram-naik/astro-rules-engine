@@ -1,8 +1,8 @@
 from fastapi import FastAPI
-from core.db import create_db_and_tables
-from api.routes_rules import router as rules_router
-from api.routes_eval import router as eval_router
-from core.logger import setup_logger, LoggingMiddleware
+from app.core.common.db import create_db_and_tables
+from app.api.routes_rules import router as rules_router
+from app.api.routes_eval import router as eval_router
+from app.core.common.logger import setup_logger, LoggingMiddleware
 
 logger = setup_logger("INFO")
 

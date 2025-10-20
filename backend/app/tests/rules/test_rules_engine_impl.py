@@ -6,9 +6,9 @@ using the StubProvider (deterministic astro data).
 """
 
 from datetime import datetime
-from core.astro.providers.stub_provider import StubProvider
-from core.rules.engine.rules_engine_impl import RulesEngineImpl
-from core.common.schemas import RuleCreate, Condition, Outcome, OutcomeEffect, Relation
+from app.core.astro.providers.stub_provider import StubProvider
+from app.core.rules.engine.rules_engine_impl import RulesEngineImpl
+from app.core.common.schemas import RuleCreate, Condition, Outcome, OutcomeEffect, Relation
 
 
 def make_basic_rule():
