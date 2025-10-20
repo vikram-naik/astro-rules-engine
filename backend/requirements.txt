@@ -7,3 +7,4 @@ pyswisseph
 skyfield
 pytest
 pydantic-settings
+httpx

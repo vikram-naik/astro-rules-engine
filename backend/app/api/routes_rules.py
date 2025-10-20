@@ -1,52 +1,98 @@
-from typing import List
+# backend/app/api/routes_rules.py
+"""
+Rules Management API
+--------------------
+CRUD endpoints for astrological rules.
+"""
+
 from fastapi import APIRouter, HTTPException
-from app.core.common.db import get_session
-from app.core.common.models import RuleModel, Sector
-from app.core.common.schemas import RuleCreate, RuleRead
+from sqlmodel import select
+from typing import List
 import json
 
+from app.core.common.db import get_session
+from app.core.common.models import RuleModel
+from app.core.common.schemas import RuleCreate, RuleRead, RuleUpdate
+from app.core.common.logger import setup_logger
+from app.core.common.config import settings
 
-router = APIRouter()
+logger = setup_logger(settings.log_level)
 
-
-@router.post("/", response_model=RuleRead)
-def create_rule(rule_in: RuleCreate):
-    with get_session() as session:
-        existing = session.exec(select(RuleModel).where(RuleModel.rule_id == rule_in.rule_id)).first()
-        if existing:
-            raise HTTPException(status_code=400, detail="rule_id already exists")
-        rm = RuleModel(rule_id=rule_in.rule_id, name=rule_in.name, description=rule_in.description,
-        enabled=rule_in.enabled, confidence=rule_in.confidence,
-        conditions_json=json.dumps([c.dict() for c in rule_in.conditions]),
-        outcomes_json=json.dumps([o.dict() for o in rule_in.outcomes]))
-        session.add(rm)
-        session.commit()
-        session.refresh(rm)
-
-        return RuleRead(rule_id=rm.rule_id, name=rm.name, description=rm.description,
-        conditions=[c for c in rule_in.conditions], outcomes=[o for o in rule_in.outcomes],
-        enabled=rm.enabled, confidence=rm.confidence)
+router = APIRouter(prefix="/rules", tags=["rules"])
 
 
 @router.get("/", response_model=List[RuleRead])
-def list_rules():
+def get_all_rules():
+    """Fetch all stored rules."""
     with get_session() as session:
-        rows = session.exec(select(RuleModel)).all()
-        out = []
-        for r in rows:
-            conds = json.loads(r.conditions_json or "[]")
-            outs = json.loads(r.outcomes_json or "[]")
-            out.append(RuleRead(rule_id=r.rule_id, name=r.name, description=r.description,
-            conditions=conds, outcomes=outs, enabled=r.enabled, confidence=r.confidence))
-        return out
+        rules = session.exec(select(RuleModel)).all()
+        return [RuleRead(**r.model_dump()) for r in rules]
+
+
+@router.get("/{rule_id}", response_model=RuleRead)
+def get_rule(rule_id: str):
+    """Fetch a single rule by rule_id."""
+    with get_session() as session:
+        rule = session.exec(select(RuleModel).where(RuleModel.rule_id == rule_id)).first()
+        if not rule:
+            raise HTTPException(status_code=404, detail="Rule not found")
+        return RuleRead(**rule.model_dump())
+
+
+@router.post("/", response_model=RuleRead)
+def create_rule(payload: RuleCreate):
+    """Create a new astrological rule."""
+    with get_session() as session:
+        if session.exec(select(RuleModel).where(RuleModel.name == payload.name)).first():
+            raise HTTPException(status_code=400, detail="Rule with this name already exists")
+
+        rule = RuleModel(
+            rule_id=payload.rule_id or f"R_{payload.name.replace(' ', '_')}",
+            name=payload.name,
+            description=payload.description,
+            confidence=payload.confidence,
+            enabled=payload.enabled,
+            conditions_json=json.dumps([c.model_dump() for c in payload.conditions]),
+            outcomes_json=json.dumps([o.model_dump() for o in payload.outcomes]),
+        )
+        session.add(rule)
+        session.commit()
+        session.refresh(rule)
+        logger.info(f"Created rule: {rule.name}")
+        return RuleRead(**rule.model_dump())
+
+@router.put("/{rule_id}", response_model=RuleRead)
+def update_rule(rule_id: str, payload: RuleUpdate):
+    """Update an existing rule."""
+    with get_session() as session:
+        rule = session.exec(select(RuleModel).where(RuleModel.rule_id == rule_id)).first()
+        if not rule:
+            raise HTTPException(status_code=404, detail="Rule not found")
+
+        update_data = payload.model_dump(exclude_unset=True)
+        for key, value in update_data.items():
+            if key in ("conditions", "outcomes") and value is not None:
+                value = json.dumps([v.model_dump() for v in value])
+                setattr(rule, f"{key}_json", value)
+            elif hasattr(rule, key):
+                setattr(rule, key, value)
+
+        session.add(rule)
+        session.commit()
+        session.refresh(rule)
+        logger.info(f"Updated rule: {rule.name}")
+        return RuleRead(**rule.model_dump())
 
 
 @router.delete("/{rule_id}")
 def delete_rule(rule_id: str):
+    """Delete a rule by ID."""
     with get_session() as session:
-        r = session.exec(select(RuleModel).where(RuleModel.rule_id == rule_id)).first()
-        if not r:
+        rule = session.exec(select(RuleModel).where(RuleModel.rule_id == rule_id)).first()
+        if not rule:
             raise HTTPException(status_code=404, detail="Rule not found")
-        session.delete(r)
+
+        session.delete(rule)
         session.commit()
-    return {"deleted": rule_id}
+        logger.info(f"Deleted rule: {rule.name}")
+        return {"message": f"Rule {rule_id} deleted successfully"}
