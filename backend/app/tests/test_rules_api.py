@@ -1,38 +1,12 @@
 # app/tests/test_rules_api.py
+from app.core.common.db import get_db
+from app.main import app
 import pytest
-from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 from app.core.common.models import Base
-from app.api.routes_rules import router as rules_router
-from app.api.routes_sectors_api import router as sectors_router
 
 
-@pytest.fixture(scope="module")
-def test_app():
-    """Spin up FastAPI app with both routers and in-memory DB."""
-    app = FastAPI()
-    app.include_router(sectors_router)
-    app.include_router(rules_router)
-
-    engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
-    TestingSessionLocal = sessionmaker(bind=engine)
-    Base.metadata.create_all(engine)
-
-    def override_get_db():
-        db = TestingSessionLocal()
-        try:
-            yield db
-        finally:
-            db.close()
-
-    for route in app.router.routes:
-        if hasattr(route.endpoint, "__dependencies__"):
-            route.endpoint.__dependencies__["get_db"] = override_get_db
-
-    client = TestClient(app)
-    return client
 
 
 def test_rule_crud_flow(test_app):
@@ -41,7 +15,7 @@ def test_rule_crud_flow(test_app):
     # Create reference sector
     sector_payload = {"code": "COMMODITY", "name": "Commodity Market", "description": "Raw materials"}
     resp = client.post("/api/sectors/", json=sector_payload)
-    assert resp.status_code == 200
+    assert resp.status_code == 200, resp.text
 
     # Create rule with condition + outcome
     rule_payload = {
@@ -58,7 +32,7 @@ def test_rule_crud_flow(test_app):
         ]
     }
     resp = client.post("/api/rules/", json=rule_payload)
-    assert resp.status_code == 200
+    assert resp.status_code == 200, resp.text
     assert resp.json()["rule_id"] == "R001"
 
     # Get rules

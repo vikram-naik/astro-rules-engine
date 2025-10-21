@@ -16,6 +16,7 @@ def create_sector(payload: dict, db: Session = Depends(get_db)):
     """Create a sector."""
     code = payload.get("code")
     if not code:
+        print("code not found.... ")
         raise HTTPException(status_code=400, detail="Sector code is required")
 
     existing = db.scalar(select(Sector).where(Sector.code == code))
