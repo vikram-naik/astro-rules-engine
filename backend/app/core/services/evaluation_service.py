@@ -6,7 +6,7 @@ from sqlmodel import select
 
 from app.core.common.db import get_session
 from app.core.common.models import RuleModel
-from app.core.common.schemas import Condition, Outcome, RuleCreate
+from app.core.common.schemas import ConditionRead, OutcomeRead, RuleCreate
 from app.core.astro.factories.provider_factory import get_provider as get_astro_provider
 from app.core.rules.engine.rules_engine_impl import RulesEngineImpl
 from app.core.common.config import settings
@@ -49,8 +49,8 @@ def evaluate_rules_for_range(start_date: str, end_date: str) -> List[Dict[str, A
     while current <= end:
         dt = datetime.combine(current, datetime.min.time())
         for r in rows:
-            conds = [Condition(**c) for c in json.loads(r.conditions_json or "[]")]
-            outs = [Outcome(**o) for o in json.loads(r.outcomes_json or "[]")]
+            conds = [ConditionRead(**c) for c in json.loads(r.conditions or "[]")]
+            outs = [OutcomeRead(**o) for o in json.loads(r.outcomes or "[]")]
             rule = RuleCreate(
                 rule_id=r.rule_id,
                 name=r.name,

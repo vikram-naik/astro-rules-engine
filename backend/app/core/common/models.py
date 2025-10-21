@@ -1,93 +1,77 @@
-# backend/app/core/common/models.py
-"""
-Data models for Astro Rules Engine
-----------------------------------
-Clean, Pydantic v2–compatible SQLModel definitions.
-"""
-
-from __future__ import annotations
+# app/core/common/models.py
 from datetime import datetime
-from typing import Optional
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Boolean,
+    Float,
+    DateTime,
+    ForeignKey,
+)
+from sqlalchemy.orm import declarative_base, relationship
 
-from sqlmodel import SQLModel, Field
-from pydantic import ConfigDict
+Base = declarative_base()
 
 
-# --------------------------------------------------------------------
-# Rule storage model
-# --------------------------------------------------------------------
-class RuleModel(SQLModel, table=True):
-    """
-    Stores each astrological rule definition with its
-    serialized conditions and outcomes.
-    """
+class Sector(Base):
+    __tablename__ = "sector"
 
-    id: Optional[int] = Field(default=None, primary_key=True)
-    rule_id: str = Field(index=True, unique=True, description="Unique rule identifier")
-    name: str = Field(description="Human-readable rule name")
-    description: Optional[str] = Field(default=None, description="Detailed rule description")
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    code = Column(String, unique=True, nullable=False)
+    name = Column(String, nullable=False)
+    description = Column(String)
 
-    # Serialized JSON
-    conditions_json: str = Field(description="JSON-serialized list of Condition objects")
-    outcomes_json: str = Field(description="JSON-serialized list of Outcome objects")
+class Rule(Base):
+    __tablename__ = "rule"
 
-    enabled: bool = Field(default=True, description="Whether the rule is active")
-    confidence: float = Field(default=1.0, description="Confidence weight 0–1")
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    rule_id = Column(String, unique=True, index=True, nullable=False)
+    name = Column(String, nullable=False)
+    description = Column(String)
+    enabled = Column(Boolean, default=True)
+    confidence = Column(Float, default=1.0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    # Metadata
-    created_at: datetime = Field(default_factory=datetime.utcnow, description="Creation timestamp (UTC)")
-    updated_at: datetime = Field(default_factory=datetime.utcnow, description="Last update timestamp (UTC)")
-
-    # --- Pydantic v2 config ---
-    model_config = ConfigDict(
-        from_attributes=True,   # ORM-friendly
-        extra="ignore",          # ignore unexpected fields
-        json_schema_extra={
-            "example": {
-                "rule_id": "R001",
-                "name": "Jupiter in Ketu Nakshatra",
-                "description": "Market weakens when Jupiter transits Ketu Nakshatra",
-                "conditions_json": "[{...}]",
-                "outcomes_json": "[{...}]",
-                "enabled": True,
-                "confidence": 0.85,
-            }
-        },
+    # Master–detail relationships
+    conditions = relationship(
+        "Condition",
+        back_populates="rule",
+        cascade="all, delete-orphan",
+        lazy="joined",
+    )
+    outcomes = relationship(
+        "Outcome",
+        back_populates="rule",
+        cascade="all, delete-orphan",
+        lazy="joined",
     )
 
 
-# --------------------------------------------------------------------
-# Backtest / Correlation results model
-# --------------------------------------------------------------------
-class BacktestRun(SQLModel, table=True):
-    """
-    Stores results of correlation / backtest analyses for reproducibility.
-    """
+class Condition(Base):
+    __tablename__ = "condition"
 
-    id: Optional[int] = Field(default=None, primary_key=True)
-    name: str = Field(description="Run label or identifier")
-    ticker: str = Field(description="Market ticker used for analysis")
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    rule_id = Column(Integer, ForeignKey("rule.id", ondelete="CASCADE"), nullable=False)
+    planet = Column(String)
+    relation = Column(String)
+    target = Column(String)
+    orb = Column(Float)
+    value = Column(Float)
 
-    params_json: str = Field(description="Serialized run parameters")
-    stats_json: str = Field(description="Aggregated statistics JSON")
-    events_json: Optional[str] = Field(default=None, description="Detailed event-level results")
-
-    created_at: datetime = Field(default_factory=datetime.utcnow, description="Run creation timestamp (UTC)")
-
-    model_config = ConfigDict(from_attributes=True, extra="ignore")
+    rule = relationship("Rule", back_populates="conditions")
 
 
-# --------------------------------------------------------------------
-# Optional: helper metadata model (future extension)
-# --------------------------------------------------------------------
-class SectorModel(SQLModel, table=True):
-    """
-    Reference table for sectors / categories used in rule outcomes.
-    """
+class Outcome(Base):
+    __tablename__ = "outcome"
 
-    id: Optional[int] = Field(default=None, primary_key=True)
-    code: str = Field(index=True, unique=True, description="Short sector code, e.g., BANK, METAL")
-    name: str = Field(description="Full sector name")
-    description: Optional[str] = Field(default=None, description="Optional notes")
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    rule_id = Column(Integer, ForeignKey("rule.id", ondelete="CASCADE"), nullable=False)
+    sector_id = Column(Integer, ForeignKey("sector.id", ondelete="SET NULL"))
+    effect = Column(String)
+    weight = Column(Float, default=1.0)
 
-    model_config = ConfigDict(from_attributes=True, extra="ignore")
+    # relationships
+    rule = relationship("Rule", back_populates="outcomes")
+    sector = relationship("Sector")  # simple reference, no backref

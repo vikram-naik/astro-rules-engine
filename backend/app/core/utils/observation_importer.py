@@ -127,8 +127,8 @@ def parse_observation(line: str) -> Optional[RuleModel]:
         rule_id=rule_id,
         name=name,
         description=f"Imported from observation: {line.strip()}",
-        conditions_json=json.dumps([condition.model_dump()]),
-        outcomes_json=json.dumps([outcome.model_dump()]),
+        conditions=json.dumps([condition.model_dump()]),
+        outcomes=json.dumps([outcome.model_dump()]),
         enabled=True,
         confidence=0.8,
     )
@@ -174,8 +174,8 @@ def import_observations_file(path: str):
             inserted += 1
 
             # Cache summary data while session is active
-            conds = json.loads(rule.conditions_json)
-            outs = json.loads(rule.outcomes_json)
+            conds = json.loads(rule.conditions)
+            outs = json.loads(rule.outcomes)
             summary_data.append([
                 conds[0].get("planet", ""),
                 conds[0].get("relation", ""),

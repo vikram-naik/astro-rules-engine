@@ -1,0 +1,99 @@
+:root {
+  --bg-dark: #0b0b0c;
+  --bg-panel: #141416;
+  --text-light: #dfe6ee;
+  --border-faint: rgba(255,255,255,0.08);
+}
+body { background-color: var(--bg-dark); color: var(--text-light); }
+.nav-tabs .nav-link.active { background-color: var(--bg-panel); border-color: var(--border-faint); }
+.card, .table, .modal-content { background-color: var(--bg-panel); }
+.btn-primary { background-color: #2b2b2f; border-color: var(--border-faint); }
+.btn-outline-light { border-color: var(--border-faint); }
+input, select, textarea { background-color: #1a1a1c; color: var(--text-light); border: 1px solid var(--border-faint); }
+
+/* Improve visibility of tab text */
+.nav-tabs .nav-link {
+  color: #bfc3ca; /* subtle grey for inactive tabs */
+  border: none;
+}
+
+.nav-tabs .nav-link:hover {
+  color: #e1e5ec;
+}
+
+.nav-tabs .nav-link.active {
+  color: #ffffff; /* brighter white for active tab */
+  background-color: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.1);
+  font-weight: 500;
+}
+
+/* brighten form labels */
+label.form-label {
+  color: #e8eaed !important;
+  font-weight: 500;
+}
+
+/* Frosted dark modal style */
+.modal-content {
+  background: rgba(25, 25, 27, 0.9);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.75rem;
+  box-shadow: 0 0 25px rgba(0,0,0,0.6);
+}
+
+.modal-header {
+  background: rgba(255,255,255,0.04);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.modal-footer {
+  background: rgba(255,255,255,0.04);
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.modal-title {
+  color: #f5f7fa;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.form-control:focus, .form-select:focus {
+  outline: none;
+  border-color: rgba(255,255,255,0.25);
+  box-shadow: 0 0 0 0.1rem rgba(255,255,255,0.1);
+  background-color: rgba(255,255,255,0.05);
+}
+
+select.form-select option {
+  background-color: #1a1a1c;
+  color: #dfe6ee;
+}
+
+/* Improved dark-mode input focus style */
+.form-control:focus,
+.form-select:focus,
+textarea:focus,
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus {
+  color: var(--text-light) !important;           /* keep text readable */
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+  box-shadow: 0 0 0 0.15rem rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Also ensure placeholder text remains visible */
+::placeholder {
+  color: #9ca3af; /* subtle grey for placeholder */
+  opacity: 1;
+}
+
+/* For dropdown options */
+select.form-select:focus option {
+  background-color: #141416 !important;
+  color: var(--text-light) !important;
+}
+

@@ -1,58 +1,50 @@
-# backend/app/main.py
-"""
-Main application entrypoint for Astro Rules Engine
---------------------------------------------------
-Uses FastAPI with lifespan events, Pydantic v2 settings,
-and modular routers for rules, evaluation, and correlation.
-"""
+# app/main.py
+from app.core.common.db import Base, engine
+from app.core.common.logger import LoggingMiddleware, setup_logger
+from app.core.common.config import settings
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from contextlib import asynccontextmanager
 
-from app.core.common.config import settings
-from app.core.common.db import create_db_and_tables
-from app.core.common.logger import setup_logger
-
-# Routers
 from app.api.routes_rules import router as rules_router
-from app.api.routes_eval import router as eval_router
-from app.api.routes_correlation import router as corr_router
-from app.api.routes_ui import router as ui_router
+from app.api.routes_sectors_api import router as sectors_router
+from app.api.routes_ui_workbench import router as ui_router
+from app.api.routes_reference_api import router as ref_router
+
 
 # Setup logger
 logger = setup_logger(settings.log_level)
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """
-    Modern FastAPI lifespan handler.
-    Handles startup and shutdown events.
-    """
-    logger.info("🚀 Starting Astro Rules Engine backend...")
-    create_db_and_tables()
+    """Lifespan context for startup and shutdown logic."""
+    # ✅ Startup: initialize database tables
+    logger.info("Creating database schema...")
+    Base.metadata.create_all(bind=engine)
+    logger.info("✅ Database schema ready.")
     yield
-    logger.info("🛑 Shutting down Astro Rules Engine backend...")
+    # ✅ Shutdown: if any cleanup is needed later
+    logger.info("Shutting down application.")
 
 
-# Initialize FastAPI app with lifespan events
-app = FastAPI(
-    title="Astro Rules Engine API",
-    description="API for managing and evaluating astrological market rules.",
-    version="1.0.0",
-    lifespan=lifespan,
-)
+# ✅ Pass lifespan into FastAPI constructor
+app = FastAPI(title="Astro Rules Engine", lifespan=lifespan)
 
-# Include routers
+app.add_middleware(LoggingMiddleware)
+
+# ✅ Register routers
+app.include_router(sectors_router)
 app.include_router(rules_router)
-app.include_router(eval_router)
-app.include_router(corr_router)
+app.include_router(ref_router)
 app.include_router(ui_router)
+
+
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
-@app.get("/", tags=["root"])
+
+@app.get("/")
 def root():
-    """Simple health check endpoint."""
-    return {"message": "Astro Rules Engine backend is running."}
+    """Health check endpoint."""
+    return {"message": "Astro Rules Engine API is running."}
