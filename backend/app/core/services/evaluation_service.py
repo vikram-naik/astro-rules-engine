@@ -4,8 +4,8 @@ from typing import List, Dict, Any
 import json
 from sqlmodel import select
 
-from app.core.common.db import get_session
-from app.core.common.models import RuleModel
+from app.core.db.db import get_db
+from app.core.db.models import RuleModel
 from app.core.common.schemas import ConditionRead, OutcomeRead, RuleCreate
 from app.core.astro.factories.provider_factory import get_provider as get_astro_provider
 from app.core.rules.engine.rules_engine_impl import RulesEngineImpl
@@ -33,7 +33,7 @@ def evaluate_rules_for_range(start_date: str, end_date: str) -> List[Dict[str, A
         raise ValueError("end_date must be >= start_date")
 
     # load rules from DB
-    with get_session() as session:
+    with get_db() as session:
         rows = session.exec(select(RuleModel).where(RuleModel.enabled == True)).all()
 
     if not rows:

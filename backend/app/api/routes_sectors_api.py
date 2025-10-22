@@ -2,8 +2,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import select
-from app.core.common.db import get_db, init_db
-from app.core.common.models import Sector
+from app.core.db.db import get_db
+from app.core.db.models import Sector
 
 router = APIRouter(prefix="/api/sectors", tags=["sectors"])
 

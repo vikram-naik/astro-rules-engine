@@ -1,16 +1,9 @@
 # app/tests/test_rules_api.py
-from app.core.common.db import get_db
-from app.main import app
-import pytest
-from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from app.core.common.models import Base
 
 
 
 
-def test_rule_crud_flow(test_app):
-    client = test_app
+def test_rule_crud_flow(client):
 
     # Create reference sector
     sector_payload = {"code": "COMMODITY", "name": "Commodity Market", "description": "Raw materials"}

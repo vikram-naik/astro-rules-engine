@@ -1,51 +1,11 @@
 # app/tests/test_api_end_to_end.py
-import pytest
-from fastapi import FastAPI
-from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
-from app.core.common.models import Base
-from app.api.routes_rules import router as rules_router
-from app.api.routes_sectors_api import router as sectors_router
-from app.core.common.db import get_db
 
 
-@pytest.fixture(scope="module")
-def test_app():
-    """FastAPI test app with shared in-memory SQLite."""
-    app = FastAPI()
-    app.include_router(sectors_router)
-    app.include_router(rules_router)
-
-    # ✅ Shared in-memory DB across all sessions
-    engine = create_engine(
-        "sqlite://",
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,  # 👈 this ensures shared memory across connections
-        echo=False,
-        future=True,
-    )
-
-    TestingSessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
-    Base.metadata.create_all(engine)
-
-    def override_get_db():
-        db = TestingSessionLocal()
-        try:
-            yield db
-        finally:
-            db.close()
-
-    # ✅ Override all router dependencies to use shared session
-    app.dependency_overrides[get_db] = override_get_db
-
-    client = TestClient(app)
-    return client
 
 
-def test_end_to_end_rules_and_sectors(test_app):
-    client = test_app
+
+def test_end_to_end_rules_and_sectors(client):
+    client = client
 
     # 1️⃣ Create sector
     sector_payload = {"code": "EQUITY", "name": "Equity Market", "description": "Stock-related sector"}

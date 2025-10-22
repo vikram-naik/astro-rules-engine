@@ -1,26 +1,10 @@
 # app/tests/test_rules_crud.py
-import pytest
-from sqlalchemy import create_engine, select
-from sqlalchemy.orm import Session
-from app.core.common.models import Base, Sector, Rule, Condition, Outcome
+from sqlalchemy import select
+from app.core.db.models import Sector, Rule, Condition, Outcome
 
 
-@pytest.fixture(scope="module")
-def test_db():
-    """Create an in-memory SQLite DB for testing."""
-    engine = create_engine("sqlite:///:memory:", echo=False, future=True)
-    Base.metadata.create_all(engine)
-    yield engine
-    engine.dispose()
-
-
-@pytest.fixture
-def session(test_db):
-    with Session(test_db) as s:
-        yield s
-
-
-def test_rule_condition_outcome_crud(session):
+def test_rule_condition_outcome_crud(db_session):
+    session = db_session
     # 1️⃣ Create sector (reference)
     sector = Sector(code="EQUITY", name="Equity Market", description="Stock market sector")
     session.add(sector)

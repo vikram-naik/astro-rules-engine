@@ -9,10 +9,8 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
 )
-from sqlalchemy.orm import declarative_base, relationship
-
-Base = declarative_base()
-
+from sqlalchemy.orm import  relationship
+from app.core.db.db import Base
 
 class Sector(Base):
     __tablename__ = "sector"
@@ -46,6 +44,12 @@ class Rule(Base):
         back_populates="rule",
         cascade="all, delete-orphan",
         lazy="joined",
+    )
+    # add: one-to-many relationship to persisted events
+    events = relationship(
+        "RuleEvent",
+        cascade="all, delete-orphan",
+        lazy="select",   # load on access (safer for large result sets)
     )
 
 

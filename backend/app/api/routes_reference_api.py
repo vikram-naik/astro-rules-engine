@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.core.common.enums import Planet, Relation, OutcomeEffect
+from app.core.db.enums import Planet, Relation, OutcomeEffect
 
 router = APIRouter(prefix="/api/reference", tags=["reference"])
 

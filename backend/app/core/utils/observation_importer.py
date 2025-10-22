@@ -20,8 +20,8 @@ from typing import List, Optional
 from sqlalchemy import text
 from tabulate import tabulate
 
-from app.core.common.db import get_session
-from app.core.common.models import RuleModel
+from app.core.db.db import get_session
+from app.core.db.models import RuleModel
 from app.core.common.schemas import Condition, Outcome, OutcomeEffect, Relation
 from app.core.common.logger import setup_logger
 

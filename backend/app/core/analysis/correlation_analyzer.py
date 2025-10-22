@@ -3,7 +3,6 @@ from datetime import datetime, timedelta, date
 from typing import List, Dict, Any, Optional
 import pandas as pd
 import numpy as np
-import logging
 
 from app.core.market.factories.provider_factory import get_market_provider
 from app.core.common.config import settings
