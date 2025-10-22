@@ -7,6 +7,8 @@ from app.core.db.models import Rule
 from app.core.astro.factories.provider_factory import get_provider as get_astro_provider
 from app.core.rules.engine.rules_engine_impl import RulesEngineImpl
 
+import logging
+logger = logging.getLogger("astro.eventgen")
 
 class EventGeneratorService:
     """
@@ -36,6 +38,8 @@ class EventGeneratorService:
         overwrite: bool = False,
     ) -> List[RuleEvent]:
         """Generate and persist RuleEvent rows for the specified rule."""
+        logger.info(f"🚀 Starting generation for rule_id={rule_id}, "
+                    f"provider={provider}, overwrite={overwrite}")
         if provider:
             self.astro = get_astro_provider(provider)
             self.rules_engine = RulesEngineImpl(self.astro)
@@ -43,17 +47,20 @@ class EventGeneratorService:
 
         rule = self.db.query(Rule).filter(Rule.id == rule_id).one_or_none()
         if not rule:
+            logger.error(f"❌ Rule {rule_id} not found in database")
             raise ValueError(f"Rule {rule_id} not found")
 
         if overwrite:
+            logger.info(f"🧹 Deleting existing events overlapping {start_date} → {end_date}")
             q = (
                 self.db.query(RuleEvent)
                 .filter(RuleEvent.rule_id == rule.id)
                 .filter(RuleEvent.start_date <= end_date)
                 .filter((RuleEvent.end_date == None) | (RuleEvent.end_date >= start_date))
             )
-            q.delete(synchronize_session="fetch")
+            deleted = q.delete(synchronize_session="fetch")
             self.db.commit()
+            logger.info(f"🗑️  Deleted {deleted} existing events")
 
         events_to_create = []
         active_start = None
@@ -68,12 +75,14 @@ class EventGeneratorService:
                 else:
                     is_true, context = result, None
             except Exception:
+                logger.exception(f"⚠️  Error evaluating rule {rule_id} on {dt}: {e}")
                 continue
 
             if is_true and active_start is None:
                 active_start = dt
                 last_true = dt
                 context_last = context
+                logger.debug(f"🔹 Active start detected at {active_start}")
             elif is_true:
                 last_true = dt
                 context_last = context
@@ -94,6 +103,7 @@ class EventGeneratorService:
                     metadata_json=context_last or {},
                 )
                 events_to_create.append(evt)
+                logger.info(f"🧩 Added event: {active_start}–{last_true}, subtype={subtype.name}")
                 active_start = None
                 last_true = None
                 context_last = None
@@ -120,7 +130,10 @@ class EventGeneratorService:
         if events_to_create:
             self.db.add_all(events_to_create)
             self.db.commit()
+            logger.info(f"💾 Persisted {len(events_to_create)} events for rule_id={rule_id}")
             for e in events_to_create:
                 self.db.refresh(e)
+        else:
+            logger.warning(f"⚠️ No events detected for rule_id={rule_id}")
 
         return events_to_create
