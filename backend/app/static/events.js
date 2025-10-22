@@ -52,7 +52,7 @@
       const events = await resp.json();
 
       if (!events.length) {
-        resultContainer.innerHTML = `<div class="text-muted">No events found for this rule.</div>`;
+        resultContainer.innerHTML = `<div class="no-events-message">No events found for this rule.</div>`;
         return;
       }
 
@@ -112,7 +112,7 @@
   //----------------------------------------------------------------
   function renderEventsTable(events) {
     if (!events || !events.length) {
-      resultContainer.innerHTML = `<div class="text-muted">No events found for selected rule.</div>`;
+      resultContainer.innerHTML = `<div class="no-events-message">No events found for selected rule.</div>`;
       return;
     }
 
@@ -139,7 +139,7 @@
           <td>${escapeHtml(e.duration_type || "–")}</td>
           <td>${escapeHtml(e.event_subtype || "")}</td>
           <td>${escapeHtml(e.provider || "")}</td>
-          <td><pre class="mb-0 small text-muted">${escapeHtml(
+          <td><pre class="mb-0 small event-metadata">${escapeHtml(
             JSON.stringify(e.metadata_json, null, 1)
           )}</pre></td>
         </tr>
