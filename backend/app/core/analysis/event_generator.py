@@ -20,6 +20,8 @@ class EventGeneratorService:
         self.db = db_session
         self.astro_provider_name = astro_provider_name
         self.astro = get_astro_provider(astro_provider_name)
+        logger.info("EventGeneratorService initialized provider=%s", self.astro_provider_name)
+        logger.debug("Using astro provider: %s", getattr(self.astro, "__class__", type(self.astro)))
         self.rules_engine = RulesEngineImpl(self.astro)
 
     @staticmethod
@@ -40,6 +42,8 @@ class EventGeneratorService:
         """Generate and persist RuleEvent rows for the specified rule."""
         logger.info(f"🚀 Starting generation for rule_id={rule_id}, "
                     f"provider={provider}, overwrite={overwrite}")
+        logger.info("generate_for_rule: rule_id=%s start=%s end=%s provider=%s overwrite=%s",
+            rule_id, start_date.isoformat(), end_date.isoformat(), provider, overwrite)
         if provider:
             self.astro = get_astro_provider(provider)
             self.rules_engine = RulesEngineImpl(self.astro)
@@ -49,6 +53,7 @@ class EventGeneratorService:
         if not rule:
             logger.error(f"❌ Rule {rule_id} not found in database")
             raise ValueError(f"Rule {rule_id} not found")
+        logger.debug("Loaded rule from DB: id=%s rule_id=%s name=%s", rule.id, rule.rule_id, rule.name)
 
         if overwrite:
             logger.info(f"🧹 Deleting existing events overlapping {start_date} → {end_date}")
@@ -69,12 +74,14 @@ class EventGeneratorService:
 
         for dt in self._daterange(start_date, end_date):
             try:
+                logger.debug("Evaluating rule for date %s", dt.isoformat())
                 result = self.rules_engine.evaluate_rule(rule, dt)
+                logger.debug("Evaluate result for %s -> %s", dt.isoformat(), result)
                 if isinstance(result, tuple):
                     is_true, context = result
                 else:
                     is_true, context = result, None
-            except Exception:
+            except Exception as e:
                 logger.exception(f"⚠️  Error evaluating rule {rule_id} on {dt}: {e}")
                 continue
 
@@ -102,6 +109,8 @@ class EventGeneratorService:
                     provider=self.astro_provider_name,
                     metadata_json=context_last or {},
                 )
+                logger.info("Detected event for rule %s start=%s end=%s duration=%d subtype=%s",
+                rule.rule_id, active_start, last_true, duration, subtype)
                 events_to_create.append(evt)
                 logger.info(f"🧩 Added event: {active_start}–{last_true}, subtype={subtype.name}")
                 active_start = None

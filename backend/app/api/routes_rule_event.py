@@ -1,6 +1,7 @@
 from datetime import date
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.db import get_db
@@ -48,6 +49,9 @@ def generate_events_for_rule(
 @router.get("/{rule_id}/events", response_model=List[dict])
 def list_events_for_rule(rule_id: str, db: Session = Depends(get_db)):
     logger.info(f"📥 Listing events for rule_id={rule_id}")
-    rows = db.query(RuleEvent).filter(RuleEvent.rule_id == rule_id).order_by(RuleEvent.start_date).all()
+    rule = db.scalar(select(Rule).where(Rule.rule_id == rule_id))
+    if not rule:
+        raise HTTPException(status_code=404, detail="Rule not found")
+    rows = db.query(RuleEvent).filter(RuleEvent.rule_id == rule.id).order_by(RuleEvent.start_date).all()
     logger.info(f"📤 Found {len(rows)} events for rule_id={rule_id}")
     return [r.to_dict() for r in rows]

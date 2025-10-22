@@ -2,7 +2,10 @@ from datetime import datetime
 from typing import List, Dict, Any
 from app.core.rules.interfaces.i_rules_engine import IRulesEngine
 from app.core.astro.interfaces.i_astro_provider import IAstroProvider
-from app.core.common.schemas import RuleCreate, ConditionRead, Relation
+from app.core.common.schemas import RuleCreate, ConditionRead
+from app.core.db.enums import Relation
+import logging
+logger = logging.getLogger("astro.rulesengine")
 
 class RulesEngineImpl(IRulesEngine):
     """Concrete rules engine depending on IAstroProvider abstraction."""
@@ -10,41 +13,55 @@ class RulesEngineImpl(IRulesEngine):
     def __init__(self, provider: IAstroProvider, orb_default: float = 5.0):
         self.provider = provider
         self.orb_default = orb_default
+        logger.debug("RulesEngineImpl initialized with provider=%s orb_default=%s",
+             getattr(self.provider, "__class__", type(self.provider)), orb_default)
+
 
     def evaluate_rule(self, rule: RuleCreate, when: datetime) -> List[Dict[str, Any]]:
+        logger.debug("evaluate_rule: rule_id=%s when=%s conditions=%d outcomes=%d",
+             getattr(rule, "rule_id", None), when.isoformat(), len(rule.conditions or []), len(rule.outcomes or []))
+
         for cond in rule.conditions:
             if not self._check_condition(cond, when):
                 return []
         events = []
         for out in rule.outcomes:
+            logger.debug(f"oc: {out}")
             events.append({
                 "rule_id": rule.rule_id,
-                "date": when.date().isoformat(),
-                "sector": out.sector_code,
-                "effect": out.effect.value,
+                "date": (when.date() if hasattr(when, "date") else when).isoformat(),
+                "sector": out.sector.code,
+                "effect": out.effect,
                 "weight": out.weight,
                 "confidence": rule.confidence
             })
+        logger.debug("evaluate_rule -> events_count=%d events=%s", len(events), events)
         return events
 
     def _check_condition(self, cond: ConditionRead, when: datetime) -> bool:
         planet = (cond.planet or "").lower()
-        relation = cond.relation
+        relation = Relation[cond.relation]
         target = (cond.target or "").lower()
         orb = cond.orb if cond.orb is not None else self.orb_default
+        logger.debug("Checking condition: planet=%s relation=%s target=%s orb=%s", planet, relation, target, orb)
 
         try:
             lon = self.provider.longitude(planet, when)
-        except Exception:
+            logger.debug("Provider longitude: planet=%s when=%s lon=%.6f", planet, when.isoformat(), lon)
+        except Exception as exc:
+            logger.exception("Provider.longitude failed for planet=%s when=%s: %s", planet, when, exc)
             return False
 
         if relation == Relation.in_nakshatra_owned_by:
             nk = self.provider.nakshatra_index(lon)
             owner = self.provider.nakshatra_owner(nk)
+            logger.debug("Nakshatra check: nk=%s owner=%s target=%s -> %s", nk, owner, target, owner.lower()==target.lower())
             return owner.lower() == target.lower()
 
         if relation == Relation.conjunct_with:
             tlon = self.provider.longitude(target, when)
+            dist = self.provider.angular_distance(lon, tlon)
+            logger.debug("Conjunction check: target=%s tlon=%.6f dist=%.6f orb=%s -> %s", target, tlon, dist, orb, dist <= orb)
             return self.provider.angular_distance(lon, tlon) <= orb
 
         if relation == Relation.in_axis:
@@ -57,6 +74,7 @@ class RulesEngineImpl(IRulesEngine):
 
         if relation == Relation.in_sign:
             sign = int((lon // 30) % 12)
+            logger.debug("In-sign check: lon=%.6f sign=%d expected=%s -> %s", lon, sign, cond.value, sign == int(cond.value))
             return sign == int(cond.value)
 
         if relation == Relation.in_house_relative_to:
@@ -70,4 +88,5 @@ class RulesEngineImpl(IRulesEngine):
             asp = float(cond.value) if cond.value is not None else 0.0
             return abs(self.provider.angular_distance(lon, tlon) - asp) <= orb
 
+        logger.debug("Condition not matched: %s", cond)
         return False

@@ -122,10 +122,9 @@
           <tr>
             <th>Start Date</th>
             <th>End Date</th>
-            <th>Provider</th>
-            <th>Duration</th>
-            <th>Type</th>
+            <th>Duration Type</th>
             <th>Subtype</th>
+            <th>Provider</th>
             <th>Metadata</th>
           </tr>
         </thead>
@@ -137,10 +136,9 @@
         <tr>
           <td>${escapeHtml(e.start_date || "")}</td>
           <td>${escapeHtml(e.end_date || "")}</td>
-          <td>${escapeHtml(e.provider || "")}</td>
           <td>${escapeHtml(e.duration_type || "–")}</td>
-          <td>${escapeHtml(e.event_type || "")}</td>
           <td>${escapeHtml(e.event_subtype || "")}</td>
+          <td>${escapeHtml(e.provider || "")}</td>
           <td><pre class="mb-0 small text-muted">${escapeHtml(
             JSON.stringify(e.metadata_json, null, 1)
           )}</pre></td>

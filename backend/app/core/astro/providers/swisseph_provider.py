@@ -7,6 +7,8 @@ Requires: pip install pyswisseph
 from datetime import datetime
 import math
 import logging
+import datetime
+
 from app.core.astro.interfaces.i_astro_provider import IAstroProvider
 
 logger = logging.getLogger("astro.swisseph")
@@ -26,26 +28,46 @@ class SwissEphemProvider(IAstroProvider):
         if HAS_SW:
             swe.set_sid_mode(self.ayanamsa)
 
-    def longitude(self, planet: str, when: datetime) -> float:
+
+    def longitude(self, planet: str, when: datetime.datetime) -> float:
+        """
+        Compute the ecliptic longitude of the given planet or node
+        using Swiss Ephemeris built-in data. Accepts both datetime.date
+        and datetime.datetime objects.
+        """
         if not HAS_SW:
             raise RuntimeError("pyswisseph not installed.")
-        jd = swe.julday(when.year, when.month, when.day,
-                        when.hour + when.minute / 60.0 + when.second / 3600.0)
+
+        # 🔧 Fix: normalize if 'when' is a date instead of datetime
+        if isinstance(when, datetime.date) and not isinstance(when, datetime.datetime):
+            when = datetime.datetime(when.year, when.month, when.day, 0, 0, 0)
+
+        jd = swe.julday(
+            when.year,
+            when.month,
+            when.day,
+            when.hour + when.minute / 60.0 + when.second / 3600.0
+        )
+
         body_map = {
             "sun": swe.SUN, "moon": swe.MOON, "mercury": swe.MERCURY,
             "venus": swe.VENUS, "mars": swe.MARS, "jupiter": swe.JUPITER,
             "saturn": swe.SATURN, "uranus": swe.URANUS, "neptune": swe.NEPTUNE,
             "pluto": swe.PLUTO
         }
+
         if planet in ["rahu", "ketu"]:
             lon = swe.calc_ut(jd, swe.MEAN_NODE)[0][0]
             if planet == "ketu":
                 lon = (lon + 180) % 360
             return lon % 360
+
         if planet not in body_map:
             raise ValueError(f"Unsupported planet: {planet}")
+
         lon = swe.calc_ut(jd, body_map[planet])[0][0]
         return lon % 360
+
 
     def nakshatra_index(self, longitude_deg: float) -> int:
         return int(math.floor((longitude_deg % 360.0) / (360.0 / 27.0)))
