@@ -1,6 +1,11 @@
 from enum import Enum
 
 class Planet(str, Enum):
+    """
+    Canonical planet enumeration for astro logic.
+    Access by lowercase key, e.g. Planet['sun'], Planet['mars'].
+    Enum values are human-readable display names.
+    """
     sun = "Sun"
     moon = "Moon"
     mars = "Mars"
@@ -10,6 +15,9 @@ class Planet(str, Enum):
     saturn = "Saturn"
     rahu = "Rahu"
     ketu = "Ketu"
+    uranus = "Uranus"
+    neptune = "Neptune"
+    pluto = "pluto"
 
 class Relation(str, Enum):
     in_nakshatra_owned_by = "In Nakshatra Owned By"

@@ -12,3 +12,5 @@ data_cache/
 backend/scripts/restructure_core.sh
 backend/Observations.txt
 backend/file::memory:
+backend/de440s.bsp
+backend/de421.bsp

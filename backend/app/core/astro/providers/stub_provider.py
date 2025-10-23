@@ -1,6 +1,7 @@
 # backend/app/core/astro/providers/stub_provider.py
 from datetime import datetime
 import math
+import os
 from app.core.astro.interfaces.i_astro_provider import IAstroProvider
 
 class StubProvider(IAstroProvider):
@@ -8,7 +9,7 @@ class StubProvider(IAstroProvider):
 
     def __init__(self):
         # optional config
-        pass
+        self.ayanamsa_mode = os.getenv("ASTRO_AYANAMSA_MODE", "lahiri")
 
     def longitude(self, planet: str, when: datetime) -> float:
         base = sum(ord(c) for c in planet.lower()) % 360

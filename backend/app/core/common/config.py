@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     default_sector_ticker: str = Field(default="^GSPC", description="Default market index ticker")
 
     # --- ConfigDict replaces old Config class ---
-    model_config = ConfigDict(env_file=".env", env_file_encoding="utf-8")
+    model_config = ConfigDict(env_file=".env", env_file_encoding="utf-8", extra='allow')
 
 # singleton instance
 settings = Settings()
