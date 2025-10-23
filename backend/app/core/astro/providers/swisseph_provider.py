@@ -79,6 +79,15 @@ class SwissEphemProvider(IAstroProvider):
             self.is_sidereal = True
 
         logger.info("SwissEphem provider initialized (mode=%s)", self.mode)
+    # -------------------------------------------------------
+    def _to_datetime(self, when):
+        """Normalize date or datetime input to a datetime object."""
+        from datetime import datetime as dtmod, time
+
+        if isinstance(when, dtmod):
+            return when
+        # Handle pure date object
+        return dtmod.combine(when, time(0, 0, 0))
 
     # -------------------------------------------------------
     def longitude(self, planet: Union[str, Planet], when: datetime) -> float:
@@ -106,13 +115,17 @@ class SwissEphemProvider(IAstroProvider):
 
         planet_id = self.mapper.resolve(planet_enum)
 
+        # Normalize datetime or date
+        dt = self._to_datetime(when)    
+
         # Compute Julian day (UT)
         jd = swe.julday(
-            when.year,
-            when.month,
-            when.day,
-            when.hour + when.minute / 60.0 + when.second / 3600.0
+            dt.year,
+            dt.month,
+            dt.day,
+            dt.hour + dt.minute / 60.0 + dt.second / 3600.0
         )
+
 
         # Determine calculation flags
         flags = swe.FLG_SWIEPH
