@@ -97,8 +97,99 @@ def test_provider_mode_switch(provider_cls, mode):
         diff = abs((tropical - sidereal + 180) % 360 - 180)
         assert 23 < diff < 25
 
-    # # In test_provider_mode_switch
-    # if mode == "tropical":
-    #     assert not getattr(p, "is_sidereal", True)
-    # else:
-    #     assert getattr(p, "is_sidereal", False)
+import pytest
+from datetime import datetime
+from app.core.astro.providers.skyfield_provider import SkyfieldProvider
+from app.core.astro.providers.swisseph_provider import SwissEphemProvider
+from app.core.astro.providers.stub_provider import StubProvider
+
+
+@pytest.mark.parametrize("provider_cls", [SkyfieldProvider, SwissEphemProvider, StubProvider])
+def test_nakshatra_index_and_owner_consistency(provider_cls):
+    """
+    Verify nakshatra_index(...) and nakshatra_owner(...) produce consistent results
+    for key planetary longitudes across providers.
+    """
+    date = datetime(2025, 1, 1)
+    provider = provider_cls()
+
+    # Test over key planets
+    for planet in ["sun", "moon", "mars", "jupiter"]:
+        lon = provider.longitude(planet, date)
+        nak_idx = provider.nakshatra_index(lon)
+        owner = provider.nakshatra_owner(nak_idx)
+
+        assert 0 <= nak_idx <= 26, f"Invalid nakshatra index for {planet}: {nak_idx}"
+        assert isinstance(owner, str) and owner, f"Empty nakshatra owner for {planet}"
+
+        print(f"{provider_cls.__name__}: {planet} → Nakshatra #{nak_idx} ({owner})")
+
+
+def test_nakshatra_index_owner_matrix_tolerance():
+    """
+    Compare nakshatra indices and owners across providers to ensure consistent
+    nakshatra boundaries and ownership.
+    """
+    date = datetime(2025, 1, 1)
+    skyfield = SkyfieldProvider()
+    swisseph = SwissEphemProvider()
+
+    for planet in ["sun", "moon", "mars", "jupiter"]:
+        lon_sf = skyfield.longitude(planet, date)
+        lon_sw = swisseph.longitude(planet, date)
+
+        nak_sf = skyfield.nakshatra_index(lon_sf)
+        nak_sw = swisseph.nakshatra_index(lon_sw)
+        diff = abs(nak_sf - nak_sw)
+
+        assert diff <= 1, f"Nakshatra mismatch for {planet}: {nak_sf} vs {nak_sw}"
+
+        owner_sf = skyfield.nakshatra_owner(nak_sf)
+        owner_sw = swisseph.nakshatra_owner(nak_sw)
+
+        assert owner_sf == owner_sw, f"Owner mismatch for {planet}: {owner_sf} vs {owner_sw}"
+
+        print(
+            f"{planet:<8} SF={nak_sf:02d}({owner_sf})  "
+            f"SW={nak_sw:02d}({owner_sw})  Δ={diff}"
+        )
+
+
+@pytest.mark.parametrize("provider_cls", [SkyfieldProvider, SwissEphemProvider, StubProvider])
+def test_angular_distance_consistency(provider_cls):
+    """
+    Validate angular_distance() function across providers for circular distance logic.
+    """
+    provider = provider_cls()
+
+    cases = [
+        (10, 350, 20),
+        (0, 180, 180),
+        (45, 90, 45),
+        (270, 90, 180),
+        (359, 1, 2),
+    ]
+
+    for a, b, expected in cases:
+        result = provider.angular_distance(a, b)
+        assert abs(result - expected) < 1e-6, f"Incorrect angular distance for {a},{b}"
+
+        print(f"{provider_cls.__name__}: angular_distance({a},{b}) = {result:.6f}")
+
+
+def test_angular_distance_matrix_tolerance():
+    """
+    Compare angular_distance results between providers to ensure consistent
+    modular arithmetic and wrapping.
+    """
+    skyfield = SkyfieldProvider()
+    swisseph = SwissEphemProvider()
+
+    for a, b in [(10, 350), (45, 90), (270, 90), (359, 1)]:
+        d_sf = skyfield.angular_distance(a, b)
+        d_sw = swisseph.angular_distance(a, b)
+
+        diff = abs(d_sf - d_sw)
+        assert diff < 1e-6, f"Angular distance mismatch: {d_sf} vs {d_sw}"
+
+        print(f"Δ angular_distance({a},{b}) = {diff:.8f}")

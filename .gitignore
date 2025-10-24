@@ -14,3 +14,4 @@ backend/Observations.txt
 backend/file::memory:
 backend/de440s.bsp
 backend/de421.bsp
+backend/.coverage

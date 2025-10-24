@@ -1,0 +1,35 @@
+# .coveragerc
+[run]
+# Measure both line and branch coverage
+branch = True
+
+# Directories and files to omit from coverage measurement
+omit =
+    */__init__.py
+    */tests/*
+    */conftest.py
+    */requirements.txt
+
+[report]
+# Exclude non-executable or debug-only lines
+exclude_lines =
+    pragma: no cover
+    if __name__ == .__main__.:
+    def __repr__
+    raise NotImplementedError
+    if TYPE_CHECKING:
+
+# Display settings
+show_missing = True
+precision = 2
+skip_covered = False
+
+# Sort report output by name for readability
+sort = Name
+
+[html]
+directory = htmlcov
+title = Astro Rules Engine – Coverage Report
+
+[xml]
+output = coverage.xml
