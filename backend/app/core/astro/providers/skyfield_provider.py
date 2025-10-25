@@ -10,7 +10,7 @@ Pure-Skyfield implementation of IAstroProvider (Plan B):
 """
 
 from __future__ import annotations
-from datetime import datetime, date as date_type, timezone
+from datetime import datetime, date as date_type, timedelta, timezone
 import math
 import logging
 import os
@@ -254,3 +254,20 @@ class SkyfieldProvider(IAstroProvider):
     def angular_distance(self, a: float, b: float) -> float:
         """Shortest angular distance between two degrees on 0..360 circle."""
         return abs((float(a) - float(b) + 180.0) % 360.0 - 180.0)
+
+    def is_retrograde(self, planet: str, when: datetime) -> bool:
+        """
+        Determine retrograde by sampling the planet longitude at t and t+1d.
+        If the longitude decreased (wrapped-aware), treat as retrograde.
+        """
+        try:
+            lon_t = self.longitude(planet, when)
+            # sample one day later
+            later = when + timedelta(days=1)
+            lon_later = self.longitude(planet, later)
+            # compute signed minimal difference in [-180,180]
+            diff = ((lon_later - lon_t + 180.0) % 360.0) - 180.0
+            # If diff < 0 => backward motion (retrograde)
+            return diff < 0.0
+        except Exception:
+            return False

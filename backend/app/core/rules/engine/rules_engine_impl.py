@@ -39,6 +39,7 @@ class RulesEngineImpl(IRulesEngine):
         return events
 
     def _check_condition(self, cond: ConditionRead, when: datetime) -> bool:
+        from app.core.rules.relations.registry import get_relation_handler
         planet = (cond.planet or "").lower()
         relation = Relation[cond.relation]
         target = (cond.target or "").lower()
@@ -52,41 +53,16 @@ class RulesEngineImpl(IRulesEngine):
             logger.exception("Provider.longitude failed for planet=%s when=%s: %s", planet, when, exc)
             return False
 
-        if relation == Relation.in_nakshatra_owned_by:
-            nk = self.provider.nakshatra_index(lon)
-            owner = self.provider.nakshatra_owner(nk)
-            logger.debug("Nakshatra check: nk=%s owner=%s target=%s -> %s", nk, owner, target, owner.lower()==target.lower())
-            return owner.lower() == target.lower()
-
-        if relation == Relation.conjunct_with:
-            tlon = self.provider.longitude(target, when)
-            dist = self.provider.angular_distance(lon, tlon)
-            logger.debug("Conjunction check: target=%s tlon=%.6f dist=%.6f orb=%s -> %s", target, tlon, dist, orb, dist <= orb)
-            return self.provider.angular_distance(lon, tlon) <= orb
-
-        if relation == Relation.in_axis:
-            tlon = self.provider.longitude(target, when)
-            if self.provider.angular_distance(lon, tlon) <= orb:
-                return True
-            if self.provider.angular_distance(lon, (tlon + 180) % 360) <= orb:
-                return True
+        # Delegate to dedicated handler (registered in app/core/rules/relations)
+        handler = get_relation_handler(relation)
+        if handler is None:
+            logger.warning("No relation handler registered for relation=%s (condition=%s)", relation, cond)
             return False
 
-        if relation == Relation.in_sign:
-            sign = int((lon // 30) % 12)
-            logger.debug("In-sign check: lon=%.6f sign=%d expected=%s -> %s", lon, sign, cond.value, sign == int(cond.value))
-            return sign == int(cond.value)
-
-        if relation == Relation.in_house_relative_to:
-            ref_lon = self.provider.longitude(target, when)
-            house = int(cond.value)
-            center = (ref_lon + (house - 1) * 30) % 360
-            return self.provider.angular_distance(lon, center) <= orb
-
-        if relation == Relation.aspect_with:
-            tlon = self.provider.longitude(target, when)
-            asp = float(cond.value) if cond.value is not None else 0.0
-            return abs(self.provider.angular_distance(lon, tlon) - asp) <= orb
-
-        logger.debug("Condition not matched: %s", cond)
-        return False
+        try:
+            result = handler.check(self.provider, cond, when, self.orb_default)
+            logger.debug("Relation handler result: relation=%s result=%s", relation, result)
+            return result
+        except Exception as exc:
+            logger.exception("Relation handler raised exception for relation=%s cond=%s: %s", relation, cond, exc)
+            return False

@@ -3,27 +3,10 @@
 from __future__ import annotations
 from datetime import datetime
 from typing import List, Optional
-from enum import Enum
+from app.core.db.enums import Relation, OutcomeEffect
 from sqlmodel import SQLModel, Field
 from pydantic import BaseModel, ConfigDict
 
-
-# --------------------------------------------------------------------
-# ENUMS (kept unchanged)
-# --------------------------------------------------------------------
-class Relation(str, Enum):
-    in_sign = "in_sign"
-    in_house = "in_house"
-    in_nakshatra_owned_by = "in_nakshatra_owned_by"
-    aspecting = "aspecting"
-    conjunct_with = "conjunct_with"
-    retrograde = "retrograde"
-
-
-class OutcomeEffect(str, Enum):
-    Bullish = "Bullish"
-    Bearish = "Bearish"
-    Neutral = "Neutral"
 
 
 # --------------------------------------------------------------------

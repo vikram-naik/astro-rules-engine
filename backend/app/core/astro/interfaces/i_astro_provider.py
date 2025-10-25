@@ -24,3 +24,8 @@ class IAstroProvider(ABC):
     def angular_distance(self, a: float, b: float) -> float:
         """Return shortest angular distance in degrees between angles a and b."""
         raise NotImplementedError
+    
+    @abstractmethod
+    def is_retrograde(self, planet: str, when: datetime) -> bool:
+        """Return True if planet is retrograde at the given time."""
+        raise NotImplementedError

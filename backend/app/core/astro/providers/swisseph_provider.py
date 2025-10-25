@@ -10,8 +10,8 @@ SwissEphem-based implementation of IAstroProvider.
 
 import os
 import logging
-from datetime import datetime
 from typing import Union
+from datetime import datetime, timedelta
 
 import swisseph as swe
 
@@ -158,3 +158,44 @@ class SwissEphemProvider(IAstroProvider):
     def angular_distance(self, a: float, b: float) -> float:
         """Shortest angular distance between two degrees on 0..360 circle."""
         return abs((float(a) - float(b) + 180.0) % 360.0 - 180.0)
+
+    def is_retrograde(self, planet: str, when: datetime) -> bool:
+        """
+        Return True if the specified planet is retrograde at the given time.
+        Uses the provider's planet_mapper to look up the swisseph body code and reads
+        the longitudinal speed from swe.calc_ut result (res[3]).
+        Defensive: returns False if body not found or error occurs.
+        """
+        try:
+            key = (planet or "").lower()
+            # planet_mapper is expected to map keys (lowercase) to swisseph constants
+            body_code = getattr(self, "planet_mapper", {}).get(key)
+            if body_code is None:
+                # If planet not mapped, we cannot compute retrograde -> False
+                return False
+
+            # Normalize when to datetime if a date was provided
+            dt = self._to_datetime(when=when)
+
+            # Compute Julian day UT (use hours/minutes of the datetime if present)
+            jd = swe.julday(
+                dt.year,
+                dt.month,
+                dt.day,
+                dt.hour + when.minute / 60.0 + when.second / 3600.0
+            )
+
+            # Use SWIEPH + speed flag to get velocities
+            flags = swe.FLG_SWIEPH | swe.FLG_SPEED
+            res, ret = swe.calc_ut(jd, body_code, flags)
+            # res expected: [lon, lat, dist, speed_lon, speed_lat, speed_dist]
+            if not res or len(res) < 4:
+                return False
+            speed_lon = float(res[3])
+            # negative longitudinal speed => retrograde
+            return speed_lon < 0.0
+
+        except Exception:
+            # Be defensive: do not raise from provider-level retro checks during rule evals
+            return False
+
