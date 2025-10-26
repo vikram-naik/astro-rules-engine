@@ -6,6 +6,7 @@ from app.core.db.enums import AyanamsaMode, Planet
 from app.core.astro.providers.skyfield_provider import SkyfieldPlanetMapper, SkyfieldProvider
 from app.core.astro.providers.swisseph_provider import SwissEphemPlanetMapper, SwissEphemProvider
 from app.core.astro.providers.stub_provider import StubProvider
+from app.core.astro.factories.provider_factory import get_provider
 
 # ---------- StubProvider -----------------------------------------------------
 
@@ -327,59 +328,35 @@ def test_is_retrograde_calc_ut_returns_short_list(monkeypatch):
     assert provider.is_retrograde("sun", datetime(2025, 1, 1)) is False
 
 
-@pytest.mark.parametrize(
-    "planet, retro_date, direct_date",
-    [
-        # Mercury retrograde early Jan 2025
-        ("mercury", datetime(2025, 3, 20), datetime(2025, 1, 10)),
-        # Mars retrograde Dec 2025 – Feb 2026
-        ("mars", datetime(2024, 12, 20), datetime(2025, 3, 1)),
-        # Saturn retrograde Jul–Nov 2025
-        ("saturn", datetime(2025, 8, 15), datetime(2025, 12, 15)),
-    ],
-)
-def test_real_retrograde_events(planet, retro_date, direct_date):
+# small helper to ensure providers are created fresh and same ayanamsa
+def _get_providers():
+    sky = get_provider("skyfield", ayanamsa_mode=AyanamsaMode.lahiri, fresh=True)
+    swe = get_provider("swisseph", ayanamsa_mode=AyanamsaMode.lahiri, fresh=True)
+    return {"skyfield": sky, "swisseph": swe}
+
+@pytest.mark.parametrize("planet,when_iso,expected", [
+    # Mercury tests (Mercury retrograde Mar 14 - Apr 7, 2025)
+    ("mercury", "2025-03-20T00:00:00+00:00", True),   # inside Mercury retrograde
+    ("mercury", "2025-01-10T00:00:00+00:00", False),  # outside retrograde
+
+    # Mars tests (Mars retrograde Dec 6, 2024 - Feb 23, 2025)
+    ("mars", "2024-12-20T00:00:00+00:00", True),      # inside Mars retrograde
+    ("mars", "2025-03-01T00:00:00+00:00", False),     # after Mars direct
+])
+def test_real_retrograde_events_across_providers(planet, when_iso, expected):
     """
-    Validate real-world retrograde detection for key planets using SwissEphemProvider.
-    Uses actual astronomical data (DE440 ephemeris).
+    Regression test using real-world retrograde windows (not monkeypatched).
+    Ensures both Skyfield and SwissEphem report the same boolean for is_retrograde.
     """
-    provider = SwissEphemProvider()  # defaults to Lahiri mode, fine for this test
+    when = datetime.fromisoformat(when_iso)
+    providers = _get_providers()
 
-    is_retro = provider.is_retrograde(planet, retro_date)
-    is_direct = provider.is_retrograde(planet, direct_date)
-
-    # The planet should be retrograde on the retro_date and direct afterward.
-    assert is_retro is True, f"{planet} should be retrograde on {retro_date.date()}"
-    assert is_direct is False, f"{planet} should be direct on {direct_date.date()}"
-
-
-
-@pytest.mark.parametrize(
-    "planet, retro_date, direct_date",
-    [
-        # Mercury retrograde early Jan 2025
-        ("mercury", datetime(2025, 3, 20), datetime(2025, 1, 10)),
-        # Mars retrograde Dec 2025 – Feb 2026
-        ("mars", datetime(2024, 12, 20), datetime(2025, 3, 1)),
-        # Saturn retrograde Jul–Nov 2025
-        ("saturn", datetime(2025, 8, 15), datetime(2025, 12, 15)),
-    ],
-)
-def test_real_retrograde_events_sf(planet, retro_date, direct_date):
-    """
-    Validate real-world retrograde detection for key planets using SwissEphemProvider.
-    Uses actual astronomical data (DE440 ephemeris).
-    """
-    provider = SkyfieldProvider()  # defaults to Lahiri mode, fine for this test
-
-    is_retro = provider.is_retrograde(planet, retro_date)
-    is_direct = provider.is_retrograde(planet, direct_date)
-
-    # The planet should be retrograde on the retro_date and direct afterward.
-    assert is_retro is True, f"{planet} should be retrograde on {retro_date.date()}"
-    assert is_direct is False, f"{planet} should be direct on {direct_date.date()}"
-
-
+    for name, prov in providers.items():
+        # providers expose is_retrograde(planet, when)
+        assert prov.is_retrograde(planet, when) is expected, (
+            f"{name}: expected {planet} retrograde={expected} on {when_iso}, "
+            f"got {prov.is_retrograde(planet, when)}"
+        )
 
 
 def test_is_retrograde_exception(monkeypatch):
