@@ -32,9 +32,11 @@ Example:
 """
 
 from datetime import datetime
+import logging
 from app.core.common.schemas import ConditionRead
 from app.core.rules.relations.i_relation import IRelationHandler
 
+logger = logging.getLogger("relation.is_retrograde")
 
 class RetrogradeHandler(IRelationHandler):
     """Checks whether a planet is retrograde."""
@@ -42,12 +44,17 @@ class RetrogradeHandler(IRelationHandler):
     def check(self, provider, condition: ConditionRead, when: datetime, orb_default: float) -> bool:
         planet = condition.planet.lower()
         try:
+            logger.debug(f"planet:{planet} when:{when}")
             # Normal path: delegate to provider
-            return bool(provider.is_retrograde(planet, when))
-
-        except (AttributeError, TypeError):
+            result = provider.is_retrograde(planet, when)
+            logger.debug(f"result:{result}")
+            # return bool(provider.is_retrograde(planet, when))
+            return result
+        except (AttributeError, TypeError) as e:
+            logger.exception(f"1. Exception encountered :: {e}", exc_info=True)
             # Missing method or non-callable attribute
             return False
-        except Exception:
+        except Exception as e:
+            logger.exception(f"2. Unepected exc encountered :: {e}", exc_info=True)
             # Defensive catch for unexpected provider runtime failure
             return False

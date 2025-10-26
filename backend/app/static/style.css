@@ -115,3 +115,15 @@ body.bg-dark .event-metadata {
   background: #2c2c2c;
   color: #e9ecef;
 }
+
+/* Spinner alignment and checkbox label fix */
+.btn .spinner-border.spinner-border-sm {
+vertical-align: middle;
+margin-left: 0.4rem;
+}
+/* Ensure checkbox labels like "Overwrite" remain visible */
+.form-check-label,
+.form-check-label.small {
+color: var(--text-light) !important;
+font-weight: 500 !important;
+}

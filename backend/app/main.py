@@ -1,4 +1,5 @@
 # app/main.py
+from fastapi.templating import Jinja2Templates
 from app.core.db.db import Base, engine
 from app.core.common.logger import LoggingMiddleware, setup_logger
 from app.core.common.config import settings
@@ -10,7 +11,6 @@ from contextlib import asynccontextmanager
 
 from app.api.routes_rules import router as rules_router
 from app.api.routes_sectors_api import router as sectors_router
-from app.api.routes_ui_workbench import router as ui_router
 from app.api.routes_reference_api import router as ref_router
 from app.api.routes_rule_event import router as rule_event_router
 
@@ -31,6 +31,9 @@ async def lifespan(app: FastAPI):
 
 # ✅ Pass lifespan into FastAPI constructor
 app = FastAPI(title="Astro Rules Engine", lifespan=lifespan)
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
+templates = Jinja2Templates(directory="app/templates")
 
 app.add_middleware(LoggingMiddleware)
 
@@ -38,12 +41,11 @@ app.add_middleware(LoggingMiddleware)
 app.include_router(sectors_router)
 app.include_router(rules_router)
 app.include_router(ref_router)
-app.include_router(ui_router)
 app.include_router(rule_event_router)
 
-
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
-
+# this import is done here to avoid circular deps as ui_router needs templates defined.
+from app.api.routes_ui_workbench import router as ui_router
+app.include_router(ui_router)
 
 @app.get("/")
 def root():

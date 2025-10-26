@@ -158,35 +158,39 @@ class SwissEphemProvider(IAstroProvider):
         """
         try:
             key = (planet or "").lower()
+            logger.debug(f"is_retrograde: planet={key} when={when}")
             # planet_mapper is expected to map keys (lowercase) to swisseph constants
             body_code = self.planet_mappper.resolve(Planet[key.lower()])
+            logger.debug(f"is_retrograde: body_code={body_code}")
             if body_code is None:
                 # If planet not mapped, we cannot compute retrograde -> False
                 return False
 
             # Normalize when to datetime if a date was provided
             dt = self._to_datetime(when=when)
-
+            logger.debug(f"is_retrograde: dt={dt}")
             # Compute Julian day UT (use hours/minutes of the datetime if present)
             jd = swe.julday(
                 dt.year,
                 dt.month,
                 dt.day,
-                dt.hour + when.minute / 60.0 + when.second / 3600.0
+                dt.hour + dt.minute / 60.0 + dt.second / 3600.0
             )
 
             # Use SWIEPH + speed flag to get velocities
             flags = swe.FLG_SWIEPH | swe.FLG_SPEED
             res, ret = swe.calc_ut(jd, body_code, flags)
             # res expected: [lon, lat, dist, speed_lon, speed_lat, speed_dist]
-            print(res)
+            logger.debug(f"is_retrograde: res={res}")
             if not res or len(res) < 4:
                 return False
             speed_lon = float(res[3])
+            logger.debug(f"is_retrograde: speed_lon={speed_lon}")
             # negative longitudinal speed => retrograde
             return speed_lon < 0.0
 
-        except Exception:
+        except Exception as e:
+            logger.exception(f"Unexpected Exception : {e}", exc_info=True)
             # Be defensive: do not raise from provider-level retro checks during rule evals
             return False
 

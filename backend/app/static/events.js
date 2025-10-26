@@ -13,25 +13,32 @@
   const resultContainer = document.getElementById("eventResults");
 
   //----------------------------------------------------------------
-  // Load all rules into dropdown
+  // Load all rules into dropdown (UX improved)
   //----------------------------------------------------------------
   async function loadRulesForEvents() {
     resultContainer.innerHTML = `<div class="text-muted">Loading rules...</div>`;
+    ruleSelect.innerHTML = `<option value="">Loading...</option>`;
+
     try {
       const resp = await fetch("/api/rules");
       if (!resp.ok) throw new Error("Failed to fetch rules");
       const rules = await resp.json();
+
       if (!rules.length) {
         ruleSelect.innerHTML = `<option value="">No rules found</option>`;
         resultContainer.innerHTML = `<div class="text-muted">No rules available.</div>`;
         return;
       }
-      ruleSelect.innerHTML = rules
-        .map((r) => `<option value="${r.rule_id}">${escapeHtml(r.name)}</option>`)
-        .join("");
+
+      // ✅ Always prepend a placeholder
+      ruleSelect.innerHTML =
+        `<option value="">-- Select a Rule --</option>` +
+        rules.map((r) => `<option value="${r.rule_id}">${escapeHtml(r.name)}</option>`).join("");
+
       resultContainer.innerHTML = `<div class="text-muted">Select a rule to view events.</div>`;
     } catch (err) {
       console.error("Error loading rules:", err);
+      ruleSelect.innerHTML = `<option value="">Error loading</option>`;
       resultContainer.innerHTML = `<div class="text-danger">Error loading rules.</div>`;
     }
   }
@@ -64,7 +71,7 @@
   }
 
   //----------------------------------------------------------------
-  // Generate new events for selected rule
+  // Generate new events for selected rule (with visual spinner)
   //----------------------------------------------------------------
   async function generateEvents() {
     const ruleId = ruleSelect.value;
@@ -81,6 +88,14 @@
       alert("Please select a valid start and end date.");
       return;
     }
+
+    // Create spinner next to button
+    const spinner = document.createElement("span");
+    spinner.className = "spinner-border spinner-border-sm ms-2 text-light";
+    spinner.role = "status";
+    spinner.ariaHidden = "true";
+    generateBtn.disabled = true;
+    generateBtn.appendChild(spinner);
 
     resultContainer.innerHTML = `<div class="text-muted">Generating events...</div>`;
 
@@ -104,6 +119,9 @@
     } catch (err) {
       console.error("Error generating events:", err);
       resultContainer.innerHTML = `<div class="text-danger">Error generating events: ${escapeHtml(err.message)}</div>`;
+    } finally {
+      generateBtn.disabled = false;
+      spinner.remove(); // clean up spinner
     }
   }
 
@@ -153,9 +171,22 @@
   //----------------------------------------------------------------
   // Event listeners
   //----------------------------------------------------------------
+
+  // When rule changes → load events
   ruleSelect.addEventListener("change", (e) => fetchEventsForRule(e.target.value));
+
+  // When user clicks generate → POST events
   generateBtn.addEventListener("click", generateEvents);
-  document.getElementById("events-tab").addEventListener("click", loadRulesForEvents);
+
+  // When events tab activated → refresh rule list and reload current rule’s events if any
+  document.getElementById("events-tab").addEventListener("click", async () => {
+    await loadRulesForEvents();
+    const selectedRuleId = ruleSelect.value;
+    if (selectedRuleId) {
+      // ✅ Auto reload events for currently selected rule
+      await fetchEventsForRule(selectedRuleId);
+    }
+  });
 
   //----------------------------------------------------------------
   // Module export

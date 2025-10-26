@@ -336,6 +336,8 @@ def _get_providers():
 
 @pytest.mark.parametrize("planet,when_iso,expected", [
     # Mercury tests (Mercury retrograde Mar 14 - Apr 7, 2025)
+     ("mercury", "2024-04-02", True), 
+    ("mercury", "2024-04-04T00:00:00+00:00", True), 
     ("mercury", "2025-03-20T00:00:00+00:00", True),   # inside Mercury retrograde
     ("mercury", "2025-01-10T00:00:00+00:00", False),  # outside retrograde
 
@@ -353,6 +355,7 @@ def test_real_retrograde_events_across_providers(planet, when_iso, expected):
 
     for name, prov in providers.items():
         # providers expose is_retrograde(planet, when)
+        print(f"{name}: {planet} retrograde={expected} on {when_iso}")
         assert prov.is_retrograde(planet, when) is expected, (
             f"{name}: expected {planet} retrograde={expected} on {when_iso}, "
             f"got {prov.is_retrograde(planet, when)}"

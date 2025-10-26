@@ -6,10 +6,9 @@ Serves the single-page workbench UI (Jinja2 template).
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
+from app.main import templates
 
 router = APIRouter(tags=["ui"])
-templates = Jinja2Templates(directory="app/templates")
 
 
 @router.get("/ui/workbench", response_class=HTMLResponse)
