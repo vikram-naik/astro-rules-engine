@@ -82,7 +82,7 @@ class SkyfieldProvider(IAstroProvider):
     # ---------------------
     # Helper / utilities
     # ---------------------
-    def _to_time(self, when: datetime):
+    def _to_datetime(self, when: datetime):
         """Normalize python datetime/date input to a Skyfield Time object (UTC)."""
         if isinstance(when, date_type) and not isinstance(when, datetime):
             when = datetime(when.year, when.month, when.day, tzinfo=timezone.utc)
@@ -99,11 +99,7 @@ class SkyfieldProvider(IAstroProvider):
         key = str(planet).strip().lower()
         if key in Planet.__members__:
             return Planet.__members__[key]
-        # fallback: try capitalized name as value match
-        for member in Planet:
-            if member.value.lower() == key:
-                return member
-        raise ValueError(f"Unsupported planet name: {planet}")
+        raise NotImplementedError(f"Unsupported planet name: {planet}")
 
     @staticmethod
     def _wrap_angle(deg: float) -> float:
@@ -173,25 +169,10 @@ class SkyfieldProvider(IAstroProvider):
         - Otherwise returns sidereal using native Lahiri polynomial.
         """
         # 1) normalize time -> Skyfield time
-        t = self._to_time(when)
+        t = self._to_datetime(when)
 
         # 2) normalize planet input to canonical Planet enum
-        if isinstance(planet, Planet):
-            planet_enum = planet
-        else:
-            key = str(planet).strip().lower()
-            if key in Planet.__members__:
-                planet_enum = Planet.__members__[key]
-            else:
-                # try matching by enum value as fallback
-                matched = None
-                for m in Planet:
-                    if m.value.lower() == key:
-                        matched = m
-                        break
-                if matched is None:
-                    raise ValueError(f"Unsupported planet name: {planet}")
-                planet_enum = matched
+        planet_enum = self._normalize_planet_input(planet)
 
         # 3) map to skyfield key using mapper
         try:

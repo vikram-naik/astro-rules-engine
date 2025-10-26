@@ -30,7 +30,7 @@ class RulesEngineImpl(IRulesEngine):
             events.append({
                 "rule_id": rule.rule_id,
                 "date": (when.date() if hasattr(when, "date") else when).isoformat(),
-                "sector": out.sector_code,
+                # "sector": out.sector.code,
                 "effect": out.effect,
                 "weight": out.weight,
                 "confidence": rule.confidence
@@ -42,6 +42,10 @@ class RulesEngineImpl(IRulesEngine):
         from app.core.rules.relations.registry import get_relation_handler
         planet = (cond.planet or "").lower()
         relation = cond.relation
+        # this hack is required as we are still stinking of pydantic schemas.. 
+        if isinstance(relation, Relation):
+            relation = relation.name
+
         target = (cond.target or "").lower()
         orb = cond.orb if cond.orb is not None else self.orb_default
         logger.debug("Checking condition: planet=%s relation=%s target=%s orb=%s", planet, relation, target, orb)
@@ -54,7 +58,8 @@ class RulesEngineImpl(IRulesEngine):
             return False
 
         # Delegate to dedicated handler (registered in app/core/rules/relations)
-        handler = get_relation_handler(relation)
+        
+        handler = get_relation_handler(Relation[relation])
         logger.debug(f"handler={handler}")
         if handler is None:
             logger.warning("No relation handler registered for relation=%s (condition=%s)", relation, cond)

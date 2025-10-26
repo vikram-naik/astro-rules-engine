@@ -59,7 +59,7 @@ class SwissEphemPlanetMapper(IPlanetMapper):
 class SwissEphemProvider(IAstroProvider):
     def __init__(self, ayanamsa_mode: AyanamsaMode = AyanamsaMode.lahiri):
         self.mode = ayanamsa_mode
-        self.mapper = SwissEphemPlanetMapper()
+        self.planet_mappper = SwissEphemPlanetMapper()
 
         # Configure sidereal/tropical mode
         if self.mode == AyanamsaMode.tropical:
@@ -75,9 +75,8 @@ class SwissEphemProvider(IAstroProvider):
             swe.set_sid_mode(swe.SIDM_RAMAN)
             self.is_sidereal = True
         else:
-            # fallback to lahiri
-            swe.set_sid_mode(swe.SIDM_LAHIRI)
-            self.is_sidereal = True
+             raise NotImplementedError(f"Unsupported ayanamsa mode: {self.mode}")
+
 
         logger.info("SwissEphem provider initialized (mode=%s)", self.mode.value)
     # -------------------------------------------------------
@@ -104,17 +103,9 @@ class SwissEphemProvider(IAstroProvider):
             if key in Planet.__members__:
                 planet_enum = Planet.__members__[key]
             else:
-                # fallback to match by enum value string
-                matched = None
-                for m in Planet:
-                    if m.value.lower() == key:
-                        matched = m
-                        break
-                if matched is None:
-                    raise ValueError(f"Unsupported planet name: {planet}")
-                planet_enum = matched
+                raise NotImplementedError(f"Unsupported planet name: {planet}")
 
-        planet_id = self.mapper.resolve(planet_enum)
+        planet_id = self.planet_mappper.resolve(planet_enum)
 
         # Normalize datetime or date
         dt = self._to_datetime(when)    
@@ -135,10 +126,8 @@ class SwissEphemProvider(IAstroProvider):
 
         # Compute planetary longitude
         res, ret = swe.calc_ut(jd, planet_id, flags)
-        if len(res) >= 3:
-            lon, lat, dist = res[0], res[1], res[2]
-        else:
-            lon, lat, dist = res[0], 0.0, 0.0
+        # res expected: [lon, lat, dist] , we only need lon so index on res[0]
+        lon = res[0]
 
         # Adjust for Ketu (180° opposite node)
         if planet_enum == Planet.ketu:
@@ -170,7 +159,7 @@ class SwissEphemProvider(IAstroProvider):
         try:
             key = (planet or "").lower()
             # planet_mapper is expected to map keys (lowercase) to swisseph constants
-            body_code = getattr(self, "planet_mapper", {}).get(key)
+            body_code = self.planet_mappper.resolve(Planet[key.lower()])
             if body_code is None:
                 # If planet not mapped, we cannot compute retrograde -> False
                 return False
@@ -190,6 +179,7 @@ class SwissEphemProvider(IAstroProvider):
             flags = swe.FLG_SWIEPH | swe.FLG_SPEED
             res, ret = swe.calc_ut(jd, body_code, flags)
             # res expected: [lon, lat, dist, speed_lon, speed_lat, speed_dist]
+            print(res)
             if not res or len(res) < 4:
                 return False
             speed_lon = float(res[3])

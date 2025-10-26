@@ -9,4 +9,5 @@ class IPlanetMapper(ABC):
     @abstractmethod
     def resolve(self, planet: Planet) -> str:
         """Return provider-specific key for given Planet."""
-        pass
+        raise NotImplementedError
+
