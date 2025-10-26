@@ -43,7 +43,7 @@ class Relation(str, Enum):
 
     # Additional astrological relations
     combust_by_sun = "Combust by Sun"
-    retrograde = "Retrograde"
+    is_retrograde = "Is Retrograde"
     # Future: combustion_by_planet, stationary, etc.
 
 class Sign(str, Enum):

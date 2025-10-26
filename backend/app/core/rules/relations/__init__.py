@@ -54,4 +54,4 @@ register_relation(Relation.quintile_with, _Quintile)
 register_relation(Relation.sesquiquadrate_with, _SesquiQuadrate)
 
 register_relation(Relation.combust_by_sun, CombustHandler)
-register_relation(Relation.retrograde, RetrogradeHandler)
+register_relation(Relation.is_retrograde, RetrogradeHandler)

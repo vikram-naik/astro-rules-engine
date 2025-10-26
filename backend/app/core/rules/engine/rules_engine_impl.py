@@ -41,7 +41,7 @@ class RulesEngineImpl(IRulesEngine):
     def _check_condition(self, cond: ConditionRead, when: datetime) -> bool:
         from app.core.rules.relations.registry import get_relation_handler
         planet = (cond.planet or "").lower()
-        relation = Relation[cond.relation]
+        relation = cond.relation
         target = (cond.target or "").lower()
         orb = cond.orb if cond.orb is not None else self.orb_default
         logger.debug("Checking condition: planet=%s relation=%s target=%s orb=%s", planet, relation, target, orb)
@@ -55,6 +55,7 @@ class RulesEngineImpl(IRulesEngine):
 
         # Delegate to dedicated handler (registered in app/core/rules/relations)
         handler = get_relation_handler(relation)
+        logger.debug(f"handler={handler}")
         if handler is None:
             logger.warning("No relation handler registered for relation=%s (condition=%s)", relation, cond)
             return False
