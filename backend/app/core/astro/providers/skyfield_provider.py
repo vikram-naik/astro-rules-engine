@@ -22,7 +22,7 @@ from skyfield.framelib import ecliptic_frame
 
 from app.core.astro.interfaces.i_astro_provider import IAstroProvider
 from app.core.astro.interfaces.i_planet_mapper import IPlanetMapper
-from app.core.db.enums import Planet
+from app.core.db.enums import AyanamsaMode, Planet
 
 load_dotenv()
 logger = logging.getLogger("astro.skyfield")
@@ -64,22 +64,20 @@ class SkyfieldProvider(IAstroProvider):
       ASTRO_AYANAMSA_MODE       (default: lahiri)  # lahiri | krishnamurti | raman | tropical | none
     """
 
-    def __init__(self):
-        # config
-        self.ephemeris = os.getenv("ASTRO_SKYFIELD_EPHEMERIS", "de440s.bsp")
-        self.ayanamsa_mode = os.getenv("ASTRO_AYANAMSA_MODE", "lahiri").lower()
+    def __init__(self, ayanamsa_mode: AyanamsaMode = AyanamsaMode.lahiri):
+        from skyfield.api import load
 
-        # load skyfield ephemeris & timescale
-        self.ts = load.timescale()
-        try:
-            self.planets = load(self.ephemeris)
-            logger.info("Skyfield ephemeris loaded: %s (ayanamsa_mode=%s)", self.ephemeris, self.ayanamsa_mode)
-        except Exception as exc:
-            logger.exception("Failed to load Skyfield ephemeris '%s': %s", self.ephemeris, exc)
-            raise
+        eph_path = os.getenv("ASTRO_SKYFIELD_EPHEMERIS", "de440.bsp")
+        self.planets = load(eph_path)
+        self.timescale = load.timescale()
 
-        # planet mapper for canonical -> provider-specific keys
+        self.ayanamsa_mode = ayanamsa_mode
+
+        self.is_sidereal = self.ayanamsa_mode != AyanamsaMode.tropical
+        logger.info("Skyfield ephemeris loaded: %s (ayanamsa_mode=%s)", eph_path, self.ayanamsa_mode.value)
+
         self.planet_mapper = SkyfieldPlanetMapper()
+        
 
     # ---------------------
     # Helper / utilities
@@ -91,7 +89,7 @@ class SkyfieldProvider(IAstroProvider):
         elif when.tzinfo is None:
             when = when.replace(tzinfo=timezone.utc)
         # Skyfield's ts.utc accepts datetime objects
-        return self.ts.utc(when)
+        return self.timescale.utc(when)
 
     @staticmethod
     def _normalize_planet_input(planet: Union[str, Planet]) -> Planet:
@@ -132,17 +130,24 @@ class SkyfieldProvider(IAstroProvider):
     #     ay = 24.2063 + 0.000043 * T + 0.0000004 * (T ** 2)
     #     return float(ay % 360.0)
 
+    # -------------------------------------------------------------------
     def _ayanamsa_deg(self, jd: float) -> float:
         """Return ayanamsa degrees for the configured mode; jd is Julian Day."""
-        mode = (self.ayanamsa_mode or "lahiri").lower()
+        mode = self.ayanamsa_mode
+
+        # Lahiri base value (approximation based on epoch 285 CE, typical Skyfield computation)
         base = self._lahiri_ayanamsa_deg_from_jd(jd)
-        if mode == "krishnamurti":
-            return base - 0.1
-        elif mode == "raman":
-            return base + 0.5
+
+        # ✅ Match SwissEphem SIDM constants for 2025 epoch
+        if mode == AyanamsaMode.krishnamurti:
+            return base - 0.1  # SIDM_KRISHNAMURTI ~ slightly less than Lahiri
+        elif mode == AyanamsaMode.raman:
+            return base - 1.446  # align precisely with SwissEphem SIDM_RAMAN
+        elif mode == AyanamsaMode.tropical:
+            return 0.0  # tropical = no ayanamsa correction
         else:
-            # includes 'lahiri' and defaults
             return base
+
 
     # ---------------------
     # Mean lunar node (Meeus-like formula)

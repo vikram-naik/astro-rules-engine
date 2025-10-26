@@ -84,18 +84,20 @@ def test_lahiri_alignment_debug():
 @pytest.mark.parametrize("mode", ["tropical", "lahiri", "krishnamurti", "raman"])
 def test_provider_mode_switch(provider_cls, mode):
     """Verify each provider respects the ayanamsa_mode setting."""
-    import os
-    os.environ["ASTRO_AYANAMSA_MODE"] = mode
-    p = provider_cls()
+    from app.core.db.enums import AyanamsaMode
+
+    ay_mode = AyanamsaMode(mode)
+    p = provider_cls(ayanamsa_mode=ay_mode)
     date = datetime(2025, 1, 1)
     sun = p.longitude("sun", date)
-    # tropical and sidereal should differ by ~24° for Lahiri-like modes
+
+    # tropical vs sidereal should differ by ~24° for Lahiri-like modes
     if mode == "tropical":
         tropical = sun
-        os.environ["ASTRO_AYANAMSA_MODE"] = "lahiri"
-        sidereal = provider_cls().longitude("sun", date)
+        sidereal = provider_cls(ayanamsa_mode=AyanamsaMode.lahiri).longitude("sun", date)
         diff = abs((tropical - sidereal + 180) % 360 - 180)
-        assert 23 < diff < 25
+        assert 23 < diff < 25, f"Unexpected tropical–sidereal offset: {diff:.3f}°"
+
 
 import pytest
 from datetime import datetime

@@ -65,3 +65,9 @@ class OutcomeEffect(str, Enum):
     Bullish = "Bullish"
     Bearish = "Bearish"
     Neutral = "Neutral"
+
+class AyanamsaMode(str, Enum):
+    lahiri = "lahiri"
+    raman = "raman"
+    krishnamurti = "krishnamurti"
+    tropical = "tropical"

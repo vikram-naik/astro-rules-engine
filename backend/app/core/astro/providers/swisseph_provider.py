@@ -17,7 +17,7 @@ import swisseph as swe
 
 from app.core.astro.interfaces.i_astro_provider import IAstroProvider
 from app.core.astro.interfaces.i_planet_mapper import IPlanetMapper
-from app.core.db.enums import Planet
+from app.core.db.enums import AyanamsaMode, Planet
 
 logger = logging.getLogger("astro.swisseph")
 
@@ -57,28 +57,29 @@ class SwissEphemPlanetMapper(IPlanetMapper):
 # SwissEphemProvider
 # -----------------------------------------------------------
 class SwissEphemProvider(IAstroProvider):
-    def __init__(self):
-        self.mode = os.getenv("ASTRO_AYANAMSA_MODE", "lahiri").lower()
+    def __init__(self, ayanamsa_mode: AyanamsaMode = AyanamsaMode.lahiri):
+        self.mode = ayanamsa_mode
         self.mapper = SwissEphemPlanetMapper()
 
         # Configure sidereal/tropical mode
-        if self.mode in ("tropical", "none"):
-            swe.set_sid_mode(swe.SIDM_FAGAN_BRADLEY)  # effectively no ayanamsa shift
+        if self.mode == AyanamsaMode.tropical:
+            swe.set_sid_mode(swe.SIDM_FAGAN_BRADLEY)  # no sidereal correction
             self.is_sidereal = False
-        elif self.mode == "lahiri":
+        elif self.mode == AyanamsaMode.lahiri:
             swe.set_sid_mode(swe.SIDM_LAHIRI)
             self.is_sidereal = True
-        elif self.mode == "krishnamurti":
+        elif self.mode == AyanamsaMode.krishnamurti:
             swe.set_sid_mode(swe.SIDM_KRISHNAMURTI)
             self.is_sidereal = True
-        elif self.mode == "raman":
+        elif self.mode == AyanamsaMode.raman:
             swe.set_sid_mode(swe.SIDM_RAMAN)
             self.is_sidereal = True
         else:
+            # fallback to lahiri
             swe.set_sid_mode(swe.SIDM_LAHIRI)
             self.is_sidereal = True
 
-        logger.info("SwissEphem provider initialized (mode=%s)", self.mode)
+        logger.info("SwissEphem provider initialized (mode=%s)", self.mode.value)
     # -------------------------------------------------------
     def _to_datetime(self, when):
         """Normalize date or datetime input to a datetime object."""

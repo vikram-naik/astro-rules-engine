@@ -3,15 +3,16 @@ from datetime import datetime
 import math
 import os
 from app.core.astro.interfaces.i_astro_provider import IAstroProvider
+from app.core.db.enums import AyanamsaMode
 
 class StubProvider(IAstroProvider):
     """Deterministic stub provider for tests and local development."""
 
 
 
-    def __init__(self):
+    def __init__(self, ayanamsa_mode: AyanamsaMode = AyanamsaMode.lahiri):
         # optional config
-        self.ayanamsa_mode = os.getenv("ASTRO_AYANAMSA_MODE", "lahiri")
+        self.ayanamsa_mode = ayanamsa_mode
         self._retro_map = {}  # e.g. {'mars': True}
         self._lon_map: dict[str, float] = {}
 
