@@ -30,7 +30,7 @@ class RulesEngineImpl(IRulesEngine):
             events.append({
                 "rule_id": rule.rule_id,
                 "date": (when.date() if hasattr(when, "date") else when).isoformat(),
-                "sector": out.sector.code,
+                "sector": out.sector_code,
                 "effect": out.effect,
                 "weight": out.weight,
                 "confidence": rule.confidence

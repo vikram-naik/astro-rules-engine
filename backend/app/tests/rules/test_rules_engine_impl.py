@@ -67,8 +67,8 @@ def make_rule(conditions, outcomes=None):
         conditions=conditions,
         outcomes=outcomes or [
             SimpleNamespace(
-                sector=SimpleNamespace(code="EQUITY"),
-                effect="positive",
+                sector_code="EQUITY",
+                effect="Bullish",
                 weight=0.8,
             )
         ],
