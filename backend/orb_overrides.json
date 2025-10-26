@@ -1,0 +1,21 @@
+{
+  "sun-moon": 12.0,
+  "moon-mercury": 9.0,
+  "moon-venus": 8.0,
+  "moon-mars": 8.0,
+  "moon-jupiter": 10.0,
+  "moon-saturn": 9.0,
+  "mercury-venus": 7.0,
+  "mercury-mars": 6.0,
+  "venus-mars": 6.0,
+  "mars-jupiter": 7.0,
+  "jupiter-saturn": 6.0,
+  "mars-saturn": 5.0,
+  "mars-ketu": 4.0,
+  "mars-rahu": 5.0,
+  "saturn-ketu": 5.0,
+  "saturn-rahu": 6.0,
+  "rahu-ketu": 5.0,
+  "sun-mercury": 10.0,
+  "sun-venus": 10.0
+}
