@@ -29,3 +29,15 @@ class IAstroProvider(ABC):
     def is_retrograde(self, planet: str, when: datetime) -> bool:
         """Return True if planet is retrograde at the given time."""
         raise NotImplementedError
+    
+    @abstractmethod
+    def configure(self, location: dict | None = None, tz_name: str | None = None):
+        """
+        Configure provider for given observer location and tz_name (optional).
+        Example:
+            location = {"lon": 72.8777, "lat": 19.0760, "alt": 14}
+            tz_name = "Asia/Kolkata"
+
+        Kept optional as the API can do just : provider.configure(tz_name="UTC")
+        """
+        raise NotImplementedError

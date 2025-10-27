@@ -9,6 +9,8 @@ from app.core.db.enums import Planet
 from app.core.astro.providers.stub_provider import StubProvider
 from app.core.astro.providers.swisseph_provider import SwissEphemProvider
 from app.core.astro.providers.skyfield_provider import SkyfieldProvider
+from zoneinfo import ZoneInfo
+from app.core.db.enums import AyanamsaMode
 
 
 @pytest.mark.parametrize("provider_cls", [StubProvider, SwissEphemProvider, SkyfieldProvider])
@@ -195,3 +197,31 @@ def test_angular_distance_matrix_tolerance():
         assert diff < 1e-6, f"Angular distance mismatch: {d_sf} vs {d_sw}"
 
         print(f"Δ angular_distance({a},{b}) = {diff:.8f}")
+
+
+
+TOL_PLANET = 0.1     # acceptable difference in degrees
+TOL_NODE = 0.2
+
+def test_alignment_skyfield_vs_swisseph():
+    loc = {"lat": 19.0760, "lon": 72.8777}
+    tz = "Asia/Kolkata"
+    dt = datetime(2025, 10, 26, 9, 15, tzinfo=ZoneInfo(tz))
+
+    sf = SkyfieldProvider(AyanamsaMode.lahiri)
+    sf.configure(location=loc, tz_name=tz)
+    sw = SwissEphemProvider(AyanamsaMode.lahiri)
+    sw.configure(location=loc, tz_name=tz)
+
+    planets = ["sun", "moon", "mars", "jupiter", "saturn", "rahu", "ketu"]
+
+    deltas = {}
+    for p in planets:
+        lon_sf = sf.longitude(p, dt)
+        lon_sw = sw.longitude(p, dt)
+        diff = abs(((lon_sf - lon_sw + 180) % 360) - 180)
+        deltas[p] = diff
+        tol = TOL_NODE if p in ("rahu", "ketu") else TOL_PLANET
+        assert diff < tol, f"{p} mismatch {diff:.3f}° > {tol}°"
+
+    print("Alignment check:", deltas)

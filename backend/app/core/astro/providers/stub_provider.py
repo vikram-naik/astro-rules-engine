@@ -16,6 +16,9 @@ class StubProvider(IAstroProvider):
         self._retro_map = {}  # e.g. {'mars': True}
         self._lon_map: dict[str, float] = {}
 
+    def configure(self, location = None, tz_name = None):
+        return self
+
     # --- IAstroProvider-compatible methods ---------------------------------
 
     def longitude(self, planet: str, when: datetime) -> float:

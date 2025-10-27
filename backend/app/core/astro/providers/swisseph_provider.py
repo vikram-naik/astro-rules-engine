@@ -8,16 +8,17 @@ SwissEphem-based implementation of IAstroProvider.
 - Fully consistent with SkyfieldProvider behavior and tests
 """
 
-import os
 import logging
 from typing import Union
-from datetime import datetime, timedelta
+from datetime import datetime, timezone
 
+from zoneinfo import ZoneInfo
 import swisseph as swe
 
 from app.core.astro.interfaces.i_astro_provider import IAstroProvider
 from app.core.astro.interfaces.i_planet_mapper import IPlanetMapper
 from app.core.db.enums import AyanamsaMode, Planet
+from app.core.astro.providers._mixin import AstroTimeMixin
 
 logger = logging.getLogger("astro.swisseph")
 
@@ -56,7 +57,7 @@ class SwissEphemPlanetMapper(IPlanetMapper):
 # -----------------------------------------------------------
 # SwissEphemProvider
 # -----------------------------------------------------------
-class SwissEphemProvider(IAstroProvider):
+class SwissEphemProvider(IAstroProvider, AstroTimeMixin):
     def __init__(self, ayanamsa_mode: AyanamsaMode = AyanamsaMode.lahiri):
         self.mode = ayanamsa_mode
         self.planet_mappper = SwissEphemPlanetMapper()
@@ -76,26 +77,59 @@ class SwissEphemProvider(IAstroProvider):
             self.is_sidereal = True
         else:
              raise NotImplementedError(f"Unsupported ayanamsa mode: {self.mode}")
-
-
         logger.info("SwissEphem provider initialized (mode=%s)", self.mode.value)
+
+
+    def configure(self, location: dict | None = None, tz_name: str | None = None):
+        """
+        Configure topocentric coordinates and timezone.
+        - location: {"lat": float, "lon": float, "alt": float}
+        - tz_name: e.g. "Asia/Kolkata"
+        """
+        location = location or {}
+        self.lat = float(location.get("lat", 0.0))
+        self.lon = float(location.get("lon", 0.0))
+        self.alt = float(location.get("alt", 0.0))
+
+        try:
+            self.tz = ZoneInfo(tz_name or "UTC")
+        except Exception:
+            self.tz = timezone.utc
+
+        try:
+            swe.set_topo(self.lon, self.lat, self.alt)
+            logger.info(f"SwissEphem configured: lat={self.lat}, lon={self.lon}, alt={self.alt}, tz={self.tz}")
+        except Exception as e:
+            logger.warning(f"SwissEphem configure: failed to set topo — {e}")
+            swe.set_topo(0.0, 0.0, 0.0)
+
+        return self
+
+
+
     # -------------------------------------------------------
-    def _to_datetime(self, when):
-        """Normalize date or datetime input to a datetime object."""
-        from datetime import datetime as dtmod, time
 
-        if isinstance(when, dtmod):
-            return when
-        # Handle pure date object
-        return dtmod.combine(when, time(0, 0, 0))
-
+    def _normalize_when(self, when):
+        return self._normalize_when_utc(when)
+    
     # -------------------------------------------------------
     def longitude(self, planet: Union[str, Planet], when: datetime) -> float:
         """
-        Return ecliptic longitude (degrees) for the planet at given datetime.
-        Handles sidereal/tropical mode per provider settings.
+        Compute ecliptic longitude (degrees) for the planet at the given datetime.
+        - Converts local time → UTC using self.tz
+        - Uses topocentric position (set via swe.set_topo)
+        - Returns tropical/sidereal based on ayanamsa_mode
         """
-        # Normalize planet input
+        # --- 1. Normalize datetime ---
+        when_utc = self._normalize_when(when)
+        jd_ut = swe.julday(
+            when_utc.year,
+            when_utc.month,
+            when_utc.day,
+            when_utc.hour + when_utc.minute / 60.0 + when_utc.second / 3600.0,
+        )
+
+        # --- 2. Resolve planet ---
         if isinstance(planet, Planet):
             planet_enum = planet
         else:
@@ -104,37 +138,27 @@ class SwissEphemProvider(IAstroProvider):
                 planet_enum = Planet.__members__[key]
             else:
                 raise NotImplementedError(f"Unsupported planet name: {planet}")
-
         planet_id = self.planet_mappper.resolve(planet_enum)
 
-        # Normalize datetime or date
-        dt = self._to_datetime(when)    
-
-        # Compute Julian day (UT)
-        jd = swe.julday(
-            dt.year,
-            dt.month,
-            dt.day,
-            dt.hour + dt.minute / 60.0 + dt.second / 3600.0
-        )
-
-
-        # Determine calculation flags
+        # --- 3. Flags & Calculation ---
         flags = swe.FLG_SWIEPH
         if getattr(self, "is_sidereal", False):
             flags |= swe.FLG_SIDEREAL
 
-        # Compute planetary longitude
-        res, ret = swe.calc_ut(jd, planet_id, flags)
-        # res expected: [lon, lat, dist] , we only need lon so index on res[0]
-        lon = res[0]
+        res, ret = swe.calc_ut(jd_ut, planet_id, flags)
+        lon = float(res[0])
 
-        # Adjust for Ketu (180° opposite node)
+        # --- 4. Adjust for Ketu ---
         if planet_enum == Planet.ketu:
             lon = (lon + 180.0) % 360.0
 
-        logger.debug("SwissEphem calc: planet=%s jd=%.6f flags=%s lon=%.6f", planet_enum, jd, flags, lon)
+        # --- 5. Return ---
+        logger.debug(
+            f"[SwissEphem] planet={planet_enum.name}, when(local)={when}, UTC={when_utc}, "
+            f"lon={lon:.4f}, mode={self.mode.value}, loc=({getattr(self, 'lat', 0)}, {getattr(self, 'lon', 0)})"
+        )
         return lon % 360.0
+
 
     # -------------------------------------------------------
     def nakshatra_index(self, longitude_deg: float) -> int:
@@ -154,43 +178,32 @@ class SwissEphemProvider(IAstroProvider):
         Return True if the specified planet is retrograde at the given time.
         Uses the provider's planet_mapper to look up the swisseph body code and reads
         the longitudinal speed from swe.calc_ut result (res[3]).
-        Defensive: returns False if body not found or error occurs.
         """
         try:
             key = (planet or "").lower()
             logger.debug(f"is_retrograde: planet={key} when={when}")
-            # planet_mapper is expected to map keys (lowercase) to swisseph constants
             body_code = self.planet_mappper.resolve(Planet[key.lower()])
-            logger.debug(f"is_retrograde: body_code={body_code}")
             if body_code is None:
-                # If planet not mapped, we cannot compute retrograde -> False
                 return False
 
-            # Normalize when to datetime if a date was provided
-            dt = self._to_datetime(when=when)
-            logger.debug(f"is_retrograde: dt={dt}")
-            # Compute Julian day UT (use hours/minutes of the datetime if present)
+            # Normalize to UTC datetime
+            when_utc = self._normalize_when(when)
             jd = swe.julday(
-                dt.year,
-                dt.month,
-                dt.day,
-                dt.hour + dt.minute / 60.0 + dt.second / 3600.0
+                when_utc.year,
+                when_utc.month,
+                when_utc.day,
+                when_utc.hour + when_utc.minute / 60.0 + when_utc.second / 3600.0
             )
 
-            # Use SWIEPH + speed flag to get velocities
             flags = swe.FLG_SWIEPH | swe.FLG_SPEED
             res, ret = swe.calc_ut(jd, body_code, flags)
-            # res expected: [lon, lat, dist, speed_lon, speed_lat, speed_dist]
-            logger.debug(f"is_retrograde: res={res}")
             if not res or len(res) < 4:
                 return False
+
             speed_lon = float(res[3])
             logger.debug(f"is_retrograde: speed_lon={speed_lon}")
-            # negative longitudinal speed => retrograde
             return speed_lon < 0.0
 
         except Exception as e:
             logger.exception(f"Unexpected Exception : {e}", exc_info=True)
-            # Be defensive: do not raise from provider-level retro checks during rule evals
             return False
-

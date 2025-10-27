@@ -10,19 +10,22 @@ Pure-Skyfield implementation of IAstroProvider (Plan B):
 """
 
 from __future__ import annotations
-from datetime import datetime, date as date_type, timedelta, timezone
+from datetime import datetime, timedelta, timezone
 import math
 import logging
 import os
 from typing import Union
 
 from dotenv import load_dotenv
-from skyfield.api import load
 from skyfield.framelib import ecliptic_frame
 
 from app.core.astro.interfaces.i_astro_provider import IAstroProvider
 from app.core.astro.interfaces.i_planet_mapper import IPlanetMapper
 from app.core.db.enums import AyanamsaMode, Planet
+from zoneinfo import ZoneInfo
+from skyfield.api import wgs84
+
+from app.core.astro.providers._mixin import AstroTimeMixin
 
 load_dotenv()
 logger = logging.getLogger("astro.skyfield")
@@ -55,7 +58,7 @@ class SkyfieldPlanetMapper(IPlanetMapper):
         return self.map[planet]
 
 
-class SkyfieldProvider(IAstroProvider):
+class SkyfieldProvider(IAstroProvider, AstroTimeMixin):
     """
     Skyfield-based provider.
 
@@ -77,19 +80,45 @@ class SkyfieldProvider(IAstroProvider):
         logger.info("Skyfield ephemeris loaded: %s (ayanamsa_mode=%s)", eph_path, self.ayanamsa_mode.value)
 
         self.planet_mapper = SkyfieldPlanetMapper()
-        
+
+
+    def configure(self, location: dict | None = None, tz_name: str | None = None):
+        """
+        Configure observer location and tz_name for local calculations.
+        - location: {"lat": float, "lon": float, "alt": float}
+        - tz_name: e.g. "Asia/Kolkata"
+        """
+        location = location or {}
+        self.lat = float(location.get("lat", 0.0))
+        self.lon = float(location.get("lon", 0.0))
+        self.alt = float(location.get("alt", 0.0))
+
+        # Timezone setup (with UTC fallback)
+        try:
+            self.tz = ZoneInfo(tz_name or "UTC")
+        except Exception:
+            self.tz = timezone.utc
+
+        # Create topocentric observer
+        try:
+            self.observer = wgs84.latlon(latitude_degrees=self.lat,
+                                        longitude_degrees=self.lon,
+                                        elevation_m=self.alt)
+            logger.info(f"Skyfield configured: lat={self.lat}, lon={self.lon}, alt={self.alt}, tz={self.tz}")
+        except Exception as e:
+            self.observer = None
+            logger.warning(f"Skyfield configure: failed to set observer — {e}")
+
+        return self
+
+
 
     # ---------------------
     # Helper / utilities
     # ---------------------
-    def _to_datetime(self, when: datetime):
-        """Normalize python datetime/date input to a Skyfield Time object (UTC)."""
-        if isinstance(when, date_type) and not isinstance(when, datetime):
-            when = datetime(when.year, when.month, when.day, tzinfo=timezone.utc)
-        elif when.tzinfo is None:
-            when = when.replace(tzinfo=timezone.utc)
-        # Skyfield's ts.utc accepts datetime objects
-        return self.timescale.utc(when)
+    def _normalize_when(self, when):
+        when_utc = self._normalize_when_utc(when)
+        return self.timescale.utc(when_utc)
 
     @staticmethod
     def _normalize_planet_input(planet: Union[str, Planet]) -> Planet:
@@ -165,67 +194,53 @@ class SkyfieldProvider(IAstroProvider):
     def longitude(self, planet: Union[str, Planet], when: datetime) -> float:
         """
         Compute ecliptic longitude (degrees) for `planet` at `when`.
-        - Returns tropical if ayanamsa_mode in ("tropical","none")
-        - Otherwise returns sidereal using native Lahiri polynomial.
+        - Converts local time → UTC using configured timezone (self.tz)
+        - Uses topocentric observer (self.observer) if configured
+        - Returns tropical or sidereal depending on ayanamsa_mode
         """
-        # 1) normalize time -> Skyfield time
-        t = self._to_datetime(when)
+        # --- 1. Normalize input time ---
+        t = self._normalize_when(when)
 
-        # 2) normalize planet input to canonical Planet enum
+        # --- 2. Normalize planet input ---
         planet_enum = self._normalize_planet_input(planet)
+        sf_key = self.planet_mapper.resolve(planet_enum)
 
-        # 3) map to skyfield key using mapper
-        try:
-            sf_key = self.planet_mapper.resolve(planet_enum)
-        except Exception as exc:
-            raise ValueError(f"Planet mapping error for {planet_enum}: {exc}")
-
-        # 4) handle mean node (Rahu/Ketu) separately
+        # --- 3. Handle Rahu/Ketu separately (same logic as before) ---
         if sf_key in ("rahu", "ketu"):
-            # use mean node polynomial to compute tropical node longitude (Meeus-like)
-            jd_tt = float(t.tt)  # use TT for polynomials
+            jd_tt = float(t.tt)
             node_tropical = self._mean_lunar_node_deg_from_jd(jd_tt)
-            # if tropical requested, return tropical node
-            if (self.ayanamsa_mode or "lahiri").lower() in ("tropical", "none"):
-                logger.debug("Node (tropical): planet=%s jd_tt=%s node_tropical=%s", sf_key, jd_tt, node_tropical)
+            if self.ayanamsa_mode in (AyanamsaMode.tropical,):
                 return node_tropical
-            # else convert to sidereal using same ayanamsa
             ay = self._ayanamsa_deg(jd_tt)
             node_sidereal = self._wrap_angle(node_tropical - ay)
-            result = node_sidereal if sf_key == "rahu" else self._wrap_angle(node_sidereal + 180.0)
-            logger.debug("Node sidereal: planet=%s jd_tt=%s ay=%s node_sidereal=%s result=%s", sf_key, jd_tt, ay, node_sidereal, result)
-            return result
+            return node_sidereal if sf_key == "rahu" else self._wrap_angle(node_sidereal + 180.0)
 
-        # 5) ensure ephemeris contains key
-        if sf_key not in self.planets:
-            raise ValueError(f"Unsupported planet name/key for ephemeris: {sf_key}")
-
-        # 6) compute geocentric apparent position and ecliptic-of-date longitude
+        # --- 4. Compute position ---
         earth = self.planets["earth"]
         body = self.planets[sf_key]
-        astrometric = earth.at(t).observe(body).apparent()
-        # use ecliptic_of_date frame for ecliptic lon/lat
+
+        # Use topocentric observer if configured
+        if hasattr(self, "observer") and self.observer is not None:
+            astrometric = (earth + self.observer).at(t).observe(body).apparent()
+        else:
+            astrometric = earth.at(t).observe(body).apparent()
+
+        # --- 5. Convert to ecliptic coordinates ---
         lat, lon, dist = astrometric.frame_latlon(ecliptic_frame)
         tropical_lon = float(lon.degrees) % 360.0
 
-        # 7) if tropical mode requested, return it
-        mode = (self.ayanamsa_mode or "lahiri").lower()
-        if mode in ("tropical", "none"):
-            logger.debug("Returning tropical: planet=%s when=%s tropical_lon=%s", sf_key, when, tropical_lon)
+        # --- 6. Sidereal correction ---
+        if self.ayanamsa_mode == AyanamsaMode.tropical:
             return tropical_lon
 
-        # 8) compute ayanamsa for this JD (use TT Julian Day from Skyfield)
-        jd_tt_for_ay = float(t.tt)
-        ay = self._ayanamsa_deg(jd_tt_for_ay)
-
-        # 9) compute sidereal = tropical - ay  (apply once)
+        ay = self._ayanamsa_deg(float(t.tt))
         sidereal_lon = self._wrap_angle(tropical_lon - ay)
 
-        # 10) log and return
-        logger.debug("Longitude calc: planet=%s when=%s tropical=%s ay=%s sidereal=%s",
-                    sf_key, when.isoformat() if hasattr(when, "isoformat") else when,
-                    tropical_lon, ay, sidereal_lon)
-
+        logger.debug(
+            f"[Skyfield] planet={sf_key} when(local)={when}, UTC={t.utc_datetime()}, "
+            f"lon_trop={tropical_lon:.4f}, ay={ay:.4f}, sid={sidereal_lon:.4f}, "
+            f"loc=({getattr(self, 'lat', 0)}, {getattr(self, 'lon', 0)})"
+        )
         return sidereal_lon
 
 

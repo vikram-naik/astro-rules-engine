@@ -1,10 +1,10 @@
-import os
+# app/core/astro/providers/provider_factory.py
 import importlib
-from dotenv import load_dotenv
-
+import logging
+from app.core.common.config import settings
 from app.core.db.enums import AyanamsaMode
 
-load_dotenv()
+logger = logging.getLogger("astro.factory")
 
 PROVIDER_MAP = {
     "stub": "app.core.astro.providers.stub_provider.StubProvider",
@@ -14,14 +14,54 @@ PROVIDER_MAP = {
 
 _provider_instances = {}
 
-def get_provider(name: str = None, ayanamsa_mode: AyanamsaMode = AyanamsaMode.lahiri, fresh: bool = False):
-    """Factory for astro provider based on .env or explicit name."""
-    provider_name = (name or os.getenv("ASTRO_PROVIDER", "swisseph")).lower()
+
+def get_provider(
+    name: str | None = None,
+    ayanamsa_mode: AyanamsaMode = AyanamsaMode.lahiri,
+    fresh: bool = False,
+    location: dict | None = None,
+    tz_name: str | None = None,
+):
+    """
+    Factory for astrology providers.
+    - Uses defaults from config.py if not explicitly provided.
+    - Providers are cached (singleton style) unless fresh=True.
+    - Calls provider.configure() automatically with lon/lat/tz.
+    """
+    provider_name = (name or settings.provider_type).lower()
+
     if provider_name not in PROVIDER_MAP:
         raise ValueError(f"Unknown astro provider: {provider_name}")
+
+    # Create or refresh provider instance
     if fresh or provider_name not in _provider_instances:
         module_path, class_name = PROVIDER_MAP[provider_name].rsplit(".", 1)
         module = importlib.import_module(module_path)
         cls = getattr(module, class_name)
-        _provider_instances[provider_name] = cls(ayanamsa_mode=ayanamsa_mode)
+
+        # Instantiate provider (ayanamsa comes from settings if not overridden)
+        ayanamsa_str = getattr(settings, "astro_ayanamsa_mode", "lahiri").lower()
+        ayanamsa_mode = AyanamsaMode[ayanamsa_str] if isinstance(ayanamsa_str, str) else ayanamsa_mode
+        instance = cls(ayanamsa_mode=ayanamsa_mode)
+
+        # Configure with location + timezone defaults or overrides
+        loc = location or {
+            "lon": float(getattr(settings, "astro_location_lon", 72.8777)),
+            "lat": float(getattr(settings, "astro_location_lat", 19.0760)),
+            "alt": float(getattr(settings, "astro_location_alt", 0.0)),
+        }
+        tz = tz_name or getattr(settings, "astro_timezone", "Asia/Kolkata")
+
+        if hasattr(instance, "configure"):
+            instance.configure(location=loc, tz_name=tz)
+            logger.info(f"Configured {provider_name} with {loc} tz={tz}")
+
+        _provider_instances[provider_name] = instance
+
     return _provider_instances[provider_name]
+
+
+def clear_providers():
+    """Forcefully clear cached provider instances (for testing or reload)."""
+    _provider_instances.clear()
+    logger.info("Cleared all provider instances.")

@@ -43,13 +43,6 @@ def test_skyfieldprovider_modes_and_ketu_offset(mode):
         assert 170 < diff < 190, f"{mode.value} mode Ketu/Rahu offset out of range: {diff}"
     assert 0 <= sun < 360
 
-def test_skyfieldprovider_to_datetime_variants():
-    p = SkyfieldProvider()
-    d1 = p._to_datetime(datetime(2025,1,1))
-    d2 = p._to_datetime(date(2025,1,1))
-    assert type(d1) == type(d2)
-
-
 
 # ---------- SwissEphemProvider ----------------------------------------------
 
@@ -100,15 +93,6 @@ def test_invalid_planet_name_raises(provider_cls):
     with pytest.raises(NotImplementedError):
         p.longitude("invalid_planet", datetime(2025, 1, 1))
 
-
-@pytest.mark.parametrize("provider_cls", [SkyfieldProvider, SwissEphemProvider])
-def test_to_datetime_with_date(provider_cls):
-    """Ensure _to_datetime normalizes date to datetime(…, 00:00:00)."""
-    p = provider_cls()
-    d = date(2025, 1, 1)
-    dt = p._to_datetime(d)
-    print(type(dt))
-    assert isinstance(dt, datetime) or isinstance(dt, skyfield.timelib.Time)
   
 
 @pytest.mark.parametrize("provider_cls", [SkyfieldProvider, SwissEphemProvider])
@@ -173,7 +157,7 @@ def test_swiss_is_retrograde_unmapped(monkeypatch):
 def test_swiss_is_retrograde_exception(monkeypatch):
     """Force exception path in is_retrograde."""
     p = SwissEphemProvider()
-    monkeypatch.setattr(p, "_to_datetime", lambda when: (_ for _ in ()).throw(RuntimeError("boom")))
+    monkeypatch.setattr(p, "_normalize_when", lambda when: (_ for _ in ()).throw(RuntimeError("boom")))
     assert p.is_retrograde("sun", datetime(2025, 1, 1)) is False
 
 
@@ -277,24 +261,8 @@ def test_skyfield_is_retrograde_positive_and_negative(monkeypatch):
     assert p.is_retrograde("mars", datetime(2025,1,1)) is False
 
 # -----------------------
-# SWISSEPH: mapper & _to_datetime
-# -----------------------
-def test_swisseph_planet_mapper_and_to_datetime():
-    mapper = SwissEphemPlanetMapper()
-    # known enum resolves
-    assert mapper.resolve(Planet.sun) == pytest.approx(mapper.map[Planet.sun])
-    prov = SwissEphemProvider(AyanamsaMode.lahiri)
-    # _to_datetime accepts date and datetime
-    d = date(2025,1,1)
-    dt = prov._to_datetime(d)
-    assert isinstance(dt, datetime)
-    dt2 = prov._to_datetime(datetime(2025,1,1,5))
-    assert isinstance(dt2, datetime) and dt2.hour == 5
-
-# -----------------------
 # SWISSEPH: longitude behavior via monkeypatching swe.calc_ut
 # -----------------------
-
 
 def test_swisseph_longitude_unsupported_planet():
     prov = SwissEphemProvider(AyanamsaMode.lahiri)
