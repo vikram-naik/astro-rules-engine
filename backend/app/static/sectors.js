@@ -1,113 +1,155 @@
-
-const sectorsBody = document.getElementById("sectorsBody");
-const btnAddSector = document.getElementById("btnAddSector");
-
-// Modals
-const sectorModalEl = document.getElementById("sectorModal");
-const sectorModal = new bootstrap.Modal(sectorModalEl);
-
-// Forms
-const sectorForm = document.getElementById("sectorForm");
-
+// =============================
+// sectors.js (final shared version)
+// =============================
 
 async function loadSectors() {
-    sectorsBody.innerHTML = '<tr><td colspan="4" class="text-muted">Loading…</td></tr>';
-    try {
-        const resp = await fetch("/api/sectors/");
-        const rows = await resp.json();
-        window.SECTORS = rows;  // ✅ cache globally
-        if (!rows || rows.length === 0) {
-            sectorsBody.innerHTML = '<tr><td colspan="4" class="text-muted">No sectors</td></tr>';
-            return;
-        }
-        sectorsBody.innerHTML = "";
-        rows.forEach(s => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-          <td>${escapeHtml(s.code)}</td>
-          <td>${escapeHtml(s.name)}</td>
-          <td>${escapeHtml(s.description || "")}</td>
-          <td>
-            <button class="btn btn-sm btn-outline-light me-1 btn-edit-sector" data-id="${s.id}">Edit</button>
-            <button class="btn btn-sm btn-outline-danger btn-del-sector" data-id="${s.id}">Delete</button>
-          </td>
-        `;
-            sectorsBody.appendChild(tr);
-        });
-        document.querySelectorAll(".btn-edit-sector").forEach(b => b.addEventListener("click", onEditSector));
-        document.querySelectorAll(".btn-del-sector").forEach(b => b.addEventListener("click", onDeleteSector));
-    } catch (err) {
-        console.error(err);
-        sectorsBody.innerHTML = '<tr><td colspan="4" class="text-danger">Failed to load sectors</td></tr>';
+  const sectorsBody = document.getElementById("sectorsBody");
+  try {
+    const resp = await fetch("/api/sectors/");
+    const rows = await resp.json();
+    window.SECTORS = rows || [];
+
+    // If there's no table (e.g., in rule_editor.html), just return the data
+    if (!sectorsBody) return window.SECTORS;
+
+    // Render table if present
+    if (!rows || rows.length === 0) {
+      sectorsBody.innerHTML = '<tr><td colspan="4" class="text-muted">No sectors</td></tr>';
+      return window.SECTORS;
     }
+
+    sectorsBody.innerHTML = "";
+    rows.forEach((s) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${escapeHtml(s.code)}</td>
+        <td>${escapeHtml(s.name)}</td>
+        <td>${escapeHtml(s.description || "")}</td>
+        <td>
+          <button class="btn btn-sm btn-outline-light me-1 btn-edit-sector" data-id="${s.code}">Edit</button>
+          <button class="btn btn-sm btn-outline-danger btn-del-sector" data-id="${s.code}">Delete</button>
+        </td>
+      `;
+      sectorsBody.appendChild(tr);
+    });
+
+    document.querySelectorAll(".btn-edit-sector").forEach((b) =>
+      b.addEventListener("click", onEditSector)
+    );
+    document.querySelectorAll(".btn-del-sector").forEach((b) =>
+      b.addEventListener("click", onDeleteSector)
+    );
+
+    return window.SECTORS;
+  } catch (err) {
+    console.error("[loadSectors] failed:", err);
+    if (sectorsBody)
+      sectorsBody.innerHTML = '<tr><td colspan="4" class="text-danger">Failed to load sectors</td></tr>';
+    window.SECTORS = [];
+    return [];
+  }
 }
 
-btnAddSector.addEventListener("click", () => openSectorModal());
+// =====================================================
+// Handlers (only run if modal is available on page)
+// =====================================================
 
-function openSectorModal(sector = null) {
-    document.getElementById("sectorForm").reset();
-    document.getElementById("sector_id").value = sector ? sector.id : "";
-    document.getElementById("sector_code").value = sector ? sector.code : "";
-    document.getElementById("sector_name").value = sector ? sector.name : "";
-    document.getElementById("sector_description").value = sector ? sector.description : "";
-    document.getElementById("sectorModalTitle").textContent = sector ? "Edit Sector" : "Add Sector";
-    sectorModal.show();
+function getSectorModalInstance() {
+  const el = document.getElementById("sectorModal");
+  if (!el) return null;
+  if (!el._bsInstance) el._bsInstance = new bootstrap.Modal(el);
+  return el._bsInstance;
 }
 
 async function onEditSector(evt) {
-    const id = evt.currentTarget.dataset.id;
-    try {
-        const resp = await fetch(`/api/sectors/`);
-        const all = await resp.json();
-        const s = all.find(x => String(x.id) === String(id));
-        openSectorModal(s);
-    } catch (err) {
-        console.error(err);
-        alert("Failed to load sector");
-    }
+  const code = evt.currentTarget.dataset.id;
+  const modal = getSectorModalInstance();
+  if (!modal) return; // not available in rule editor
+
+  try {
+    const resp = await fetch(`/api/sectors/${code}`);
+    if (!resp.ok) throw new Error("Failed to load sector details");
+    const s = await resp.json();
+
+    const title = document.getElementById("sectorModalTitle");
+    const idField = document.getElementById("sector_id");
+    const codeField = document.getElementById("sector_code");
+    const nameField = document.getElementById("sector_name");
+    const descField = document.getElementById("sector_description");
+
+    if (title) title.textContent = "Edit Sector";
+    if (idField) idField.value = s.id;
+    if (codeField) codeField.value = s.code || "";
+    if (nameField) nameField.value = s.name || "";
+    if (descField) descField.value = s.description || "";
+
+    modal.show();
+  } catch (err) {
+    console.error("[onEditSector] failed:", err);
+    alert("Failed to load sector for editing");
+  }
 }
 
 async function onDeleteSector(evt) {
-    const id = evt.currentTarget.dataset.id;
-    if (!confirm("Delete sector?")) return;
-    try {
-        const resp = await fetch(`/api/sectors/${id}`, { method: "DELETE" });
-        if (!resp.ok) throw new Error("delete failed");
-        await loadSectors();
-    } catch (err) {
-        console.error(err);
-        alert("Failed to delete sector");
-    }
+  const id = evt.currentTarget.dataset.id;
+  if (!confirm("Delete this sector?")) return;
+
+  try {
+    const resp = await fetch(`/api/sectors/${id}`, { method: "DELETE" });
+    if (!resp.ok) throw new Error("Delete failed");
+    await loadSectors();
+  } catch (err) {
+    console.error("[onDeleteSector] failed:", err);
+    alert("Failed to delete sector");
+  }
 }
 
-sectorForm.addEventListener("submit", async (e) => {
+// =====================================================
+// Sector Form Handling
+// =====================================================
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("sectorForm");
+  const modal = getSectorModalInstance();
+  if (!form) return;
+
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const id = document.getElementById("sector_id").value;
-    const payload = {
-        code: document.getElementById("sector_code").value,
-        name: document.getElementById("sector_name").value,
-        description: document.getElementById("sector_description").value,
-    };
+    const code = document.getElementById("sector_code").value.trim();
+    const name = document.getElementById("sector_name").value.trim();
+    const description = document.getElementById("sector_description").value.trim();
+
     try {
-        let resp;
-        if (id) {
-            resp = await fetch(`/api/sectors/${id}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            });
-        } else {
-            resp = await fetch(`/api/sectors/`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            });
-        }
-        if (!resp.ok) throw new Error("save failed");
-        sectorModal.hide();
-        await loadSectors();
+      const payload = { code, name, description };
+      const resp = await fetch(`/api/sectors/${id || ""}`, {
+        method: id ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!resp.ok) throw new Error("Save failed");
+
+      await loadSectors();
+      if (modal) modal.hide();
     } catch (err) {
-        console.error(err);
-        alert("Failed to save sector");
+      console.error("[sectorForm submit] failed:", err);
+      alert("Failed to save sector");
     }
+  });
+
+  const btnAddSector = document.getElementById("btnAddSector");
+  if (btnAddSector) {
+    btnAddSector.addEventListener("click", () => {
+      const title = document.getElementById("sectorModalTitle");
+      const idField = document.getElementById("sector_id");
+      const form = document.getElementById("sectorForm");
+      if (title) title.textContent = "Add Sector";
+      if (idField) idField.value = "";
+      if (form) form.reset();
+      const modal = getSectorModalInstance();
+      if (modal) modal.show();
+    });
+  }
 });
+
+// expose globally
+window.loadSectors = loadSectors;

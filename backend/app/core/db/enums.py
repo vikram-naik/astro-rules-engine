@@ -1,12 +1,9 @@
 # app/core/db/enums.py
 from enum import Enum
 
+
 class Planet(str, Enum):
-    """
-    Canonical planet enumeration for astro logic.
-    Access by lowercase key, e.g. Planet['sun'], Planet['mars'].
-    Enum values are human-readable display names.
-    """
+    """Canonical planet enumeration for astro logic."""
     sun = "Sun"
     moon = "Moon"
     mars = "Mars"
@@ -21,33 +18,65 @@ class Planet(str, Enum):
     pluto = "Pluto"
 
 
-class Relation(str, Enum):
-    # Existing high level relations
-    in_nakshatra_owned_by = "In Nakshatra Owned By"
-    conjunct_with = "Conjunct With"
-    in_axis = "In Axis"
-    aspect_with = "Aspect With"          # generic numeric aspect (value = degrees)
-    in_sign = "In Sign"
-    in_house_relative_to = "In House Relative To"
+class RelationData:
+    """Encapsulates metadata for each relation."""
+    def __init__(
+        self,
+        label,
+        target_source="planets",
+        has_orb=True,
+        has_value=False,
+        requires_target=True,
+        requires_planet=True,
+    ):
+        self.label = label
+        self.target_source = target_source  # "planets", "signs", "none"
+        self.has_orb = has_orb
+        self.has_value = has_value
+        self.requires_target = requires_target
+        self.requires_planet = requires_planet
 
-    # Explicit named aspects (Vedic/Astro oriented; technical key -> user friendly label)
-    opposition_with = "Opposition (180°)"
-    trine_with = "Trine (120°)"
-    square_with = "Square (90°)"
-    sextile_with = "Sextile (60°)"
-    quincunx_with = "Quincunx / Inconjunct (150°)"
-    semisextile_with = "Semisextile (30°)"
-    semisquare_with = "Semisquare (45°)"
-    quintile_with = "Quintile (72°)"
-    sesquiquadrate_with = "Sesquiquadrate (135°)"
 
-    # Additional astrological relations
-    combust_by_sun = "Combust by Sun"
-    is_retrograde = "Is Retrograde"
-    # Future: combustion_by_planet, stationary, etc.
+class Relation(Enum):
+    # Core relations
+    in_nakshatra_owned_by = RelationData("In Nakshatra Owned By", target_source="planets", has_orb=False)
+    conjunct_with = RelationData("Conjunct With", target_source="planets", has_orb=True)
+    in_axis = RelationData("In Axis", target_source="planets", has_orb=False)
+    aspect_with = RelationData("Aspect With", target_source="planets", has_orb=True, has_value=True)
+    in_sign = RelationData("In Sign", target_source="signs", has_orb=False)
+    in_house_relative_to = RelationData("In House Relative To", target_source="planets", has_orb=False)
+
+    # Standard aspects
+    opposition_with = RelationData("Opposition (180°)")
+    trine_with = RelationData("Trine (120°)")
+    square_with = RelationData("Square (90°)")
+    sextile_with = RelationData("Sextile (60°)")
+    quincunx_with = RelationData("Quincunx / Inconjunct (150°)")
+    semisextile_with = RelationData("Semisextile (30°)")
+    semisquare_with = RelationData("Semisquare (45°)")
+    quintile_with = RelationData("Quintile (72°)")
+    sesquiquadrate_with = RelationData("Sesquiquadrate (135°)")
+
+    # Special conditions
+    combust_by_sun = RelationData("Combust by Sun", target_source="planets", has_orb=True)
+    is_retrograde = RelationData(
+        "Is Retrograde",
+        target_source="none",
+        has_orb=False,
+        requires_target=False,
+        requires_planet=True,
+    )
+    melifics_in_kendra = RelationData(
+        "Malefics in Kendra",
+        target_source="none",
+        has_orb=False,
+        requires_target=False,
+        requires_planet=False,
+    )
+
 
 class Sign(str, Enum):
-    """Zodiac signs, mapped to indices 0..11 (Aries = 0). Values are friendly names."""
+    """Zodiac signs mapped to indices 0–11."""
     aries = "Aries"
     taurus = "Taurus"
     gemini = "Gemini"
@@ -61,10 +90,12 @@ class Sign(str, Enum):
     aquarius = "Aquarius"
     pisces = "Pisces"
 
+
 class OutcomeEffect(str, Enum):
     Bullish = "Bullish"
     Bearish = "Bearish"
     Neutral = "Neutral"
+
 
 class AyanamsaMode(str, Enum):
     lahiri = "lahiri"

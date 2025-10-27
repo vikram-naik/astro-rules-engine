@@ -18,3 +18,16 @@ def workbench(request: Request):
     rules, sectors and correlation.
     """
     return templates.TemplateResponse("workbench.html", {"request": request})
+
+@router.get("/ui/rule-editor", response_class=HTMLResponse)
+@router.get("/ui/rule-editor/{rule_id}", response_class=HTMLResponse)
+def rule_editor(request: Request, rule_id: str | None = None):
+    """
+    Full-page Rule Authoring UI.
+    If rule_id is provided, the page loads in 'Edit Mode'.
+    """
+    context = {"request": request}
+    if rule_id:
+        context["rule_id"] = rule_id  # Optional, in case you want to use in Jinja
+    return templates.TemplateResponse("workbench/rule_editor.html", context)
+

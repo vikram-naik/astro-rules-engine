@@ -127,3 +127,80 @@ margin-left: 0.4rem;
 color: var(--text-light) !important;
 font-weight: 500 !important;
 }
+/* ---------------------------
+   Rule editor / card header fixes
+   --------------------------- */
+
+/* Ensure card header text is visible on dark backgrounds */
+.card .card-header,
+.card .card-header .btn,
+.card .card-header span {
+  color: var(--text-light) !important;
+  font-weight: 600;
+}
+
+/* Ensure small labels in card-body are visible too */
+.card .form-label.small {
+  color: var(--text-light) !important;
+  font-weight: 500;
+}
+
+/* Make the Add Condition button stand out in header */
+.card .card-header .btn-sm {
+  background-color: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+/* ======================================= */
+/* Rule Editor – Disabled Field Indicators */
+/* ======================================= */
+
+/* Dim disabled form elements (inputs/selects) */
+.form-control:disabled,
+.form-select:disabled {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+  color: rgba(255, 255, 255, 0.4) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  cursor: not-allowed !important;
+  opacity: 0.8;
+}
+
+/* Ensure labels stay visible above disabled controls */
+.form-label.small {
+  color: #e0e0e0 !important;
+}
+
+/* Slightly fade out disabled dropdowns for clarity */
+select.form-select:disabled option {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Style the remove (×) button when disabled (if ever used later) */
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Condition row spacing and subtle separation */
+.condition-row {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 0.4rem;
+}
+
+/* Compact “Add Condition” button in header */
+#btnAddCondition {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.2s ease;
+}
+#btnAddCondition:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Outcome and Conditions header readability */
+.card-header {
+  color: #e8eaed !important;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
