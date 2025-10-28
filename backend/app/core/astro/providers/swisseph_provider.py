@@ -59,25 +59,25 @@ class SwissEphemPlanetMapper(IPlanetMapper):
 # -----------------------------------------------------------
 class SwissEphemProvider(IAstroProvider, AstroTimeMixin):
     def __init__(self, ayanamsa_mode: AyanamsaMode = AyanamsaMode.lahiri):
-        self.mode = ayanamsa_mode
+        self.ayanamsa_mode = ayanamsa_mode
         self.planet_mappper = SwissEphemPlanetMapper()
 
         # Configure sidereal/tropical mode
-        if self.mode == AyanamsaMode.tropical:
+        if self.ayanamsa_mode == AyanamsaMode.tropical:
             swe.set_sid_mode(swe.SIDM_FAGAN_BRADLEY)  # no sidereal correction
             self.is_sidereal = False
-        elif self.mode == AyanamsaMode.lahiri:
+        elif self.ayanamsa_mode == AyanamsaMode.lahiri:
             swe.set_sid_mode(swe.SIDM_LAHIRI)
             self.is_sidereal = True
-        elif self.mode == AyanamsaMode.krishnamurti:
+        elif self.ayanamsa_mode == AyanamsaMode.krishnamurti:
             swe.set_sid_mode(swe.SIDM_KRISHNAMURTI)
             self.is_sidereal = True
-        elif self.mode == AyanamsaMode.raman:
+        elif self.ayanamsa_mode == AyanamsaMode.raman:
             swe.set_sid_mode(swe.SIDM_RAMAN)
             self.is_sidereal = True
         else:
-             raise NotImplementedError(f"Unsupported ayanamsa mode: {self.mode}")
-        logger.info("SwissEphem provider initialized (mode=%s)", self.mode.value)
+             raise NotImplementedError(f"Unsupported ayanamsa mode: {self.ayanamsa_mode}")
+        logger.info("SwissEphem provider initialized (mode=%s)", self.ayanamsa_mode)
 
 
     def configure(self, location: dict | None = None, tz_name: str | None = None):
@@ -155,7 +155,7 @@ class SwissEphemProvider(IAstroProvider, AstroTimeMixin):
         # --- 5. Return ---
         logger.debug(
             f"[SwissEphem] planet={planet_enum.name}, when(local)={when}, UTC={when_utc}, "
-            f"lon={lon:.4f}, mode={self.mode.value}, loc=({getattr(self, 'lat', 0)}, {getattr(self, 'lon', 0)})"
+            f"lon={lon:.4f}, mode={self.ayanamsa_mode.value}, loc=({getattr(self, 'lat', 0)}, {getattr(self, 'lon', 0)})"
         )
         return lon % 360.0
 

@@ -77,7 +77,7 @@ class SkyfieldProvider(IAstroProvider, AstroTimeMixin):
         self.ayanamsa_mode = ayanamsa_mode
 
         self.is_sidereal = self.ayanamsa_mode != AyanamsaMode.tropical
-        logger.info("Skyfield ephemeris loaded: %s (ayanamsa_mode=%s)", eph_path, self.ayanamsa_mode.value)
+        logger.info("Skyfield ephemeris loaded: %s (ayanamsa_mode=%s)", eph_path, self.ayanamsa_mode)
 
         self.planet_mapper = SkyfieldPlanetMapper()
 

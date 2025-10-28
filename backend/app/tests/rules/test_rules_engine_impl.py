@@ -10,9 +10,11 @@ Covers:
 import pytest
 from datetime import datetime
 from types import SimpleNamespace
-from app.core.rules.engine.rules_engine_impl import RulesEngineImpl
-from app.core.common.schemas import ConditionRead, RuleCreate
+from app.core.rules.engine.rules_engine_impl import RulesEngineImpl, get_orb
+from app.core.common.schemas import ConditionRead
 from app.core.db.enums import Relation
+from app.core.common.config import settings
+
 
 
 # -------------------------------------------------------------------------
@@ -186,3 +188,10 @@ def test_evaluate_rule_logs_and_structure(monkeypatch, engine, when, caplog):
     assert isinstance(events, list)
     assert events[0]["rule_id"] == 42
     assert "events_count" in caplog.text
+
+def test_get_orb():
+    # def get_orb(planet_a: str, planet_b: str) -> float: 
+    planet_a = None
+    planet_b = None
+    orb = get_orb(planet_a, planet_b)
+    assert orb == settings.orb_default 

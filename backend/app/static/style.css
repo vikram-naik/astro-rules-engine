@@ -204,3 +204,17 @@ select.form-select:disabled option {
   font-weight: 600;
   letter-spacing: 0.3px;
 }
+
+/* make small separators visible on dark header */
+.astro-sep {
+  color: rgba(255, 255, 255, 0.65); /* readable on dark bg */
+  font-weight: 500;
+  margin: 0 .25rem;
+  user-select: none;
+}
+
+/* slightly reduce badge font size so it fits cleanly */
+#astroAyanamsaLabel {
+  letter-spacing: 0.2px;
+}
+

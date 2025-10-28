@@ -2,11 +2,31 @@
 <!-- workbench/nav.html -->
 <!-- ============================= -->
 <nav class="navbar navbar-dark bg-dark border-bottom border-secondary">
-<div class="container-fluid">
-<span class="navbar-brand mb-0 h1">Astro-Market Workbench</span>
-<div>
-<a class="btn btn-sm btn-outline-secondary" href="/docs" target="_blank">API Docs</a>
-</div>
-</div>
+    <div class="container-fluid">
+        <span class="navbar-brand mb-0 h1">Astro-Market Workbench</span>
+        <!-- top-right Astro controls (nav.html) -->
+        <div class="d-flex align-items-center">
+            <!-- Ayanamsa selector first -->
+            <select id="astroAyanamsaTop" class="form-select form-select-sm me-2" aria-label="Select Ayanamsa"
+                style="width:auto;">
+                <option value="lahiri">Lahiri</option>
+                <option value="raman">Raman</option>
+                <option value="krishnamurti">Krishnamurti</option>
+                <option value="tropical">Tropical</option>
+            </select>
+
+            <!-- Compact location button -->
+            <button id="astroConfigBtn" class="btn btn-sm btn-outline-light d-flex align-items-center"
+                data-bs-toggle="modal" data-bs-target="#astroConfigModal" title="Open Astro configuration">
+                🔭<span class="astro-sep me-1">|</span>
+                <span id="astroLocationLabel" class="me-1">-- / --</span>
+                <span class="astro-sep me-1">|</span>
+                <span id="astroTzLabel" class="me-2">--</span>
+                <span class="visually-hidden">Open Astro settings</span>
+            </button>
+        </div>
+
+
+    </div>
 </nav>
 <!-- ============================= -->
