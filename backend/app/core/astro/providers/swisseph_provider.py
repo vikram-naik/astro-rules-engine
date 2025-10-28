@@ -196,13 +196,17 @@ class SwissEphemProvider(IAstroProvider, AstroTimeMixin):
             )
 
             flags = swe.FLG_SWIEPH | swe.FLG_SPEED
+            if getattr(self, "is_sidereal", False):
+                flags |= swe.FLG_SIDEREAL
+
             res, ret = swe.calc_ut(jd, body_code, flags)
             if not res or len(res) < 4:
                 return False
 
             speed_lon = float(res[3])
             logger.debug(f"is_retrograde: speed_lon={speed_lon}")
-            return speed_lon < 0.0
+            # consider near-zero as retrograde (stationary) to match JPL behavior
+            return speed_lon < -1e-5 or abs(speed_lon) < 0.02
 
         except Exception as e:
             logger.exception(f"Unexpected Exception : {e}", exc_info=True)

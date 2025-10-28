@@ -26,7 +26,7 @@ def test_event_generation_flow(db_session, monkeypatch):
     )
     cond = Condition(
         planet=Planet.mars.value,       # e.g. "Mars"
-        relation=Relation.in_axis.value,  # e.g. "In Axis"
+        relation=Relation.in_axis.name,  # e.g. "In Axis"
         target="Venus",
         orb=3.0,
         value=None,

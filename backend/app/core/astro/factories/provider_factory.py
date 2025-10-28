@@ -40,8 +40,7 @@ def get_provider(
         cls = getattr(module, class_name)
 
         # Instantiate provider (ayanamsa comes from settings if not overridden)
-        ayanamsa_str = getattr(settings, "astro_ayanamsa_mode", "lahiri").lower()
-        ayanamsa_mode = AyanamsaMode[ayanamsa_str] if isinstance(ayanamsa_str, str) else ayanamsa_mode
+        ayanamsa_mode = ayanamsa_mode or AyanamsaMode(getattr(settings, "astro_ayanamsa_mode", "lahiri").lower())
         instance = cls(ayanamsa_mode=ayanamsa_mode)
 
         # Configure with location + timezone defaults or overrides
