@@ -7,10 +7,12 @@ const btnAddRule = document.getElementById("btnAddRule");
 
 // Load all rules from API
 async function loadRules() {
+  console.log("loadRules")
   rulesBody.innerHTML = '<tr><td colspan="5" class="text-muted">Loading…</td></tr>';
   try {
     const resp = await fetch("/api/rules/");
     const data = await resp.json();
+    console.log("loadRules", data)
     renderRules(data);
   } catch (err) {
     console.error(err);
@@ -32,17 +34,22 @@ function renderRules(rules) {
       <td>${escapeHtml(r.name)}</td>
       <td>${escapeHtml(r.description || "")}</td>
       <td>${(r.confidence || 0).toFixed(2)}</td>
-      <td>${r.enabled ? "Yes" : "No"}</td>
+      <td>${r.enabled ? "✅" : "❌"}</td>
       <td>
-        <a href="/ui/rule-editor/${r.rule_id}" class="btn btn-sm btn-outline-light me-1">Edit</a>
-        <button class="btn btn-sm btn-outline-danger btn-del" data-id="${r.rule_id}">Delete</button>
+        <button class="btn btn-sm btn-outline-light btn-edit" data-id="${r.rule_id}" title="Edit">
+          <i class="bi bi-pencil"></i>
+        </button>
+        <button class="btn btn-sm btn-outline-danger btn-del" data-id="${r.rule_id}" title="Delete">
+          <i class="bi bi-trash"></i>
+        </button>
       </td>
     `;
     rulesBody.appendChild(tr);
   });
 
-  // Bind delete buttons
+  // Bind delete and edit buttons
   document.querySelectorAll(".btn-del").forEach((b) => b.addEventListener("click", onDeleteRule));
+  document.querySelectorAll(".btn-edit").forEach((b) => b.addEventListener("click", onEditRule));
 }
 
 // Delete rule handler
@@ -63,6 +70,13 @@ async function onDeleteRule(evt) {
 btnAddRule.addEventListener("click", () => {
   window.location.href = "/ui/rule-editor";
 });
+
+// Edit rule handler
+function onEditRule(evt) {
+  const id = evt.currentTarget.dataset.id;
+  if (!id) return;
+  window.location.href = `/ui/rule-editor/${id}`;
+}
 
 // Expose globally for tab initialization
 window.loadRules = loadRules;

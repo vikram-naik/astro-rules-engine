@@ -1,10 +1,10 @@
 <!-- ============================= -->
 <!-- workbench/rules.html -->
 <!-- ============================= -->
-<div class="tab-pane fade show active" id="rules" role="tabpanel" aria-labelledby="rules-tab">
+<div id="rules">
     <div class="d-flex justify-content-between align-items-center mb-2">
-        <h4>Rules</h4>
-        <button id="btnAddRule" class="btn btn-sm btn-outline-light">+ Add Rule</button>
+        <h4 data-i18n="rules.title">Rules</h4>
+        <button id="btnAddRule" data-i18n="rules.add" class="btn btn-sm btn-outline-light">+ Add Rule</button>
     </div>
 
 
@@ -12,11 +12,11 @@
         <table id="rulesTable" class="table table-sm table-dark table-striped align-middle">
             <thead class="table-dark">
                 <tr>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Confidence</th>
-                    <th>Enabled</th>
-                    <th style="width:160px">Actions</th>
+                    <th data-i18n="rules.col.name">Name</th>
+                    <th data-i18n="rules.col.description">Description</th>
+                    <th data-i18n="rules.col.confidence">Confidence</th>
+                    <th data-i18n="rules.col.enabled">Enabled</th>
+                    <th data-i18n="rules.col.actions" style="width:160px">Actions</th>
                 </tr>
             </thead>
             <tbody id="rulesBody"></tbody>

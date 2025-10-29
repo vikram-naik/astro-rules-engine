@@ -8,25 +8,25 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content bg-dark text-light border-secondary">
       <div class="modal-header border-secondary">
-        <h5 class="modal-title">Astro Configuration</h5>
+        <h5 data-i18n="modal.astro.title" class="modal-title">Astro Configuration</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        <form id="astroConfigForm" class="row g-2">
+        <form id="astroConfigForm" class="row g-3">
           <div class="col-md-6">
-            <label class="form-label small">Longitude (°E)</label>
+            <label data-i18n="modal.astro.lon" class="form-label small">Longitude (°E)</label>
             <input type="number" step="0.0001" id="astroLon" class="form-control form-control-sm" required>
           </div>
           <div class="col-md-6">
-            <label class="form-label small">Latitude (°N)</label>
+            <label data-i18n="modal.astro.lat" class="form-label small">Latitude (°N)</label>
             <input type="number" step="0.0001" id="astroLat" class="form-control form-control-sm" required>
           </div>
           <div class="col-md-6">
-            <label class="form-label small">Altitude (m)</label>
+            <label data-i18n="modal.astro.alt" class="form-label small">Altitude (m)</label>
             <input type="number" step="1" id="astroAlt" class="form-control form-control-sm">
           </div>
           <div class="col-md-6">
-            <label class="form-label small">Timezone</label>
+            <label data-i18n="modal.astro.tz" class="form-label small">Timezone</label>
             <input type="text" id="astroTz" class="form-control form-control-sm" list="tzList">
             <datalist id="tzList">
               <option>UTC</option>
@@ -37,28 +37,34 @@
             </datalist>
           </div>
           <div class="col-12">
-            <label class="form-label small">Ayanamsa Mode (use top-right to change)</label>
-            <div id="astroAyanamsaModalLabel" class="form-control form-control-sm bg-dark text-light"
-              style="border:1px solid #6c757d;">
+            <label data-i18n="modal.astro.ayanamsaHint" class="form-label small">
+              Ayanamsa Mode (use top-right to change)
+            </label>
+            <div id="astroAyanamsaModalLabel"
+              class="form-control form-control-sm bg-dark text-light border border-secondary">
               --
             </div>
           </div>
-          <div class="col-12 mt-2">
-            <p class="small text-secondary mb-1">
+          <div class="col-12">
+            <p data-i18n="modal.astro.info" class="small text-secondary mb-1">
               <i class="bi bi-info-circle"></i>
-              You can use the “Auto Detect” button below to fill in your current
-              browser location and timezone. This uses your device’s GPS or IP-based location.
+              You can use the “Auto Detect” button below to fill in your current browser location and timezone.
             </p>
-            <button type="button" id="astroAutoDetect" class="btn btn-outline-info btn-sm w-100">
+            <button data-i18n="modal.astro.auto" type="button" id="astroAutoDetect"
+              class="btn btn-outline-info btn-sm w-100">
               📍 Auto Detect My Location
             </button>
           </div>
         </form>
+
       </div>
       <div class="modal-footer border-secondary">
-        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" id="astroConfigReset" class="btn btn-outline-warning btn-sm">Reset to Defaults</button>
-        <button type="button" id="astroConfigSave" class="btn btn-primary btn-sm">Save Changes</button>
+        <button type="button" data-i18n="modal.astro.cancel" class="btn btn-secondary btn-sm"
+          data-bs-dismiss="modal">Cancel</button>
+        <button type="button" data-i18n="modal.astro.reset" id="astroConfigReset"
+          class="btn btn-outline-warning btn-sm">Reset to Defaults</button>
+        <button type="button" data-i18n="modal.astro.save" id="astroConfigSave" class="btn btn-primary btn-sm">Save
+          Changes</button>
       </div>
     </div>
   </div>

@@ -174,19 +174,22 @@
 
   // When rule changes → load events
   ruleSelect.addEventListener("change", (e) => fetchEventsForRule(e.target.value));
-
-  // When user clicks generate → POST events
   generateBtn.addEventListener("click", generateEvents);
 
-  // When events tab activated → refresh rule list and reload current rule’s events if any
-  document.getElementById("events-tab").addEventListener("click", async () => {
-    await loadRulesForEvents();
-    const selectedRuleId = ruleSelect.value;
-    if (selectedRuleId) {
-      // ✅ Auto reload events for currently selected rule
-      await fetchEventsForRule(selectedRuleId);
-    }
-  });
+  // Sidebar integration + initial load
+  if (document.readyState === "loading")
+    document.addEventListener("DOMContentLoaded", loadRulesForEvents);
+  else
+    loadRulesForEvents();
+
+  const sidebarEventsLink = document.querySelector('#wbNav a[data-target="#events"]');
+  if (sidebarEventsLink) {
+    sidebarEventsLink.addEventListener("click", async () => {
+      await loadRulesForEvents();
+      const selectedRuleId = ruleSelect.value;
+      if (selectedRuleId) await fetchEventsForRule(selectedRuleId);
+    });
+  }
 
   //----------------------------------------------------------------
   // Module export

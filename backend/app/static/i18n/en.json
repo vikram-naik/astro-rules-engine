@@ -1,0 +1,101 @@
+{
+  "_meta": { "dir": "ltr" },
+  "nav": {
+    "brand": "Astro-Market Workbench",
+    "astroConfig": "Astro Configuration",
+    "ayanamsa": {
+      "lahiri": "Lahiri",
+      "raman": "Raman",
+      "krishnamurti": "Krishnamurti",
+      "tropical": "Tropical"
+    }
+  },
+  "tabs": {
+    "workbench": "Workbench",
+    "rules": "Rules",
+    "sectors": "Sectors",
+    "events": "Events",
+    "correlation": "Correlation"
+  },
+  "rules": {
+    "title": "Rules",
+    "add": "Add Rule",
+    "col": {
+      "name": "Name",
+      "description": "Description",
+      "confidence": "Confidence",
+      "enabled": "Enabled",
+      "actions": "Actions"
+    }
+  },
+  "sectors": {
+    "title": "Sectors",
+    "add": "Add Sector",
+    "col": {
+      "code": "Code",
+      "name": "Name",
+      "description": "Description",
+      "actions": "Actions"
+    },
+    "modal": {
+      "title": "Add Sector",
+      "code": "Code",
+      "name": "Name",
+      "description": "Description",
+      "save": "Save Sector",
+      "close": "Close"
+    }
+  },
+  "events": {
+    "title": "Rule Events",
+    "form": {
+      "rule": "Rule",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "provider": "Provider",
+      "overwrite": "Overwrite",
+      "generate": "Generate Events"
+    },
+    "providerOptions": {
+      "swisseph": "Swiss Ephemeris",
+      "skyfield": "Skyfield Ephemeris"
+    },
+    "placeholder": "Select a rule to view events."
+  },
+  "ruleEditor": {
+    "title": "Rule Authoring",
+    "back": "Back to Workbench",
+    "info": {
+      "name": "Rule Name",
+      "description": "Description",
+      "confidence": "Confidence",
+      "enabled": "Enabled"
+    },
+    "conditions": {
+      "title": "Conditions",
+      "add": "Add Condition"
+    },
+    "outcome": {
+      "title": "Outcome",
+      "sector": "Sector",
+      "effect": "Effect",
+      "weight": "Weight"
+    },
+    "save": "Save Rule"
+  },
+  "modal": {
+    "astro": {
+      "title": "Astro Configuration",
+      "lon": "Longitude (°E)",
+      "lat": "Latitude (°N)",
+      "alt": "Altitude (m)",
+      "tz": "Timezone",
+      "ayanamsaHint": "Ayanamsa Mode (use top-right to change)",
+      "info": "You can use the “Auto Detect” button below to fill in your current browser location and timezone. This uses your device’s GPS or IP-based location.",
+      "auto": "Auto Detect My Location",
+      "cancel": "Cancel",
+      "reset": "Reset to Defaults",
+      "save": "Save Changes"
+    }
+  }
+}

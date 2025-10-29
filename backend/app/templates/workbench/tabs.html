@@ -1,29 +1,39 @@
 <!-- ============================= -->
-<!-- workbench/tabs.html -->
+<!-- workbench/tabs.html  (REPLACE with sidebar) -->
 <!-- ============================= -->
-<div class="container my-4">
-<ul class="nav nav-tabs mb-3" id="workbenchTabs" role="tablist">
-<li class="nav-item" role="presentation">
-<button class="nav-link active" id="rules-tab" data-bs-toggle="tab" data-bs-target="#rules" type="button" role="tab">Rules</button>
-</li>
-<li class="nav-item" role="presentation">
-<button class="nav-link" id="sectors-tab" data-bs-toggle="tab" data-bs-target="#sectors" type="button" role="tab">Sectors</button>
-</li>
-<li class="nav-item" role="presentation">
-<button class="nav-link" id="events-tab" data-bs-toggle="tab" data-bs-target="#events" type="button" role="tab">Events</button>
-</li>
-<li class="nav-item" role="presentation">
-<button class="nav-link" id="correlation-tab" data-bs-toggle="tab" data-bs-target="#correlation" type="button" role="tab">Correlation</button>
-</li>
-</ul>
+<div class="container-fluid my-4">
+  <div class="row">
+    <!-- Sidebar -->
+    <nav id="wbSidebar" class="col-auto col-md-2 bg-dark border-secondary rounded p-2">
+      <div class="d-flex align-items-center mb-3">
+        <strong class="d-none d-md-inline" data-i18n="tabs.workbench">Workbench</strong>
+      </div>
 
 
-<div class="tab-content" id="workbenchTabsContent">
-{% include 'workbench/rules.html' %}
-{% include 'workbench/sectors.html' %}
-{% include 'workbench/events.html' %}
-{% include 'workbench/correlation.html' %}
-{% include 'workbench/modals.html' %}
-</div>
+      <ul id="wbNav" class="nav nav-pills flex-column">
+        <li class="nav-item">
+          <a class="nav-link text-light active" href="#" data-i18n="tabs.rules" data-target="#rules">Rules</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-light" href="#" data-i18n="tabs.sectors" data-target="#sectors">Sectors</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-light" href="#" data-i18n="tabs.events" data-target="#events">Events</a>
+        </li>
+        <!-- keep Correlation if you want, otherwise remove -->
+      </ul>
+
+      <hr class="border-secondary mt-3">
+      <div class="small text-secondary">Click item to open</div>
+    </nav>
+
+    <!-- Content area -->
+    <main class="col" id="workbenchContent">
+      {% include 'workbench/rules.html' %}
+      {% include 'workbench/sectors.html' %}
+      {% include 'workbench/events.html' %}
+      {% include 'workbench/modals.html' %}
+    </main>
+  </div>
 </div>
 <!-- ============================= -->

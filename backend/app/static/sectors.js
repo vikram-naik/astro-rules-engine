@@ -25,18 +25,22 @@ async function loadSectors() {
         <td>${escapeHtml(s.code)}</td>
         <td>${escapeHtml(s.name)}</td>
         <td>${escapeHtml(s.description || "")}</td>
-        <td>
-          <button class="btn btn-sm btn-outline-light me-1 btn-edit-sector" data-id="${s.code}">Edit</button>
-          <button class="btn btn-sm btn-outline-danger btn-del-sector" data-id="${s.code}">Delete</button>
-        </td>
+      <td>
+        <button class="btn btn-sm btn-outline-light btn-edit-sectors" data-id="${s.code}" title="Edit">
+          <i class="bi bi-pencil"></i>
+        </button>
+        <button class="btn btn-sm btn-outline-danger btn-del-sectors" data-id="${s.code}" title="Delete">
+          <i class="bi bi-trash"></i>
+        </button>
+      </td>
       `;
       sectorsBody.appendChild(tr);
     });
 
-    document.querySelectorAll(".btn-edit-sector").forEach((b) =>
+    document.querySelectorAll(".btn-edit-sectors").forEach((b) =>
       b.addEventListener("click", onEditSector)
     );
-    document.querySelectorAll(".btn-del-sector").forEach((b) =>
+    document.querySelectorAll(".btn-del-sectors").forEach((b) =>
       b.addEventListener("click", onDeleteSector)
     );
 
@@ -63,6 +67,7 @@ function getSectorModalInstance() {
 
 async function onEditSector(evt) {
   const code = evt.currentTarget.dataset.id;
+  console.log(code)
   const modal = getSectorModalInstance();
   if (!modal) return; // not available in rule editor
 

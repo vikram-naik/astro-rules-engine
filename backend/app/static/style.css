@@ -1,220 +1,229 @@
+/* ================================================================
+   Astro-Market Workbench – streamlined stylesheet
+   ================================================================ */
+
+/* -------------------- CORE THEME -------------------- */
 :root {
   --bg-dark: #0b0b0c;
   --bg-panel: #141416;
   --text-light: #dfe6ee;
   --border-faint: rgba(255,255,255,0.08);
 }
-body { background-color: var(--bg-dark); color: var(--text-light); }
-.nav-tabs .nav-link.active { background-color: var(--bg-panel); border-color: var(--border-faint); }
-.card, .table, .modal-content { background-color: var(--bg-panel); }
-.btn-primary { background-color: #2b2b2f; border-color: var(--border-faint); }
+body {
+  background-color: var(--bg-dark);
+  color: var(--text-light);
+}
+
+/* -------------------- BUTTONS & INPUTS -------------------- */
+.btn-primary {
+  background-color: #2b2b2f;
+  border-color: var(--border-faint);
+}
 .btn-outline-light { border-color: var(--border-faint); }
-input, select, textarea { background-color: #1a1a1c; color: var(--text-light); border: 1px solid var(--border-faint); }
 
-/* Improve visibility of tab text */
-.nav-tabs .nav-link {
-  color: #bfc3ca; /* subtle grey for inactive tabs */
-  border: none;
+input, select, textarea {
+  background-color: #1a1a1c;
+  color: var(--text-light);
+  border: 1px solid var(--border-faint);
 }
 
-.nav-tabs .nav-link:hover {
-  color: #e1e5ec;
+/* Focus / active inputs */
+.form-control:focus, .form-select:focus,
+textarea:focus, input[type="text"]:focus,
+input[type="number"]:focus, input[type="date"]:focus {
+  color: var(--text-light) !important;
+  background-color: rgba(255,255,255,0.08) !important;
+  border-color: rgba(255,255,255,0.25) !important;
+  box-shadow: 0 0 0 0.15rem rgba(255,255,255,0.08) !important;
 }
 
-.nav-tabs .nav-link.active {
-  color: #ffffff; /* brighter white for active tab */
-  background-color: rgba(255,255,255,0.08);
-  border-color: rgba(255,255,255,0.1);
-  font-weight: 500;
-}
+/* Placeholder color */
+::placeholder { color: #9ca3af; opacity: 1; }
 
-/* brighten form labels */
-label.form-label {
+/* -------------------- LABELS -------------------- */
+label.form-label, .form-check-label.small {
   color: #e8eaed !important;
   font-weight: 500;
 }
 
-/* Frosted dark modal style */
+/* -------------------- MODALS -------------------- */
 .modal-content {
   background: rgba(25, 25, 27, 0.9);
   backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: 0.75rem;
   box-shadow: 0 0 25px rgba(0,0,0,0.6);
 }
-
-.modal-header {
+.modal-header, .modal-footer {
   background: rgba(255,255,255,0.04);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.06);
 }
+.modal-title { color: #f5f7fa; font-weight: 600; letter-spacing: 0.3px; }
 
-.modal-footer {
-  background: rgba(255,255,255,0.04);
-  border-top: 1px solid rgba(255,255,255,0.06);
-}
+#astroConfigForm .form-label.small { font-weight: 500; color: #e6e8ec; }
+#astroConfigForm .form-control-sm { padding: 0.25rem 0.5rem; }
+#astroConfigModal .modal-body { padding-block: 1rem; }
 
-.modal-title {
-  color: #f5f7fa;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-}
-
-.form-control:focus, .form-select:focus {
-  outline: none;
-  border-color: rgba(255,255,255,0.25);
-  box-shadow: 0 0 0 0.1rem rgba(255,255,255,0.1);
-  background-color: rgba(255,255,255,0.05);
-}
-
-select.form-select option {
-  background-color: #1a1a1c;
-  color: #dfe6ee;
-}
-
-/* Improved dark-mode input focus style */
-.form-control:focus,
-.form-select:focus,
-textarea:focus,
-input[type="text"]:focus,
-input[type="number"]:focus,
-input[type="date"]:focus {
-  color: var(--text-light) !important;           /* keep text readable */
-  background-color: rgba(255, 255, 255, 0.08) !important;
-  border-color: rgba(255, 255, 255, 0.25) !important;
-  box-shadow: 0 0 0 0.15rem rgba(255, 255, 255, 0.08) !important;
-}
-
-/* Also ensure placeholder text remains visible */
-::placeholder {
-  color: #9ca3af; /* subtle grey for placeholder */
-  opacity: 1;
-}
-
-/* For dropdown options */
-select.form-select:focus option {
-  background-color: #141416 !important;
-  color: var(--text-light) !important;
-}
-
-.no-events-message {
-  color: #212529 !important;      /* Bootstrap's default dark text */
-  font-size: 0.9rem;
-}
-body.bg-dark .no-events-message {
-  color: #f8f9fa !important;      /* white for dark background */
-}
-.event-metadata {
-  background: #f8f9fa;
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-family: monospace;
-  color: #212529;
-}
-body.bg-dark .event-metadata {
-  background: #2c2c2c;
-  color: #e9ecef;
-}
-
-/* Spinner alignment and checkbox label fix */
-.btn .spinner-border.spinner-border-sm {
-vertical-align: middle;
-margin-left: 0.4rem;
-}
-/* Ensure checkbox labels like "Overwrite" remain visible */
-.form-check-label,
-.form-check-label.small {
-color: var(--text-light) !important;
-font-weight: 500 !important;
-}
-/* ---------------------------
-   Rule editor / card header fixes
-   --------------------------- */
-
-/* Ensure card header text is visible on dark backgrounds */
+/* -------------------- CARDS & TABLES -------------------- */
+.card, .table { background-color: var(--bg-panel); }
 .card .card-header,
-.card .card-header .btn,
-.card .card-header span {
+.card .card-header span,
+.card .card-header .btn {
   color: var(--text-light) !important;
   font-weight: 600;
 }
-
-/* Ensure small labels in card-body are visible too */
 .card .form-label.small {
   color: var(--text-light) !important;
   font-weight: 500;
 }
+.card-header { color: #e8eaed !important; font-weight: 600; letter-spacing: 0.3px; }
 
-/* Make the Add Condition button stand out in header */
-.card .card-header .btn-sm {
-  background-color: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.06);
+/* -------------------- RULE EDITOR -------------------- */
+.condition-row {
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  padding-bottom: 0.4rem;
 }
+#btnAddCondition {
+  background-color: rgba(255,255,255,0.05);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.2);
+  transition: all 0.2s ease;
+}
+#btnAddCondition:hover { background-color: rgba(255,255,255,0.15); }
 
-/* ======================================= */
-/* Rule Editor – Disabled Field Indicators */
-/* ======================================= */
-
-/* Dim disabled form elements (inputs/selects) */
-.form-control:disabled,
-.form-select:disabled {
-  background-color: rgba(255, 255, 255, 0.06) !important;
-  color: rgba(255, 255, 255, 0.4) !important;
-  border-color: rgba(255, 255, 255, 0.1) !important;
+/* Disabled field appearance */
+.form-control:disabled, .form-select:disabled {
+  background-color: rgba(255,255,255,0.06) !important;
+  color: rgba(255,255,255,0.4) !important;
+  border-color: rgba(255,255,255,0.1) !important;
   cursor: not-allowed !important;
   opacity: 0.8;
 }
 
-/* Ensure labels stay visible above disabled controls */
-.form-label.small {
-  color: #e0e0e0 !important;
-}
-
-/* Slightly fade out disabled dropdowns for clarity */
-select.form-select:disabled option {
-  color: rgba(255, 255, 255, 0.6);
-}
-
-/* Style the remove (×) button when disabled (if ever used later) */
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* Condition row spacing and subtle separation */
-.condition-row {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  padding-bottom: 0.4rem;
-}
-
-/* Compact “Add Condition” button in header */
-#btnAddCondition {
-  background-color: rgba(255, 255, 255, 0.05);
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: all 0.2s ease;
-}
-#btnAddCondition:hover {
-  background-color: rgba(255, 255, 255, 0.15);
-}
-
-/* Outcome and Conditions header readability */
-.card-header {
-  color: #e8eaed !important;
-  font-weight: 600;
+/* -------------------- SIDEBAR / NAV -------------------- */
+.navbar-brand {
+  font-size: 1.5rem !important;
+  font-weight: 600 !important;
   letter-spacing: 0.3px;
 }
+#wbSidebar {
+  position: fixed;
+  top: 56px;
+  left: 0;
+  width: 220px;
+  height: calc(100% - 56px);
+  background: var(--bg-panel);
+  border-right: 1px solid var(--border-faint);
+  transition: transform 0.3s ease-in-out;
+  z-index: 1030;
+}
+#wbSidebar.collapsed { transform: translateX(-100%); }
 
-/* make small separators visible on dark header */
-.astro-sep {
-  color: rgba(255, 255, 255, 0.65); /* readable on dark bg */
-  font-weight: 500;
-  margin: 0 .25rem;
-  user-select: none;
+#workbenchContent {
+  margin-left: 220px;
+  transition: margin-left 0.3s ease-in-out;
+}
+#workbenchContent.expanded { margin-left: 0; }
+
+/* Sidebar nav items */
+#wbSidebar .nav-link.active {
+  background-color: rgba(255,255,255,0.1) !important;
+  color: #fff !important;
+}
+#wbSidebar .nav-link:hover {
+  background-color: rgba(255,255,255,0.08) !important;
+  color: #e5e5e5 !important;
+}
+.astro-sep { color: rgba(255,255,255,0.65); font-weight: 500; margin: 0 .25rem; }
+
+/* -------------------- TABLE UTILS -------------------- */
+.btn .spinner-border.spinner-border-sm { vertical-align: middle; margin-left: 0.4rem; }
+
+/* ------------------------- EVENTS PAGE styles ---------------------- */
+
+/*  "no events" + metadata style  */
+.no-events-message {
+  color: #212529 !important;
+  font-size: 0.9rem;
+}
+body.bg-dark .no-events-message {
+  color: #f8f9fa !important;
+}
+.event-metadata {
+  background: #2c2c2c;
+  color: #e9ecef;
+  padding: 4px 8px;
+  border-radius: 6px;
 }
 
-/* slightly reduce badge font size so it fits cleanly */
-#astroAyanamsaLabel {
-  letter-spacing: 0.2px;
+/* -------------------- OPTIONAL/TO REVIEW -------------------- */
+
+
+/* Rule Editor minor alignment fix */
+.condition-row .btn-remove {
+  margin-top: 0.2rem;
+  padding-inline: 0.5rem;
 }
 
+/* Ensure spinners align well in dark theme */
+.spinner-border-sm {
+  --bs-spinner-border-width: 0.15em;
+}
+
+/* Text colors in dynamic messages */
+.text-muted { color: rgba(255,255,255,0.6) !important; }
+.text-danger { color: #ff7b7b !important; }
+
+/* =======================================================
+   Dropdown readability fixes
+   ======================================================= */
+select.form-select, select.form-select-sm {
+  background-color: #1a1a1c !important;
+  color: #f1f3f6 !important;
+  border: 1px solid var(--border-faint);
+}
+
+/* Ensure dropdown list popup is readable */
+select option {
+  background-color: #202022 !important;
+  color: #f1f3f6 !important;
+}
+
+/* Highlighted option on hover / active */
+select option:checked,
+select option:hover,
+select option:focus {
+  background-color: #2d2d31 !important;
+  color: #ffffff !important;
+}
+/* =======================================================
+   Form tone adjustments (mellower inputs)
+   ======================================================= */
+.form-control, .form-select {
+  background-color: #191a1d !important;
+  border: 1px solid rgba(255,255,255,0.10) !important;
+  color: #e8eaee !important;
+}
+
+.form-control:focus, .form-select:focus {
+  background-color: #1e1f22 !important;
+  border-color: rgba(255,255,255,0.25) !important;
+  box-shadow: 0 0 0 0.15rem rgba(255,255,255,0.05) !important;
+}
+
+/* Soften disabled controls */
+.form-control:disabled, .form-select:disabled {
+  background-color: rgba(255,255,255,0.04) !important;
+  border-color: rgba(255,255,255,0.08) !important;
+  color: rgba(255,255,255,0.5) !important;
+}
+
+/* Dropdown option tone (readable, not neon) */
+select option {
+  background-color: #212224 !important;
+  color: #f2f2f4 !important;
+}
+select option:checked,
+select option:hover {
+  background-color: #2a2b2e !important;
+}
