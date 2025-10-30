@@ -17,9 +17,25 @@
                     <th data-i18n="sectors.col.actions" style="width:120px">Actions</th>
                 </tr>
             </thead>
-            <tbody id="sectorsBody"></tbody>
+            <tbody id="sectorsTableBody"></tbody>
         </table>
     </div>
 
+    <!-- ✅ Template for a single sector row -->
+    <template id="sector-row-template">
+        <tr>
+            <td class="sector-code"></td>
+            <td class="sector-name"></td>
+            <td class="sector-description"></td>
+            <td>
+                <button class="btn btn-sm btn-outline-light btn-edit-sector" title="Edit">
+                    <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger btn-del-sector" title="Delete">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </td>
+        </tr>
+    </template>
 </div>
 <!-- ============================= -->

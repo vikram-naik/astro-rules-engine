@@ -75,7 +75,7 @@ async function onEditSector(evt) {
     const resp = await fetch(`/api/sectors/${code}`);
     if (!resp.ok) throw new Error("Failed to load sector details");
     const s = await resp.json();
-
+    console.log(s)
     const title = document.getElementById("sectorModalTitle");
     const idField = document.getElementById("sector_id");
     const codeField = document.getElementById("sector_code");

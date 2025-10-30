@@ -227,3 +227,28 @@ select option:checked,
 select option:hover {
   background-color: #2a2b2e !important;
 }
+
+/* =======================================================
+   Language selector styling (navbar)
+   ======================================================= */
+#langSelect {
+  background-color: #1a1a1c !important;
+  color: #f0f0f0 !important;
+  border: 1px solid rgba(255,255,255,0.15) !important;
+}
+#langSelect:focus {
+  background-color: #232326 !important;
+  border-color: rgba(255,255,255,0.25) !important;
+  box-shadow: none !important;
+}
+
+/* === Modal Close Button Fix for Dark Theme === */
+.modal-header .btn-close {
+  filter: invert(1) grayscale(100%) brightness(180%);
+  opacity: 0.9;
+}
+
+.modal-header .btn-close:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}

@@ -7,7 +7,6 @@
         <button id="btnAddRule" data-i18n="rules.add" class="btn btn-sm btn-outline-light">+ Add Rule</button>
     </div>
 
-
     <div class="table-responsive">
         <table id="rulesTable" class="table table-sm table-dark table-striped align-middle">
             <thead class="table-dark">
@@ -19,7 +18,26 @@
                     <th data-i18n="rules.col.actions" style="width:160px">Actions</th>
                 </tr>
             </thead>
-            <tbody id="rulesBody"></tbody>
+            <tbody id="rulesTableBody"></tbody>
         </table>
     </div>
+
+    <!-- ✅ Template for a single rule row -->
+    <template id="rule-row-template">
+        <tr>
+            <td class="rule-name"></td>
+            <td class="rule-description"></td>
+            <td class="rule-confidence"></td>
+            <td class="rule-enabled text-center"></td>
+            <td>
+                <button class="btn btn-sm btn-outline-light btn-edit-rule" title="Edit">
+                    <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger btn-del-rule" title="Delete">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </td>
+        </tr>
+    </template>
 </div>
+<!-- ============================= -->

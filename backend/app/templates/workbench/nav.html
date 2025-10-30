@@ -4,26 +4,44 @@
 <nav class="navbar navbar-dark bg-dark border-bottom border-secondary">
   <div class="container-fluid align-items-center">
     <div class="d-flex align-items-center">
-      <!-- Sidebar toggle button now lives here -->
+      <!-- Sidebar toggle button -->
       <button id="sidebarToggle" class="btn btn-sm btn-outline-light me-3" title="Toggle sidebar">☰</button>
       <span data-i18n="nav.brand" class="navbar-brand mb-0 h1">Astro-Market Workbench</span>
     </div>
 
     <div class="d-flex align-items-center">
-      <select id="astroAyanamsaTop" class="form-select form-select-sm me-2" aria-label="Select Ayanamsa" style="width:auto;">
+      <!-- Ayanamsa selector -->
+      <select id="astroAyanamsaTop" class="form-select form-select-sm me-2"
+              aria-label="Select Ayanamsa" style="width:auto;">
         <option value="lahiri" data-i18n="nav.ayanamsa.lahiri">Lahiri</option>
         <option value="raman" data-i18n="nav.ayanamsa.raman">Raman</option>
         <option value="krishnamurti" data-i18n="nav.ayanamsa.krishnamurti">Krishnamurti</option>
         <option value="tropical" data-i18n="nav.ayanamsa.tropical">Tropical</option>
       </select>
 
-      <button id="astroConfigBtn" class="btn btn-sm btn-outline-light d-flex align-items-center"
-              data-bs-toggle="modal" data-bs-target="#astroConfigModal" title="Open Astro configuration">
+      <!-- Astro configuration button -->
+      <button id="astroConfigBtn"
+              class="btn btn-sm btn-outline-light d-flex align-items-center me-3"
+              data-bs-toggle="modal"
+              data-bs-target="#astroConfigModal"
+              title="Open Astro configuration">
         🔭<span class="astro-sep me-1">|</span>
         <span id="astroLocationLabel" class="me-1">-- / --</span>
         <span class="astro-sep me-1">|</span>
         <span id="astroTzLabel" class="me-2">--</span>
       </button>
+
+      <!-- Language selector -->
+      <div class="d-flex align-items-center">
+        <span class="text-light me-2" title="Language">🌐</span>
+        <select id="langSelect"
+                class="form-select form-select-sm bg-dark text-light border-secondary"
+                style="width:auto;"
+                aria-label="Select language">
+          <option value="en" data-i18n="nav.lang.en">English</option>
+          <option value="gu" data-i18n="nav.lang.gu">ગુજરાતી</option>
+        </select>
+      </div>
     </div>
   </div>
 </nav>
