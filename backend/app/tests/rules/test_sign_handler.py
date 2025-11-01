@@ -2,13 +2,13 @@ import pytest
 from datetime import datetime
 from app.core.rules.relations.sign_handler import SignHandler
 from app.core.astro.providers.stub_provider import StubProvider
-from app.core.common.schemas import ConditionRead
+from app.core.db.models import Condition
 from app.core.db.enums import Planet, Relation
 
 
 def make_cond(planet: str, target: str):
     planet_enum = Planet[planet]
-    return ConditionRead(
+    return Condition(
         id=1,
         rule_id=1,
         planet=planet_enum,

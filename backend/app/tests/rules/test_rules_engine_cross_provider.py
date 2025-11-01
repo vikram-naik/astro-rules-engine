@@ -4,7 +4,8 @@ from decimal import Decimal
 from app.core.rules.engine.rules_engine_impl import RulesEngineImpl
 from app.core.rules.relations import registry
 from app.core.db.enums import Relation
-from app.core.common.schemas import ConditionRead, OutcomeRead
+from app.core.db.models import Condition, Outcome
+
 from app.core.astro.factories.provider_factory import get_provider
 
 
@@ -47,7 +48,7 @@ def make_rule(conds):
             self.confidence = 0.9
             self.conditions = conditions
             self.outcomes = [
-                OutcomeRead(id=1, rule_id=1, sector_code="EQUITY", effect="Bullish", weight=0.7),
+                Outcome(id=1, rule_id=1, sector_code="EQUITY", effect="Bullish", weight=0.7),
             ]
     return FakeRule(conds)
 
@@ -73,7 +74,7 @@ def test_cross_provider_consistency(providers, when, relation, planet, target, v
     """
     results = {}
 
-    cond = ConditionRead(
+    cond = Condition(
         id=1, rule_id=1,
         planet=planet, relation=relation,
         target=target, value=value
@@ -146,7 +147,7 @@ def test_provider_missing_is_retrograde(providers, when):
         def longitude(self, *args, **kwargs):
             return stub.longitude(*args, **kwargs)
 
-    cond = ConditionRead(id=1, rule_id=1, planet="saturn", relation=Relation.is_retrograde)
+    cond = Condition(id=1, rule_id=1, planet="saturn", relation=Relation.is_retrograde)
     rule = make_rule([cond])
 
     engine = RulesEngineImpl(NoRetrograde())
@@ -169,9 +170,9 @@ def test_multiple_conditions_behavior(providers, when, passes_expected, monkeypa
     stub = providers["stub"]
 
     conds = [
-        ConditionRead(id=1, rule_id=2, planet="sun",
+        Condition(id=1, rule_id=2, planet="sun",
                       relation=Relation.in_sign, target="pisces"),
-        ConditionRead(id=2, rule_id=2, planet="moon",
+        Condition(id=2, rule_id=2, planet="moon",
                       relation=Relation.in_house_relative_to, target="sun", value="7"),
     ]
 
@@ -209,7 +210,7 @@ def test_provider_recovers_after_failure(providers, when, monkeypatch):
         raise KeyError("temporary glitch")
 
     monkeypatch.setattr(stub, "longitude", bad_longitude)
-    cond = ConditionRead(id=1, rule_id=5,
+    cond = Condition(id=1, rule_id=5,
                          planet="sun", relation=Relation.in_sign, target="pisces")
     rule = make_rule([cond])
 

@@ -1,6 +1,6 @@
 # app/core/rules/relations/nakshatra_handler.py
 from datetime import datetime
-from app.core.common.schemas import ConditionRead
+from app.core.db.models import Condition
 from app.core.astro.interfaces.i_astro_provider import IAstroProvider
 from .i_relation import IRelationHandler
 
@@ -38,7 +38,7 @@ class NakshatraOwnedHandler(IRelationHandler):
         handler.check(provider, cond, datetime(2025, 1, 1), orb_default=2.0)
     """
 
-    def check(self, provider: IAstroProvider, cond: ConditionRead, when: datetime, orb_default: float) -> bool:
+    def check(self, provider: IAstroProvider, cond: Condition, when: datetime, orb_default: float) -> bool:
         planet = (cond.planet or "").lower()
         owner_target = (cond.target or "").lower()
         try:

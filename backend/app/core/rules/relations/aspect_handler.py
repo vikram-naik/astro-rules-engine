@@ -1,7 +1,7 @@
 # app/core/rules/relations/aspect_handler.py
 from datetime import datetime
 from typing import Optional
-from app.core.common.schemas import ConditionRead
+from app.core.db.models import Condition
 from app.core.astro.interfaces.i_astro_provider import IAstroProvider
 from .i_relation import IRelationHandler
 
@@ -15,7 +15,7 @@ class AspectHandler(IRelationHandler):
     def __init__(self, target_angle: Optional[float] = None):
         self.target_angle = float(target_angle) if target_angle is not None else None
 
-    def check(self, provider: IAstroProvider, cond: ConditionRead, when: datetime, orb_default: float) -> bool:
+    def check(self, provider: IAstroProvider, cond: Condition, when: datetime, orb_default: float) -> bool:
         orb = cond.orb if cond.orb is not None else orb_default
         # allow numeric aspect angle in cond.value (highest priority)
         angle = None

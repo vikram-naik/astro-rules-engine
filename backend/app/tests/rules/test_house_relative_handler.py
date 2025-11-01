@@ -15,7 +15,8 @@ import pytest
 from datetime import datetime
 from decimal import Decimal
 from app.core.rules.relations.house_relative_handler import HouseRelativeHandler
-from app.core.common.schemas import ConditionRead
+from app.core.db.models import Condition
+
 from app.core.db.enums import Relation
 from app.core.astro.providers.stub_provider import StubProvider
 
@@ -25,9 +26,9 @@ from app.core.astro.providers.stub_provider import StubProvider
 # -------------------------------------------------------------------------
 
 def make_cond(planet: str, relation: str, target: str, value=None, orb=None):
-    """Helper to build a valid ConditionRead object."""
+    """Helper to build a valid Condition object."""
     rel_enum = Relation.in_house_relative_to
-    return ConditionRead(
+    return Condition(
         planet=planet,
         relation=rel_enum,
         target=target,

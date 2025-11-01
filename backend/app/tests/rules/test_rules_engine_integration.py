@@ -9,7 +9,8 @@ import pytest
 from datetime import datetime
 from app.core.rules.engine.rules_engine_impl import RulesEngineImpl
 from app.core.astro.providers.stub_provider import StubProvider
-from app.core.common.schemas import ConditionRead, RuleCreate
+from app.core.db.models import Condition, Rule
+
 from app.core.db.enums import Relation
 
 
@@ -45,7 +46,7 @@ def engine(provider):
 
 def make_rule(conditions, rule_id="R001"):
     """Build a minimal rule for testing."""
-    return RuleCreate(
+    return Rule(
         name=f"Rule-{rule_id}",
         conditions=conditions,
         outcomes=[
@@ -63,7 +64,7 @@ def make_rule(conditions, rule_id="R001"):
 
 def test_in_sign_relation(engine, provider, when):
     """Verify Sun in Aries → SignHandler executes successfully."""
-    cond = ConditionRead(id=1, rule_id=1, planet="sun", relation=Relation.in_sign, target="aries")
+    cond = Condition(id=1, rule_id=1, planet="sun", relation=Relation.in_sign, target="aries")
     rule = make_rule([cond])
     result = engine.evaluate_rule(rule, when)
     assert result and result[0]["rule_id"] == "R001"
@@ -71,7 +72,7 @@ def test_in_sign_relation(engine, provider, when):
 
 def test_house_relative_relation(engine, provider, when):
     """Moon 90° from Sun → 4th house."""
-    cond = ConditionRead(id=1, rule_id=1, 
+    cond = Condition(id=1, rule_id=1, 
         planet="moon",
         relation=Relation.in_house_relative_to,
         target="sun",
@@ -84,7 +85,7 @@ def test_house_relative_relation(engine, provider, when):
 
 def test_combust_relation(engine, provider, when):
     """Venus near Sun within orb → combust."""
-    cond = ConditionRead(id=1, rule_id=1, planet="venus", relation=Relation.combust_by_sun, target=None)
+    cond = Condition(id=1, rule_id=1, planet="venus", relation=Relation.combust_by_sun, target=None)
     rule = make_rule([cond])
     result = engine.evaluate_rule(rule, when)
     assert result and result[0]["rule_id"] == "R001"
@@ -92,7 +93,7 @@ def test_combust_relation(engine, provider, when):
 
 def test_aspect_relation(engine, provider, when):
     """Jupiter 120° from Saturn → trine aspect."""
-    cond = ConditionRead(id=1, rule_id=1, 
+    cond = Condition(id=1, rule_id=1, 
         planet="jupiter",
         relation=Relation.aspect_with,
         target="saturn",
@@ -106,7 +107,7 @@ def test_aspect_relation(engine, provider, when):
 def test_axis_relation(engine, provider, when):
     """Sun opposite Saturn → axis alignment."""
     provider.set_longitude_map({"sun": 0.0, "saturn": 180.0})
-    cond = ConditionRead(id=1, rule_id=1, 
+    cond = Condition(id=1, rule_id=1, 
         planet="sun",
         relation=Relation.in_axis,
         target="saturn",
@@ -118,7 +119,7 @@ def test_axis_relation(engine, provider, when):
 
 def test_nakshatra_owned_by_relation(engine, provider, when):
     """Verify Moon is in a Nakshatra owned by Venus."""
-    cond = ConditionRead(
+    cond = Condition(
         id=1, rule_id=1,
         planet="moon",
         relation=Relation.in_nakshatra_owned_by,
@@ -141,7 +142,7 @@ def test_nakshatra_owned_by_relation(engine, provider, when):
 def test_retrograde_relation(monkeypatch, engine, provider, when):
     """Retrograde handler → uses provider.is_retrograde()."""
     provider.is_retrograde = lambda planet, when: True
-    cond = ConditionRead(id=1, rule_id=1, planet="mercury", relation=Relation.is_retrograde)
+    cond = Condition(id=1, rule_id=1, planet="mercury", relation=Relation.is_retrograde)
     rule = make_rule([cond])
     result = engine.evaluate_rule(rule, when)
     assert result and result[0]["rule_id"] == "R001"
@@ -150,8 +151,8 @@ def test_retrograde_relation(monkeypatch, engine, provider, when):
 def test_mixed_conditions_all_true(engine, provider, when):
     """Combust + HouseRelative both True → event generated."""
     conds = [
-        ConditionRead(id=1, rule_id=1, planet="venus", relation=Relation.combust_by_sun),
-        ConditionRead(id=1, rule_id=1, planet="moon", relation=Relation.in_house_relative_to, target="sun", value="4"),
+        Condition(id=1, rule_id=1, planet="venus", relation=Relation.combust_by_sun),
+        Condition(id=1, rule_id=1, planet="moon", relation=Relation.in_house_relative_to, target="sun", value="4"),
     ]
     rule = make_rule(conds)
     result = engine.evaluate_rule(rule, when)
@@ -161,8 +162,8 @@ def test_mixed_conditions_all_true(engine, provider, when):
 def test_partial_failure(engine, provider, when):
     """One condition fails → no event generated."""
     conds = [
-        ConditionRead(id=1, rule_id=1, planet="sun", relation=Relation.in_sign, target="aries"),
-        ConditionRead(id=1, rule_id=1, planet="venus", relation=Relation.combust_by_sun, target=None, orb=-1),  # invalid orb
+        Condition(id=1, rule_id=1, planet="sun", relation=Relation.in_sign, target="aries"),
+        Condition(id=1, rule_id=1, planet="venus", relation=Relation.combust_by_sun, target=None, orb=-1),  # invalid orb
     ]
     rule = make_rule(conds)
     result = engine.evaluate_rule(rule, when)
@@ -178,7 +179,7 @@ def test_partial_failure(engine, provider, when):
 def test_aspect_named_relations(engine, provider, when, angle, expected):
     """Validate that known angular separations map to the correct named aspects."""
     provider.set_longitude_map({"jupiter": 0.0, "saturn": angle})
-    cond = ConditionRead(
+    cond = Condition(
         id=1, rule_id=1,
         planet="jupiter",
         relation=Relation.aspect_with,
@@ -203,7 +204,7 @@ def test_aspect_named_relations(engine, provider, when, angle, expected):
 def test_named_aspect_relations(engine, provider, when, relation, angle, name):
     """Check all named aspect_with derivatives like trine_with, sextile_with, etc."""
     provider.set_longitude_map({"jupiter": 0.0, "saturn": angle})
-    cond = ConditionRead(
+    cond = Condition(
         id=1, rule_id=1,
         planet="jupiter",
         relation=relation,

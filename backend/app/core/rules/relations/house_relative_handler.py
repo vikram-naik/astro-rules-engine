@@ -63,7 +63,7 @@ for all possible input conditions.
 import logging
 from datetime import datetime
 from decimal import Decimal, getcontext
-from app.core.common.schemas import ConditionRead
+from app.core.db.models import Condition
 from app.core.astro.interfaces.i_astro_provider import IAstroProvider
 from .i_relation import IRelationHandler
 
@@ -107,7 +107,7 @@ class HouseRelativeHandler(IRelationHandler):
         """Convert float longitude to quantized Decimal(°)."""
         return Decimal(str(value)).quantize(Decimal("0.0001"))
 
-    def check(self, provider: IAstroProvider, cond: ConditionRead, when: datetime, orb_default: float) -> bool:
+    def check(self, provider: IAstroProvider, cond: Condition, when: datetime, orb_default: float) -> bool:
         try:
             planet_lon = provider.longitude(cond.planet.lower(), when)
             ref_lon = provider.longitude(cond.target.lower(), when)

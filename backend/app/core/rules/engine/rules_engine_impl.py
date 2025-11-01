@@ -1,8 +1,9 @@
+# app/core/rules/rules_engine_impl.py
 from datetime import datetime
 from typing import List, Dict, Any
 from app.core.rules.interfaces.i_rules_engine import IRulesEngine
 from app.core.astro.interfaces.i_astro_provider import IAstroProvider
-from app.core.common.schemas import RuleCreate, ConditionRead
+from app.core.db.models import Rule, Condition  # ✅ use ORM directly
 from app.core.db.enums import Relation
 from app.core.common.config import settings
 import logging
@@ -11,60 +12,117 @@ logger = logging.getLogger("astro.rulesengine")
 
 
 def get_orb(planet_a: str, planet_b: str) -> float:
-    """
-    Determine orb based on planetary pair.
-    Fallback order:
-      1. Explicit entry in settings.orb_overrides
-      2. Reversed key (planet_b-planet_a)
-      3. settings.orb_default
-    """
+    """Determine orb based on planetary pair."""
     if not planet_a or not planet_b:
         return settings.orb_default
     key1 = f"{planet_a.lower()}-{planet_b.lower()}"
     key2 = f"{planet_b.lower()}-{planet_a.lower()}"
-    return settings.orb_overrides.get(key1) or settings.orb_overrides.get(key2) or settings.orb_default
+    return (
+        settings.orb_overrides.get(key1)
+        or settings.orb_overrides.get(key2)
+        or settings.orb_default
+    )
 
 
 class RulesEngineImpl(IRulesEngine):
-    """Concrete rules engine depending on IAstroProvider abstraction."""
+    """Evaluates nested condition groups and outcomes using ORM models."""
 
     def __init__(self, provider: IAstroProvider, orb_default: float = None):
         self.provider = provider
         self.orb_default = orb_default if orb_default is not None else settings.orb_default
         logger.debug(
             "RulesEngineImpl initialized with provider=%s orb_default=%s",
-            getattr(self.provider, "__class__", type(self.provider)), self.orb_default
+            getattr(self.provider, "__class__", type(self.provider)),
+            self.orb_default,
         )
 
-    def evaluate_rule(self, rule: RuleCreate, when: datetime) -> List[Dict[str, Any]]:
+    # ------------------------------------------------------------
+    # PUBLIC: Evaluate entire rule
+    # ------------------------------------------------------------
+    def evaluate_rule(self, rule: Rule, when: datetime) -> List[Dict[str, Any]]:
+        """
+        Evaluate a rule composed of nested condition groups.
+        Returns a list of generated outcome events if satisfied.
+        """
         logger.debug(
-            "evaluate_rule: rule_id=%s when=%s conditions=%d outcomes=%d",
-            getattr(rule, "rule_id", None),
-            when.isoformat(),
-            len(rule.conditions or []),
+            "Evaluating rule id=%s name=%s groups=%d outcomes=%d",
+            getattr(rule, "id", None),
+            getattr(rule, "name", None),
+            len(rule.condition_groups or []),
             len(rule.outcomes or []),
         )
 
-        for cond in rule.conditions:
-            if not self._check_condition(cond, when):
-                return []
+        if not rule.condition_groups:
+            logger.warning("Rule %s has no condition groups", getattr(rule, "name", None))
+            return []
 
-        events = []
-        for out in rule.outcomes:
-            logger.debug("Outcome: %s", out)
-            events.append({
-                "rule_id": rule.rule_id,
+        satisfied = all(self._evaluate_group(g, when) for g in rule.condition_groups)
+
+        if not satisfied:
+            logger.debug("Rule %s NOT satisfied", getattr(rule, "name", None))
+            return []
+
+        logger.debug("Rule %s satisfied — generating outcomes", getattr(rule, "name", None))
+        events = [
+            {
+                "rule_id": getattr(rule, "id", None),
                 "date": (when.date() if hasattr(when, "date") else when).isoformat(),
                 "effect": out.effect,
                 "weight": out.weight,
                 "confidence": rule.confidence,
-            })
+            }
+            for out in rule.outcomes
+        ]
 
-        logger.debug("evaluate_rule -> events_count=%d events=%s", len(events), events)
+        logger.debug("Generated %d event(s)", len(events))
         return events
 
-    def _check_condition(self, cond: ConditionRead, when: datetime) -> bool:
+    # ------------------------------------------------------------
+    # PRIVATE: Evaluate a single group (recursive)
+    # ------------------------------------------------------------
+    def _evaluate_group(self, group, when: datetime) -> bool:
+        """Recursively evaluate a condition group tree."""
+        group_results = []
+
+        for cond in getattr(group, "conditions", []):
+            result = self._check_condition(cond, when)
+            group_results.append(result)
+            logger.debug(
+                "Condition check [%s %s %s] => %s",
+                cond.planet,
+                cond.relation,
+                cond.target,
+                result,
+            )
+
+        for subgroup in getattr(group, "subgroups", []):
+            sub_result = self._evaluate_group(subgroup, when)
+            group_results.append(sub_result)
+            logger.debug(
+                "Subgroup operator=%s result=%s",
+                subgroup.operator,
+                sub_result,
+            )
+
+        if not group_results:
+            logger.debug("Empty group encountered, returning False")
+            return False
+
+        group_result = all(group_results) if group.operator == "AND" else any(group_results)
+        logger.debug(
+            "Group operator=%s aggregated_result=%s (from %d entries)",
+            group.operator,
+            group_result,
+            len(group_results),
+        )
+        return group_result
+
+    # ------------------------------------------------------------
+    # PRIVATE: Evaluate one condition
+    # ------------------------------------------------------------
+    def _check_condition(self, cond: Condition, when: datetime) -> bool:
         from app.core.rules.relations.registry import get_relation_handler
+
         planet = (cond.planet or "").lower()
         relation = cond.relation
         if isinstance(relation, Relation):
@@ -72,24 +130,13 @@ class RulesEngineImpl(IRulesEngine):
 
         target = (cond.target or "").lower()
         orb = cond.orb if cond.orb is not None else get_orb(planet, target)
-        logger.debug("Checking condition: planet=%s relation=%s target=%s orb=%s", planet, relation, target, orb)
 
         try:
-            lon = self.provider.longitude(planet, when)
-            logger.debug("Provider longitude: planet=%s when=%s lon=%.6f", planet, when.isoformat(), lon)
+            handler = get_relation_handler(Relation[relation])
+            if handler is None:
+                logger.warning("No relation handler registered for %s", relation)
+                return False
+            return handler.check(self.provider, cond, when, orb)
         except Exception as exc:
-            logger.exception("Provider.longitude failed for planet=%s when=%s: %s", planet, when, exc)
-            return False
-
-        handler = get_relation_handler(Relation[relation])
-        if handler is None:
-            logger.warning("No relation handler registered for relation=%s (condition=%s)", relation, cond)
-            return False
-
-        try:
-            result = handler.check(self.provider, cond, when, orb)
-            logger.debug("Relation handler result: relation=%s result=%s", relation, result)
-            return result
-        except Exception as exc:
-            logger.exception("Relation handler raised exception for relation=%s cond=%s: %s", relation, cond, exc)
+            logger.exception("Condition check failed for %s: %s", relation, exc)
             return False

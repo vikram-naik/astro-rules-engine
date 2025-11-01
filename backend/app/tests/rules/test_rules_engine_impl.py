@@ -11,7 +11,8 @@ import pytest
 from datetime import datetime
 from types import SimpleNamespace
 from app.core.rules.engine.rules_engine_impl import RulesEngineImpl, get_orb
-from app.core.common.schemas import ConditionRead
+from app.core.db.models import Condition
+
 from app.core.db.enums import Relation
 from app.core.common.config import settings
 
@@ -51,8 +52,8 @@ def engine(fake_provider):
 # -------------------------------------------------------------------------
 
 def make_condition(relation="in_sign", planet="sun", target="aries"):
-    """Constructs a minimal ConditionRead."""
-    return ConditionRead(
+    """Constructs a minimal Condition."""
+    return Condition(
         planet=planet,
         relation=Relation[relation],
         target=target,

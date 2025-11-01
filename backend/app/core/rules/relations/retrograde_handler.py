@@ -33,7 +33,7 @@ Example:
 
 from datetime import datetime
 import logging
-from app.core.common.schemas import ConditionRead
+from app.core.db.models import Condition
 from app.core.rules.relations.i_relation import IRelationHandler
 
 logger = logging.getLogger("relation.is_retrograde")
@@ -41,7 +41,7 @@ logger = logging.getLogger("relation.is_retrograde")
 class RetrogradeHandler(IRelationHandler):
     """Checks whether a planet is retrograde."""
 
-    def check(self, provider, condition: ConditionRead, when: datetime, orb_default: float) -> bool:
+    def check(self, provider, condition: Condition, when: datetime, orb_default: float) -> bool:
         planet = condition.planet.lower()
         try:
             logger.debug(f"planet:{planet} when:{when}")

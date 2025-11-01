@@ -1,15 +1,14 @@
 import logging
 from datetime import datetime
 from app.core.rules.relations.i_relation import IRelationHandler
-from app.core.common.schemas import ConditionRead
-
+from app.core.db.models import Condition
 logger = logging.getLogger("astro.axis")
 
 
 class AxisHandler(IRelationHandler):
     """Checks if two planets are in opposition (≈ 180° apart) within a given orb."""
 
-    def check(self, provider, cond: ConditionRead, when: datetime, orb_default: float) -> bool:
+    def check(self, provider, cond: Condition, when: datetime, orb_default: float) -> bool:
         try:
             orb = cond.orb or orb_default
             lon = provider.longitude(cond.planet, when)

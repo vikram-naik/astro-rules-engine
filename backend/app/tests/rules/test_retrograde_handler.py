@@ -2,7 +2,8 @@ from app.core.db.enums import Relation
 import pytest
 from datetime import datetime
 from app.core.rules.relations.retrograde_handler import RetrogradeHandler
-from app.core.common.schemas import ConditionRead
+from app.core.db.models import Condition
+
 from app.core.astro.providers.stub_provider import StubProvider
 
 
@@ -27,7 +28,7 @@ def when():
 
 
 def make_cond(planet):
-    return ConditionRead(
+    return Condition(
         id=1,
         rule_id=1,
         planet=planet,

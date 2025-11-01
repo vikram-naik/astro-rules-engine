@@ -1,6 +1,6 @@
 # app/core/rules/relations/combust_handler.py
 from datetime import datetime
-from app.core.common.schemas import ConditionRead
+from app.core.db.models import Condition
 from app.core.astro.interfaces.i_astro_provider import IAstroProvider
 from .i_relation import IRelationHandler
 from app.core.common.config import settings  # your pydantic settings (if available)
@@ -67,7 +67,7 @@ class CombustHandler(IRelationHandler):
 
     DEFAULT_ORB = 8.0  # example fallback; treat as configurable in settings
 
-    def check(self, provider: IAstroProvider, cond: ConditionRead, when: datetime, orb_default: float) -> bool:
+    def check(self, provider: IAstroProvider, cond: Condition, when: datetime, orb_default: float) -> bool:
         planet = (cond.planet or "").lower()
         orb = cond.orb if cond.orb is not None else None
 

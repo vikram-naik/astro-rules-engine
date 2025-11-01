@@ -4,7 +4,7 @@ from datetime import datetime
 
 from app.core.rules.relations.aspect_handler import AspectHandler
 from app.core.astro.providers.stub_provider import StubProvider
-from app.core.common.schemas import ConditionRead
+from app.core.db.models import Condition
 from app.core.db.enums import Relation
 
 
@@ -15,7 +15,7 @@ def provider():
 
 def make_cond(planet, relation, target, orb=None, value=None):
     relation_enum = Relation[relation]
-    return ConditionRead(
+    return Condition(
         planet=planet,
         relation=relation_enum,
         target=target,
