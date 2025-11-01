@@ -78,11 +78,16 @@ function ephemerisCellRenderer(params) {
   if (v.is_stationary) flags.push("S");
   if (!v.is_retrograde && !v.is_stationary) flags.push("D");
 
-  const statusHtml = flags.length
-    ? `<span class="ephem-status">${flags
-      .map(f => `<span data-flag="${f}">[${f}]</span>`)
+const statusHtml = flags.length
+  ? `<span class="ephem-status">${flags
+      .map(f => {
+        if (f === "Ex") return `<span data-flag="${f}" title="${safeT("ephemeris.legend.Ex") || "Exalted"}">\u2B06</span>`;
+        if (f === "Db") return `<span data-flag="${f}" title="${safeT("ephemeris.legend.Db") || "Debilitated"}">\u2B07</span>`;
+        if (f === "C") return `<span data-flag="${f}" title="${safeT("ephemeris.legend.C") || "Combust"}">\u2600</span>`;
+        return `<span data-flag="${f}">[${f}]</span>`;
+      })
       .join("")}</span>`
-    : "";
+  : "";
 
   let transitionHtml = "";
   if (v.transition_from && v.transition_to && v.transition_time_local) {
@@ -295,10 +300,10 @@ function updateMeta(meta) {
   footer.innerHTML = `
   <div class="text-secondary small ephem-legend">
     <span class="ephem-status">
-      <span data-flag="Ex">[Ex]</span> ${safeT("ephemeris.legend.Ex")} · 
-      <span data-flag="Db">[Db]</span> ${safeT("ephemeris.legend.Db")} · 
+      <span data-flag="Ex">\u2B06</span> ${safeT("ephemeris.legend.Ex")} · 
+      <span data-flag="Db">\u2B07</span> ${safeT("ephemeris.legend.Db")} · 
       <span data-flag="MT">[MT]</span> ${safeT("ephemeris.legend.MT")} · 
-      <span data-flag="C">[C]</span> ${safeT("ephemeris.legend.C")} · 
+      <span data-flag="C">\u2600</span> ${safeT("ephemeris.legend.C")} · 
       <span data-flag="R">[R]</span> ${safeT("ephemeris.legend.R")} · 
       <span data-flag="D">[D]</span> ${safeT("ephemeris.legend.D")} · 
       <span data-flag="S">[S]</span> ${safeT("ephemeris.legend.S")}

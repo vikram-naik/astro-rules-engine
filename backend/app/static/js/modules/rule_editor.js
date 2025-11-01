@@ -7,6 +7,7 @@
 
 import { toast, fetchJSON, escapeHtml, useTemplate } from "../core/utils.js";
 import { loadSectors, loadReference } from "../core/ref_data.js";
+import { translateNewContent } from "../core/i18n.js";
 
 
 // ---------- MAIN INITIALIZER ----------
@@ -96,6 +97,9 @@ export async function initRuleEditor() {
 
       // Append to container
       container.appendChild(fragment);
+
+      // Re-translate dynamic labels
+      translateNewContent(row);
 
       // Query controls inside this row
       const planetSel = row.querySelector(".planet-select");

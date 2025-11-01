@@ -33,7 +33,8 @@
       "confidence": "Confidence",
       "enabled": "Enabled",
       "actions": "Actions"
-    }
+    },
+    "noRules": "No rules found"
   },
   "sectors": {
     "title": "Sectors",
@@ -130,7 +131,12 @@
     },
     "conditions": {
       "title": "Conditions",
-      "add": "Add Condition"
+      "add": "Add Condition",
+      "planet": "Planet",
+      "relation": "Relation",
+      "value": "Value",
+      "target": "Target",
+      "orb": "Orb"
     },
     "outcome": {
       "title": "Outcome",

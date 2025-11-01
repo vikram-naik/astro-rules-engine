@@ -140,6 +140,15 @@ applyLocale = async function (locale) {
     });
 };
 
+export function translateNewContent(container = document) {
+  try {
+    if (!container) container = document;
+    translateDom(currentDict, fallbackDict);
+  } catch (e) {
+    console.warn("i18n translateNewContent failed:", e);
+  }
+}
+
 /* Backward compatibility globals */
 if (typeof window !== "undefined") {
     window.initI18n = initI18n;

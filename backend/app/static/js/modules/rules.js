@@ -34,7 +34,7 @@ function renderRules(rules = []) {
   if (!rulesTable) return;
   if (!Array.isArray(rules) || rules.length === 0) {
     rulesTable.innerHTML =
-      `<tr><td colspan="5" class="text-center text-secondary small">No rules found</td></tr>`;
+      `<tr><td colspan="5" data-i18n="rules.noRules" class="text-center text-secondary small">No rules found</td></tr>`;
     return;
   }
 
