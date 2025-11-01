@@ -127,6 +127,18 @@ function useTemplate(id) {
   return tpl.content.cloneNode(true);
 }
 
+function showOverlay(el, show = true) {
+  if (!el) return;
+  // prefer class toggle for transitions and less brittle layout changes
+  if (show) {
+    el.classList.add("visible");
+    el.setAttribute("aria-hidden", "false");
+  } else {
+    el.classList.remove("visible");
+    el.setAttribute("aria-hidden", "true");
+  }
+}
+
 
 /* Backwards compatibility: set window.* so current non-module callers work immediately.
    This avoids having to edit all files before we migrate them. We will remove these
@@ -137,7 +149,8 @@ if (typeof window !== "undefined") {
   window.fetchJSON = fetchJSON;
   window.toast = toast;
   window.withSpinner = withSpinner;
+  window.showOverlay = showOverlay;
 }
 
 /* Exports for module consumers */
-export { escapeHtml, fetchJSON, toast, withSpinner, useTemplate };
+export { escapeHtml, fetchJSON, toast, withSpinner, useTemplate, showOverlay };

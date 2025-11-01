@@ -8,6 +8,7 @@ import { initSidebar }      from "./core/sidebar.js";
 import { initI18n }         from "./core/i18n.js";
 import { initAstroConfig }  from "./core/astro_config.js";
 
+import { initEphemeris }    from "./modules/ephemeris.js";
 import { initRules }        from "./modules/rules.js";
 import { initSectors }      from "./modules/sectors.js";
 import { initEvents }       from "./modules/events.js";
@@ -26,6 +27,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     /* -------- Domain modules -------- */
     console.time("domain:init");
+    initEphemeris();
     initRules();
     initSectors();
     initEvents();

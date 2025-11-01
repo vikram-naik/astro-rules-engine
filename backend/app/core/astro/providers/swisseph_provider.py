@@ -173,13 +173,15 @@ class SwissEphemProvider(IAstroProvider, AstroTimeMixin):
         """Shortest angular distance between two degrees on 0..360 circle."""
         return abs((float(a) - float(b) + 180.0) % 360.0 - 180.0)
 
-    def is_retrograde(self, planet: str, when: datetime) -> bool:
+    def is_retrograde(self, planet: Union[str, Planet], when: datetime) -> bool:
         """
         Return True if the specified planet is retrograde at the given time.
         Uses the provider's planet_mapper to look up the swisseph body code and reads
         the longitudinal speed from swe.calc_ut result (res[3]).
         """
         try:
+            if isinstance(planet, Planet):
+                planet = planet.name 
             key = (planet or "").lower()
             logger.debug(f"is_retrograde: planet={key} when={when}")
             body_code = self.planet_mappper.resolve(Planet[key.lower()])

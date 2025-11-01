@@ -23,7 +23,7 @@
   --bg-dark: #0b0b0c;
   --bg-panel: #141416;
   --text-light: #dfe6ee;
-  --border-faint: rgba(255, 255, 255, 0.08);
+  --border-faint: rgba(255,255,255,0.08);
 }
 
 
@@ -197,6 +197,7 @@ label.form-label,
   scrollbar-width: thin;
 }
 
+
 .ag-root-wrapper {
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 0.5rem;
@@ -204,8 +205,25 @@ label.form-label,
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.35);
 }
 
+/* Header glyph & tooltip fixes */
+.ag-header-cell,
+.ag-header-group-cell,
+.ag-header-cell .ag-header-cell-label {
+  overflow: visible !important;
+}
+
+.ag-header-cell-label {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding-top: 6px !important;
+  padding-bottom: 8px !important;
+  line-height: 1.5 !important;
+  font-size: 0.96rem !important;
+}
+
 .ag-header {
-  min-height: 35px !important;
+  min-height: 30px !important;
 }
 
 .ag-theme-alpine-dark .ag-tooltip {
@@ -253,46 +271,14 @@ label.form-label,
   font-weight: 600;
 }
 
-.ephem-status span[data-flag="Sg"] {
-  color: var(--accent-gold);
-}
-
-/* Sign Change */
-.ephem-status span[data-flag="Ex"] {
-  color: var(--accent-teal);
-}
-
-/* Exalted */
-.ephem-status span[data-flag="Db"] {
-  color: var(--accent-red);
-}
-
-/* Debilitated */
-.ephem-status span[data-flag="MT"] {
-  color: var(--accent-blue);
-}
-
-/* Moolatrikona */
-.ephem-status span[data-flag="C"] {
-  color: var(--accent-gold-soft);
-}
-
-/* Combust */
-.ephem-status span[data-flag="R"] {
-  color: #ffb347;
-}
-
-/* Retrograde */
-.ephem-status span[data-flag="S"] {
-  color: #9fa8da;
-}
-
-/* Stationary */
-.ephem-status span[data-flag="D"] {
-  color: #a5d6a7;
-}
-
-/* Direct */
+.ephem-status span[data-flag="Sg"] { color: var(--accent-gold); }   /* Sign Change */
+.ephem-status span[data-flag="Ex"] { color: var(--accent-teal); }   /* Exalted */
+.ephem-status span[data-flag="Db"] { color: var(--accent-red); }    /* Debilitated */
+.ephem-status span[data-flag="MT"] { color: var(--accent-blue); }   /* Moolatrikona */
+.ephem-status span[data-flag="C"]  { color: var(--accent-gold-soft); } /* Combust */
+.ephem-status span[data-flag="R"]  { color: #ffb347; }              /* Retrograde */
+.ephem-status span[data-flag="S"]  { color: #9fa8da; }              /* Stationary */
+.ephem-status span[data-flag="D"]  { color: #a5d6a7; }              /* Direct */
 
 
 .ephem-transition {
@@ -330,9 +316,8 @@ label.form-label,
   font-size: 0.95em;
 }
 
-.ephem-legend span[data-flag]+span:not([data-flag]) {
-  color: rgba(230, 230, 230, 0.8) !important;
-  /* text labels softer */
+.ephem-legend span[data-flag] + span:not([data-flag]) {
+  color: rgba(230, 230, 230, 0.8) !important; /* text labels softer */
 }
 
 
@@ -452,7 +437,28 @@ label.form-label,
   border-color: rgba(255, 255, 255, 0.3) !important;
 }
 
+.ag-cell {
+  line-height: 1.4 !important;
+  padding-top: 4px !important;
+  padding-bottom: 4px !important;
+  overflow: visible !important;
+  white-space: nowrap !important;  /* Prevent unintended wrapping */
+}
+/* =======================================================
+   Ephemeris – Row Height Adjustment & Center Fix
+   ======================================================= */
 
+/* Let rows expand if transition line wraps */
+.ag-theme-alpine-dark .ag-row {
+  height: auto !important;
+  align-items: flex-start !important;
+}
+
+.ag-theme-alpine-dark .ag-cell {
+  height: auto !important;
+  overflow: visible !important;
+  white-space: nowrap;
+}
 
 .ag-theme-alpine-dark .ephem-transition {
   white-space: normal !important;
@@ -461,7 +467,6 @@ label.form-label,
   padding-top: 2px;
   padding-bottom: 2px;
 }
-
 /* =======================================================
    Ephemeris Final: Prevent planet line wrapping (Nov 2025)
    ======================================================= */
@@ -473,26 +478,93 @@ label.form-label,
   align-items: center;
 }
 
+.ag-theme-alpine-dark .ag-cell {
+  min-width: 160px !important;   /* safeguard for AG auto-resize */
+}
+/* =======================================================
+   ✅ Ephemeris Header Alignment – Final Fix
+   ======================================================= */
+.ag-theme-alpine-dark .ag-header,
+.ag-theme-alpine-dark .ag-pinned-left-header {
+  display: flex !important;
+  align-items: stretch !important;
+  height: 40px !important;
+}
+
+.ag-theme-alpine-dark .ag-header-cell,
+.ag-theme-alpine-dark .ag-pinned-left-header .ag-header-cell {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  height: 100% !important;
+  line-height: 1.4 !important;
+  box-sizing: border-box !important;
+}
+
+.ag-theme-alpine-dark .ag-header-cell-label {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
 
 /* =======================================================
-   🌙 Ephemeris Table Text Subtle Contrast Adjustment
+   ✅ Header Row Alignment Correction
    ======================================================= */
-
-/* Dim the main cell text for comfortable reading */
-.ag-theme-alpine-dark .ag-cell,
-.ag-theme-alpine-dark .ephem-cell,
-.ag-theme-alpine-dark .ephem-pos {
-  color: rgba(220, 220, 220, 0.82) !important; /* softer neutral gray */
-  font-weight: 500 !important;
+.ag-theme-alpine-dark .ag-header {
+  align-items: center !important;
+  height: 42px !important;
 }
 
-/* Keep planetary highlights, retrograde markers, etc., vivid */
-.ag-theme-alpine-dark .ephem-status span[data-flag] {
-  filter: brightness(1.05); /* keeps accent colors slightly vivid */
-}
-
-/* Optional: slightly darker header text to balance grid contrast */
 .ag-theme-alpine-dark .ag-header-cell-text {
-  color: rgba(235, 235, 235, 0.88) !important;
-  font-weight: 600 !important;
+  line-height: 1.2 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  height: 100% !important;
+}
+
+.ag-theme-alpine-dark .ag-pinned-left-header {
+  align-items: center !important;
+}
+
+/* =======================================================
+   ✅ Ephemeris Grid Border & Cell Fix – Final Stable
+   ======================================================= */
+.ag-theme-alpine-dark .ag-root-wrapper-body,
+.ag-theme-alpine-dark .ag-center-cols-container,
+.ag-theme-alpine-dark .ag-row,
+.ag-theme-alpine-dark .ag-cell {
+  border-collapse: collapse !important;
+  box-sizing: border-box !important;
+}
+
+.ag-theme-alpine-dark .ag-row {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+.ag-theme-alpine-dark .ag-cell {
+  border-right: 1px solid rgba(255, 255, 255, 0.12) !important;
+  overflow: hidden !important; /* 🔧 Fix overlapping */
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+  padding: 4px 6px !important;
+}
+
+.ag-theme-alpine-dark .ag-row:last-child {
+  border-bottom: none !important;
+}
+
+.ag-theme-alpine-dark .ag-cell:last-child {
+  border-right: none !important;
+}
+
+/* Hover feedback (subtle highlight) */
+.ag-theme-alpine-dark .ag-row:hover .ag-cell {
+  background-color: rgba(255, 255, 255, 0.04) !important;
 }

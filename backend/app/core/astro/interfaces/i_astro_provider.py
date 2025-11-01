@@ -1,12 +1,15 @@
 # backend/app/core/astro/interfaces/i_astro_provider.py
 from abc import ABC, abstractmethod
 from datetime import datetime
+from typing import Union
+
+from app.core.db.enums import Planet
 
 class IAstroProvider(ABC):
     """Interface for planetary data providers."""
 
     @abstractmethod
-    def longitude(self, planet: str, when: datetime) -> float:
+    def longitude(self, planet: Union[str, Planet], when: datetime) -> float:
         """Return ecliptic longitude in degrees for planet at given datetime."""
         raise NotImplementedError
 
@@ -26,7 +29,7 @@ class IAstroProvider(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    def is_retrograde(self, planet: str, when: datetime) -> bool:
+    def is_retrograde(self, planet: Union[str, Planet], when: datetime) -> bool:
         """Return True if planet is retrograde at the given time."""
         raise NotImplementedError
     

@@ -1,0 +1,45 @@
+<!-- ============================= -->
+<!-- workbench/ephemeris.html -->
+<!-- ============================= -->
+<div id="ephemeris">
+  <div class="card bg-dark border-secondary shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0 text-light" data-i18n="ephemeris.title">Ephemeris Matrix</h5>
+
+      <div class="d-flex align-items-center gap-2">
+        <!-- Date selector -->
+        <input type="date" id="ephemerisStartDate"
+          class="form-control form-control-sm bg-dark text-light border-secondary" />
+
+        <!-- Navigation buttons -->
+        <div class="btn-group">
+          <button id="ephemerisPrev" class="btn btn-sm btn-outline-light" title="Previous Week">⟨</button>
+          <button id="ephemerisRefresh" class="btn btn-sm btn-outline-light" title="Refresh">⟳</button>
+          <button id="ephemerisNext" class="btn btn-sm btn-outline-light" title="Next Week">⟩</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-body bg-dark p-2">
+      <!-- Grid container -->
+      <div id="ephemerisGrid" class="ag-theme-alpine-dark" style="height: 500px; width: 100%;"></div>
+      <!-- Loading overlay (initially hidden) -->
+      <div id="ephemerisLoadingOverlay" class="ephemeris-overlay" aria-hidden="true">
+        <div class="d-flex flex-column justify-content-center align-items-center text-light">
+          <div class="spinner-border mb-3" role="status" aria-hidden="true"></div>
+          <div class="fw-semibold">Loading Ephemeris Data...</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-footer text-secondary small text-center ephem-legend" data-i18n-html="ephemeris.legend.full">
+      [Sg]=Sign Change · [Ex]=Exalted · [Db]=Debilitated · [MT]=Moolatrikona · [C]=Combust · [R]=Retrograde · [D]=Direct
+      · [S]=Stationary
+    </div>
+
+  </div>
+
+  <!-- AG Grid JS/CDN (latest community build) -->
+  <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.2.1/dist/ag-grid-community.min.noStyle.js"></script>
+</div>
+<!-- ============================= -->

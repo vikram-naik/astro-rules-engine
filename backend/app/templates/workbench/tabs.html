@@ -9,10 +9,12 @@
         <strong class="d-none d-md-inline" data-i18n="tabs.workbench">Workbench</strong>
       </div>
 
-
       <ul id="wbNav" class="nav nav-pills flex-column">
         <li class="nav-item">
-          <a class="nav-link text-light active" href="#" data-i18n="tabs.rules" data-target="#rules">Rules</a>
+          <a class="nav-link text-light active" href="#" data-i18n="tabs.ephemeris" data-target="#ephemeris">Ephemeris</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-light" href="#" data-i18n="tabs.rules" data-target="#rules">Rules</a>
         </li>
         <li class="nav-item">
           <a class="nav-link text-light" href="#" data-i18n="tabs.sectors" data-target="#sectors">Sectors</a>
@@ -29,6 +31,7 @@
 
     <!-- Content area -->
     <main class="col" id="workbenchContent">
+      {% include 'workbench/ephemeris.html' %}
       {% include 'workbench/rules.html' %}
       {% include 'workbench/sectors.html' %}
       {% include 'workbench/events.html' %}

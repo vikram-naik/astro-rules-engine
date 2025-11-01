@@ -10,9 +10,17 @@
     </div>
 
     <div class="d-flex align-items-center">
+      <!-- Provider selector -->
+      <select id="astroProviderTop" class="form-select form-select-sm me-2" aria-label="Select Ephemeris Provider"
+        style="width:auto;">
+        <option value="skyfield">Skyfield</option>
+        <option value="swisseph">Swiss Ephemeris</option>
+      </select>
+
+
       <!-- Ayanamsa selector -->
-      <select id="astroAyanamsaTop" class="form-select form-select-sm me-2"
-              aria-label="Select Ayanamsa" style="width:auto;">
+      <select id="astroAyanamsaTop" class="form-select form-select-sm me-2" aria-label="Select Ayanamsa"
+        style="width:auto;">
         <option value="lahiri" data-i18n="nav.ayanamsa.lahiri">Lahiri</option>
         <option value="raman" data-i18n="nav.ayanamsa.raman">Raman</option>
         <option value="krishnamurti" data-i18n="nav.ayanamsa.krishnamurti">Krishnamurti</option>
@@ -20,11 +28,8 @@
       </select>
 
       <!-- Astro configuration button -->
-      <button id="astroConfigBtn"
-              class="btn btn-sm btn-outline-light d-flex align-items-center me-3"
-              data-bs-toggle="modal"
-              data-bs-target="#astroConfigModal"
-              title="Open Astro configuration">
+      <button id="astroConfigBtn" class="btn btn-sm btn-outline-light d-flex align-items-center me-3"
+        data-bs-toggle="modal" data-bs-target="#astroConfigModal" title="Open Astro configuration">
         🔭<span class="astro-sep me-1">|</span>
         <span id="astroLocationLabel" class="me-1">-- / --</span>
         <span class="astro-sep me-1">|</span>
@@ -34,10 +39,8 @@
       <!-- Language selector -->
       <div class="d-flex align-items-center">
         <span class="text-light me-2" title="Language">🌐</span>
-        <select id="langSelect"
-                class="form-select form-select-sm bg-dark text-light border-secondary"
-                style="width:auto;"
-                aria-label="Select language">
+        <select id="langSelect" class="form-select form-select-sm bg-dark text-light border-secondary"
+          style="width:auto;" aria-label="Select language">
           <option value="en" data-i18n="nav.lang.en">English</option>
           <option value="gu" data-i18n="nav.lang.gu">ગુજરાતી</option>
         </select>

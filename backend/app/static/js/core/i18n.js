@@ -66,6 +66,33 @@ export async function applyLocale(locale) {
     );
 }
 
+
+/**
+ * t(key) - lookup in currentDict then fallbackDict, returns null if missing
+ * kept minimal so other modules can call t(...) directly if they want.
+ */
+export function t(key) {
+  if (!key || typeof key !== "string") return null;
+  const val = resolveKey(key, currentDict);
+  if (val !== null && val !== undefined) return val;
+  const fb = fallbackDict || {};
+  return resolveKey(key, fb);
+}
+
+/**
+ * Safe translator for external libraries (e.g., AG Grid)
+ * Returns key itself if translation missing.
+ */
+export function safeT(key) {
+  try {
+    const v = t(key);
+    return v ?? key;
+  } catch {
+    return key;
+  }
+}
+
+
 /** Initialize i18n system (on DOM ready) */
 export async function initI18n() {
     fallbackDict = (await fetchLocale(FALLBACK_LOCALE)) || {};
@@ -103,3 +130,5 @@ if (typeof window !== "undefined") {
     window.initI18n = initI18n;
     window.applyLocale = applyLocale;
 }
+
+

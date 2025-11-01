@@ -1,6 +1,7 @@
 /* core/astro_config.js
  * 
  * Manages Astro configuration (ayanamsa, lon, lat, alt, tz).
+ * Now also manages provider, max_workers, node_mode.
  * Exports: initAstroConfig()
  * 
  * Depends on: core/utils.js (toast, fetchJSON, withSpinner)
@@ -15,12 +16,20 @@ export function initAstroConfig() {
   const tzEl  = document.getElementById("astroTz");
   const ayTopEl = document.getElementById("astroAyanamsaTop");
 
+  // NEW fields
+  const providerEl = document.getElementById("astroProvider");
+  const maxWorkersEl = document.getElementById("astroMaxWorkers");
+  const nodeModeEl = document.getElementById("astroNodeMode");
+
   const locLbl = document.getElementById("astroLocationLabel");
   const tzLbl  = document.getElementById("astroTzLabel");
 
   const saveBtn  = document.getElementById("astroConfigSave");
   const resetBtn = document.getElementById("astroConfigReset");
   const autoBtn  = document.getElementById("astroAutoDetect");
+
+  const modalAyLbl = document.getElementById("astroAyanamsaModalLabel");
+
 
   if (!ayTopEl || !saveBtn || !resetBtn) {
     console.warn("Astro config: required elements not found, skipping init.");
@@ -33,6 +42,12 @@ export function initAstroConfig() {
     try {
       const data = await fetchJSON("/api/astro/config");
       ayTopEl.value = data.ayanamsa || "lahiri";
+      modalAyLbl.textContent = ayTopEl.value;
+
+      // NEW: load provider, max_workers, node_mode if present
+      if (providerEl) providerEl.value = data.provider || "skyfield";
+      if (maxWorkersEl) maxWorkersEl.value = safeNum(data.max_workers ?? data.ephemeris_max_workers, 1);
+      if (nodeModeEl) nodeModeEl.value = data.node_mode || data.ephemeris_node_mode || "mean";
 
       if (lonEl) lonEl.value = (+data.lon).toFixed(4);
       if (latEl) latEl.value = (+data.lat).toFixed(4);
@@ -56,6 +71,10 @@ export function initAstroConfig() {
       alt: safeNum(altEl?.value, 0),
       tz:  tzEl?.value || "UTC",
       ayanamsa: ayTopEl?.value || "lahiri",
+      // NEW fields included in save payload
+      provider: providerEl?.value || "skyfield",
+      max_workers: safeNum(maxWorkersEl?.value, 1),
+      node_mode: nodeModeEl?.value || "mean",
     };
     await withSpinner(saveBtn, async () => {
       const res = await fetch("/api/astro/config", {
@@ -123,11 +142,63 @@ export function initAstroConfig() {
     }
   }
 
+  // --- NEW: update provider (updates server config immediately like updateAyanamsa) ---
+  async function updateProvider() {
+    if (!providerEl) return;
+    const newP = providerEl.value;
+    providerEl.disabled = true;
+    try {
+      const cur = await fetchJSON("/api/astro/config");
+      const payload = { ...cur, provider: newP };
+      const res = await fetch("/api/astro/config", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error("Failed to update provider");
+      toast("Ephemeris provider updated to " + newP, "success");
+      await loadAstroConfig();
+    } catch (err) {
+      toast("Failed to update provider: " + err.message, "danger");
+      console.error("Provider update failed:", err);
+    } finally {
+      providerEl.disabled = false;
+    }
+  }
+
+  // --- NEW: update node mode (updates server config immediately) ---
+  async function updateNodeMode() {
+    if (!nodeModeEl) return;
+    const newMode = nodeModeEl.value;
+    nodeModeEl.disabled = true;
+    try {
+      const cur = await fetchJSON("/api/astro/config");
+      const payload = { ...cur, node_mode: newMode };
+      const res = await fetch("/api/astro/config", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error("Failed to update node mode");
+      toast("Node mode updated to " + newMode, "success");
+      await loadAstroConfig();
+    } catch (err) {
+      toast("Failed to update node mode: " + err.message, "danger");
+      console.error("Node mode update failed:", err);
+    } finally {
+      nodeModeEl.disabled = false;
+    }
+  }
+
   // --- Event wiring ---
   if (saveBtn)  saveBtn.addEventListener("click", saveAstroConfig);
   if (resetBtn) resetBtn.addEventListener("click", resetAstroConfig);
   if (autoBtn)  autoBtn.addEventListener("click", autoDetectLocation);
   if (ayTopEl)  ayTopEl.addEventListener("change", updateAyanamsa);
+
+  // NEW event listeners for provider / node_mode: update immediately on change (matching your pattern)
+  if (providerEl) providerEl.addEventListener("change", updateProvider);
+  if (nodeModeEl) nodeModeEl.addEventListener("change", updateNodeMode);
 
   // --- Initial load ---
   loadAstroConfig();

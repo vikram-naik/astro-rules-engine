@@ -1,5 +1,7 @@
 {
-  "_meta": { "dir": "ltr" },
+  "_meta": {
+    "dir": "ltr"
+  },
   "nav": {
     "brand": "Astro-Market Workbench",
     "astroConfig": "Astro Configuration",
@@ -15,7 +17,8 @@
     "rules": "Rules",
     "sectors": "Sectors",
     "events": "Events",
-    "correlation": "Correlation"
+    "correlation": "Correlation",
+    "ephemeris": "Ephemeris"
   },
   "rules": {
     "title": "Rules",
@@ -62,6 +65,56 @@
     },
     "placeholder": "Select a rule to view events."
   },
+  "ephemeris": {
+    "title": "Ephemeris Matrix",
+    "columns": {
+      "date": "Date",
+      "sun": "Sun",
+      "moon": "Moon",
+      "mars": "Mars",
+      "mercury": "Mercury",
+      "jupiter": "Jupiter",
+      "venus": "Venus",
+      "saturn": "Saturn",
+      "rahu": "Rahu",
+      "ketu": "Ketu",
+      "uranus": "Uranus",
+      "neptune": "Neptune",
+      "pluto": "Pluto"
+    },
+    "legend": {
+      "Sg": "Sign Change",
+      "Ex": "Exalted",
+      "Db": "Debilitated",
+      "MT": "Moolatrikona",
+      "C": "Combust",
+      "R": "Retrograde",
+      "D": "Direct",
+      "S": "Stationary"
+    },
+    "labels": {
+      "ingress": "Ingress"
+    },
+    "motion": {
+      "retrograde": "Retrograde Motion",
+      "direct": "Direct Motion",
+      "stationary": "Stationary"
+    },
+    "signs": {
+      "aries": "Aries",
+      "taurus": "Taurus",
+      "gemini": "Gemini",
+      "cancer": "Cancer",
+      "leo": "Leo",
+      "virgo": "Virgo",
+      "libra": "Libra",
+      "scorpio": "Scorpio",
+      "sagittarius": "Sagittarius",
+      "capricorn": "Capricorn",
+      "aquarius": "Aquarius",
+      "pisces": "Pisces"
+    }
+  },
   "ruleEditor": {
     "title": "Rule Authoring",
     "back": "Back to Workbench",
@@ -95,7 +148,10 @@
       "auto": "Auto Detect My Location",
       "cancel": "Cancel",
       "reset": "Reset to Defaults",
-      "save": "Save Changes"
+      "save": "Save Changes",
+      "provider": "Ephemeris Provider",
+      "maxWorkers": "Max Workers",
+      "nodeMode": "Node Mode (Mean/True)"
     }
   }
 }

@@ -256,7 +256,7 @@ class SkyfieldProvider(IAstroProvider, AstroTimeMixin):
         """Shortest angular distance between two degrees on 0..360 circle."""
         return abs((float(a) - float(b) + 180.0) % 360.0 - 180.0)
 
-    def is_retrograde(self, planet: str, when: datetime) -> bool:
+    def is_retrograde(self, planet: Union[str, Planet], when: datetime) -> bool:
         """
         Determine retrograde by sampling the planet longitude at t and t+1d.
         If the longitude decreased (wrapped-aware), treat as retrograde.
