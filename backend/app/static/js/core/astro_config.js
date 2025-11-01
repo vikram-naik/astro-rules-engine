@@ -13,7 +13,7 @@ export function initAstroConfig() {
   const lonEl = document.getElementById("astroLon");
   const latEl = document.getElementById("astroLat");
   const altEl = document.getElementById("astroAlt");
-  const tzEl  = document.getElementById("astroTz");
+  const tzEl = document.getElementById("astroTz");
   const ayTopEl = document.getElementById("astroAyanamsaTop");
 
   // NEW fields
@@ -22,11 +22,11 @@ export function initAstroConfig() {
   const nodeModeEl = document.getElementById("astroNodeMode");
 
   const locLbl = document.getElementById("astroLocationLabel");
-  const tzLbl  = document.getElementById("astroTzLabel");
+  const tzLbl = document.getElementById("astroTzLabel");
 
-  const saveBtn  = document.getElementById("astroConfigSave");
+  const saveBtn = document.getElementById("astroConfigSave");
   const resetBtn = document.getElementById("astroConfigReset");
-  const autoBtn  = document.getElementById("astroAutoDetect");
+  const autoBtn = document.getElementById("astroAutoDetect");
 
   const modalAyLbl = document.getElementById("astroAyanamsaModalLabel");
 
@@ -52,7 +52,7 @@ export function initAstroConfig() {
       if (lonEl) lonEl.value = (+data.lon).toFixed(4);
       if (latEl) latEl.value = (+data.lat).toFixed(4);
       if (altEl) altEl.value = data.alt ?? 0;
-      if (tzEl)  tzEl.value  = data.tz;
+      if (tzEl) tzEl.value = data.tz;
 
       if (locLbl)
         locLbl.textContent = `${(+data.lon).toFixed(2)} / ${(+data.lat).toFixed(2)}`;
@@ -69,7 +69,7 @@ export function initAstroConfig() {
       lon: safeNum(lonEl?.value, 0),
       lat: safeNum(latEl?.value, 0),
       alt: safeNum(altEl?.value, 0),
-      tz:  tzEl?.value || "UTC",
+      tz: tzEl?.value || "UTC",
       ayanamsa: ayTopEl?.value || "lahiri",
       // NEW fields included in save payload
       provider: providerEl?.value || "skyfield",
@@ -113,7 +113,7 @@ export function initAstroConfig() {
         if (altEl) altEl.value = pos.coords.altitude ?? 0;
         try {
           if (tzEl) tzEl.value = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        } catch (_) {}
+        } catch (_) { }
         toast("Detected location and timezone.", "success");
       },
       (err) => toast("Failed to detect location: " + err.message, "warning"),
@@ -191,14 +191,36 @@ export function initAstroConfig() {
   }
 
   // --- Event wiring ---
-  if (saveBtn)  saveBtn.addEventListener("click", saveAstroConfig);
+  if (saveBtn) saveBtn.addEventListener("click", saveAstroConfig);
   if (resetBtn) resetBtn.addEventListener("click", resetAstroConfig);
-  if (autoBtn)  autoBtn.addEventListener("click", autoDetectLocation);
-  if (ayTopEl)  ayTopEl.addEventListener("change", updateAyanamsa);
+  if (autoBtn) autoBtn.addEventListener("click", autoDetectLocation);
+  if (ayTopEl) ayTopEl.addEventListener("change", updateAyanamsa);
 
   // NEW event listeners for provider / node_mode: update immediately on change (matching your pattern)
   if (providerEl) providerEl.addEventListener("change", updateProvider);
   if (nodeModeEl) nodeModeEl.addEventListener("change", updateNodeMode);
+  
+  const topProviderEl = document.getElementById("astroProviderTop");
+  if (topProviderEl) {
+    topProviderEl.addEventListener("change", async () => {
+      try {
+        const newP = topProviderEl.value;
+        const cur = await fetchJSON("/api/astro/config");
+        const payload = { ...cur, provider: newP };
+        const res = await fetch("/api/astro/config", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) throw new Error("Failed to update provider");
+        toast("Ephemeris provider updated to " + newP, "success");
+        await loadAstroConfig();
+      } catch (err) {
+        toast("Failed to update provider: " + err.message, "danger");
+        console.error("Top provider update failed:", err);
+      }
+    });
+  }
 
   // --- Initial load ---
   loadAstroConfig();

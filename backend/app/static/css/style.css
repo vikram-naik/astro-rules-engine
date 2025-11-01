@@ -496,3 +496,41 @@ label.form-label,
   color: rgba(235, 235, 235, 0.88) !important;
   font-weight: 600 !important;
 }
+
+#sidebarToggle img {
+  filter: brightness(0.95);
+  transition: filter 0.2s ease;
+}
+
+#sidebarToggle:hover img {
+  filter: brightness(1.2);
+}
+
+#sidebarToggle:active img {
+  filter: brightness(0.8);
+}
+
+/* =======================================================
+   Sidebar Toggle Icon Animation (Final Polished)
+   ======================================================= */
+.sidebar-icon {
+  transition: transform 0.35s cubic-bezier(0.4, 0.0, 0.2, 1), filter 0.25s ease;
+  transform-origin: center center;
+  filter: brightness(0.95);
+  will-change: transform;
+}
+
+#sidebarToggle:hover .sidebar-icon {
+  filter: brightness(1.2);
+}
+
+#sidebarToggle:active .sidebar-icon {
+  filter: brightness(0.8);
+}
+
+/* Rotation animation when toggled */
+.sidebar-icon.rotated {
+  transform: rotate(90deg);
+}
+
+

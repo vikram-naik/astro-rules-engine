@@ -10,6 +10,7 @@
 
 import { toast, fetchJSON, showOverlay, escapeHtml } from "../core/utils.js";
 import { safeT } from "../core/i18n.js";
+import { onLocaleChange } from "../core/i18n.js";
 
 let gridApi = null;
 let currentStartDate = null;
@@ -23,7 +24,7 @@ async function loadEphemeris(forceRefresh = false) {
   const overlay = document.getElementById("ephemerisLoadingOverlay");
   showOverlay(overlay, true);
 
-  console.log("🪐 loadEphemeris", { startDate, forceRefresh });
+  console.debug("🪐 loadEphemeris", { startDate, forceRefresh });
 
   try {
     const data = await fetchJSON("/api/ephemeris/matrix", {
@@ -214,17 +215,17 @@ function renderGrid(data) {
       });
       // base height for single-line row; second line when a transition exists
       const h = hasTransition ? 64 : 36;
-      console.log(`🪐 RowHeight | date=${data.date || "?"} | hasTransition=${hasTransition} | height=${h}`);
+      console.debug(`🪐 RowHeight | date=${data.date || "?"} | hasTransition=${hasTransition} | height=${h}`);
       return h;
     },
 
     onGridReady: (params) => {
       gridApi = params.api;
-      console.log("🔧 onGridReady invoked", { rowCount: gridApi.getDisplayedRowCount() });
+      console.debug("🔧 onGridReady invoked", { rowCount: gridApi.getDisplayedRowCount() });
       // small delay to let grid render, then recompute heights and keep columns as-is (no sizeToFit)
       setTimeout(() => {
         try {
-          console.log("🔧 onGridReady → resetRowHeights()");
+          console.debug("🔧 onGridReady → resetRowHeights()");
           gridApi.resetRowHeights();
           gridApi.redrawRows();
         } catch (e) {
@@ -237,7 +238,7 @@ function renderGrid(data) {
       showOverlay(overlay, false);
       requestAnimationFrame(() => {
         try {
-          console.log("🔧 onFirstDataRendered → resetRowHeights + redrawRows()");
+          console.debug("🔧 onFirstDataRendered → resetRowHeights + redrawRows()");
           gridApi.resetRowHeights();
           gridApi.redrawRows();
         } catch (e) {
@@ -261,7 +262,7 @@ function renderGrid(data) {
 
     onGridSizeChanged: () => {
       try {
-        console.log("🔧 onGridSizeChanged → resetRowHeights()");
+        console.debug("🔧 onGridSizeChanged → resetRowHeights()");
         gridApi.resetRowHeights();
       } catch (e) {
         console.warn("⚠️ gridSizeChanged handler failed", e);
@@ -276,7 +277,7 @@ function renderGrid(data) {
     setTimeout(() => {
       try {
         const cols = gridApi.getAllGridColumns().map(c => ({ id: c.getId(), width: c.getActualWidth() }));
-        console.log("🪐 Column widths after init:", cols);
+        console.debug("🪐 Column widths after init:", cols);
       } catch (e) { /* ignore in older ag-grid where API differs */ }
     }, 300);
   } catch (err) {
@@ -340,4 +341,38 @@ export function initEphemeris() {
   });
 
   loadEphemeris(false);
+
+
+
+  onLocaleChange(() => {
+    try {
+      if (!gridApi) return;
+      console.debug("🌐 Locale changed – refreshing grid headers");
+
+      // Update header names and tooltips for current columns
+      const updatedCols = gridApi.getColumnDefs().map(col => {
+        if (col.field === "date") {
+          col.headerName = safeT("ephemeris.columns.date") || "Date";
+        } else {
+          col.headerName = safeT(`ephemeris.columns.${col.field}`) || col.field;
+        }
+        return col;
+      });
+
+      // Apply new localized column definitions
+      gridApi.setGridOption("columnDefs", updatedCols);
+
+      // Redraw all visible cells to refresh text rendered via safeT()
+      gridApi.refreshCells({ force: true });
+      gridApi.refreshHeader();
+      gridApi.redrawRows();
+      updateMeta({}); // re-renders footer legend with new safeT()
+
+      toast(safeT("ephemeris.labels.localeUpdated") || "Grid refreshed for new language", "info");
+    } catch (err) {
+      console.warn("🌐 Locale change refresh failed:", err);
+    }
+  });
+
+
 }

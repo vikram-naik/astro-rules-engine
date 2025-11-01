@@ -45,7 +45,7 @@ function showPaneById(id) {
 
   try {
     localStorage.setItem("wb:lastView", `#${targetId}`);
-  } catch (_) {}
+  } catch (_) { }
 }
 
 /** Initialize sidebar logic */
@@ -61,13 +61,23 @@ function initSidebar() {
   }
 
   // --- Collapse toggle handling ---
+  // --- Collapse toggle handling with rotation animation ---
   toggle.addEventListener("click", () => {
     const collapsed = !sidebar.classList.contains("collapsed");
     applyCollapsed(collapsed);
+
+    // Rotate favicon icon
+    const icon = toggle.querySelector(".sidebar-icon");
+    if (icon) {
+      icon.classList.toggle("rotated", collapsed);
+    }
+
+    // Persist state
     try {
       localStorage.setItem("wb:sidebarCollapsed", collapsed ? "1" : "0");
-    } catch (_) {}
+    } catch (_) { }
   });
+
 
   // --- Nav link handling ---
   navLinks.forEach((a) =>
@@ -88,7 +98,7 @@ function initSidebar() {
   window.wbShowPane = showPaneById;
 
   // --- Optional feedback toast (commented out) ---
-//   toast("Sidebar initialized", "info", { duration: 1000 });
+  //   toast("Sidebar initialized", "info", { duration: 1000 });
 }
 
 /* Export module API */

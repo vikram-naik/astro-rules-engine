@@ -72,11 +72,11 @@ export async function applyLocale(locale) {
  * kept minimal so other modules can call t(...) directly if they want.
  */
 export function t(key) {
-  if (!key || typeof key !== "string") return null;
-  const val = resolveKey(key, currentDict);
-  if (val !== null && val !== undefined) return val;
-  const fb = fallbackDict || {};
-  return resolveKey(key, fb);
+    if (!key || typeof key !== "string") return null;
+    const val = resolveKey(key, currentDict);
+    if (val !== null && val !== undefined) return val;
+    const fb = fallbackDict || {};
+    return resolveKey(key, fb);
 }
 
 /**
@@ -84,12 +84,12 @@ export function t(key) {
  * Returns key itself if translation missing.
  */
 export function safeT(key) {
-  try {
-    const v = t(key);
-    return v ?? key;
-  } catch {
-    return key;
-  }
+    try {
+        const v = t(key);
+        return v ?? key;
+    } catch {
+        return key;
+    }
 }
 
 
@@ -124,6 +124,21 @@ export async function initI18n() {
     console.info(`🌐 i18n initialized: ${locale}`);
 }
 
+/** Notify components (like AG Grid) when locale changes */
+const localeChangeListeners = [];
+
+export function onLocaleChange(callback) {
+    if (typeof callback === "function") localeChangeListeners.push(callback);
+}
+
+/* patch applyLocale to trigger listener callbacks */
+const _applyLocale = applyLocale;
+applyLocale = async function (locale) {
+    await _applyLocale(locale);
+    localeChangeListeners.forEach(fn => {
+        try { fn(locale); } catch (e) { console.warn("i18n localeChange handler failed:", e); }
+    });
+};
 
 /* Backward compatibility globals */
 if (typeof window !== "undefined") {

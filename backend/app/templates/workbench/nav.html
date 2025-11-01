@@ -5,7 +5,11 @@
   <div class="container-fluid align-items-center">
     <div class="d-flex align-items-center">
       <!-- Sidebar toggle button -->
-      <button id="sidebarToggle" class="btn btn-sm btn-outline-light me-3" title="Toggle sidebar">☰</button>
+<!-- Sidebar Toggle -->
+<button id="sidebarToggle" class="btn btn-sm btn-outline-light d-flex align-items-center justify-content-center me-3" title="Toggle sidebar">
+  <img src="/static/images/favicon.ico" alt="Toggle sidebar" class="sidebar-icon" style="width: 18px; height: 18px;">
+</button>
+
       <span data-i18n="nav.brand" class="navbar-brand mb-0 h1">Astro-Market Workbench</span>
     </div>
 
@@ -13,9 +17,10 @@
       <!-- Provider selector -->
       <select id="astroProviderTop" class="form-select form-select-sm me-2" aria-label="Select Ephemeris Provider"
         style="width:auto;">
-        <option value="skyfield">Skyfield</option>
-        <option value="swisseph">Swiss Ephemeris</option>
+        <option value="skyfield" data-i18n="nav.providerOptions.skyfield">Skyfield Ephemeris</option>
+        <option value="swisseph" data-i18n="nav.providerOptions.swisseph">Swiss Ephemeris</option>
       </select>
+
 
 
       <!-- Ayanamsa selector -->

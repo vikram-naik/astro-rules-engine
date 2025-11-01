@@ -46,16 +46,20 @@
             </div>
             <!-- Ephemeris Provider -->
             <div class="mb-2">
-              <label data-i18n="modal.astro.provider" for="astroProvider" class="form-label">Ephemeris Provider</label>
+              <label data-i18n="modal.astro.provider" for="astroProvider" class="form-label small">
+                Ephemeris Provider
+              </label>
               <select id="astroProvider" class="form-select form-select-sm">
-                <option value="skyfield">Skyfield</option>
-                <option value="swisseph">Swiss Ephemeris</option>
+                <option value="skyfield" data-i18n="nav.providerOptions.skyfield">Skyfield Ephemeris</option>
+                <option value="swisseph" data-i18n="nav.providerOptions.swisseph">Swiss Ephemeris</option>
               </select>
             </div>
 
             <!-- Node Mode -->
             <div class="mb-2">
-              <label  data-i18n="modal.astro.nodeMode"  for="astroNodeMode" class="form-label">Node Mode</label>
+              <label data-i18n="modal.astro.nodeMode" for="astroNodeMode" class="form-label small">
+                Node Mode (Mean/True)
+              </label>
               <select id="astroNodeMode" class="form-select form-select-sm">
                 <option value="mean">Mean Node</option>
                 <option value="true">True Node</option>
@@ -64,9 +68,12 @@
 
             <!-- Max Workers -->
             <div class="mb-2">
-              <label data-i18n="modal.astro.maxWorkers" for="astroWorkers" class="form-label">Parallel Workers</label>
+              <label data-i18n="modal.astro.maxWorkers" for="astroWorkers" class="form-label small">
+                Max Workers
+              </label>
               <input type="number" min="1" max="8" id="astroWorkers" class="form-control form-control-sm" value="2" />
             </div>
+
 
           </div>
 

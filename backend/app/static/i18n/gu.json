@@ -10,6 +10,10 @@
       "raman": "રમણ",
       "krishnamurti": "કૃષ્ણમૂર્તિ",
       "tropical": "ટ્રોપિકલ"
+    },
+    "providerOptions": {
+      "skyfield": "સ્કાયફીલ્ડ એપીમેરિસ",
+      "swisseph": "સ્વિસ એપીમેરિસ"
     }
   },
   "tabs": {
@@ -150,7 +154,11 @@
       "save": "ફેરફારો સાચવો",
       "provider": "એપીમેરિસ પ્રદાતા",
       "maxWorkers": "મહત્તમ વર્કર",
-      "nodeMode": "નોડ મોડ (મીન/ટ્રુ)"
+      "nodeMode": "નોડ મોડ (મીન/ટ્રુ)",
+      "providerOptions": {
+        "skyfield": "સ્કાયફીલ્ડ એપીમેરિસ",
+        "swisseph": "સ્વિસ એપીમેરિસ"
+      }
     }
   }
 }
