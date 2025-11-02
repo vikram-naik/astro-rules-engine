@@ -27,6 +27,12 @@ from skyfield.api import wgs84
 
 from app.core.astro.providers._mixin import AstroTimeMixin
 
+try:
+    import swisseph as swe
+    HAS_SW = True
+except Exception:
+    HAS_SW = False
+
 load_dotenv()
 logger = logging.getLogger("astro.skyfield")
 
@@ -149,30 +155,32 @@ class SkyfieldProvider(IAstroProvider, AstroTimeMixin):
         ay = 24.2063 - 0.0000001 * T  # practically constant over 1900–2100
         return float(ay % 360.0)
     
-    # @staticmethod
-    # def _lahiri_ayanamsa_deg_from_jd(jd: float) -> float:
-    #     T = (jd - 2451545.0) / 36525.0
-    #     ay = 24.2063 + 0.000043 * T + 0.0000004 * (T ** 2)
-    #     return float(ay % 360.0)
-
-    # -------------------------------------------------------------------
+    # Lahiri ayanamsa obtained via SwissEphem for exact parity with commercial Jyotish software.
     def _ayanamsa_deg(self, jd: float) -> float:
-        """Return ayanamsa degrees for the configured mode; jd is Julian Day."""
+        """Return ayanamsa degrees (Lahiri etc.) consistent with Swiss Ephem."""
         mode = self.ayanamsa_mode
 
-        # Lahiri base value (approximation based on epoch 285 CE, typical Skyfield computation)
+        if mode == AyanamsaMode.tropical:
+            return 0.0
+
+        if HAS_SW and mode == AyanamsaMode.lahiri:
+            try:
+                swe.set_sid_mode(swe.SIDM_LAHIRI)
+                # Swiss expects JD UT, but difference TT–UT is tiny here
+                res_t, _ = swe.calc_ut(jd, swe.SUN, swe.FLG_SWIEPH)
+                res_s, _ = swe.calc_ut(jd, swe.SUN, swe.FLG_SWIEPH | swe.FLG_SIDEREAL)
+                ay = (float(res_t[0]) - float(res_s[0])) % 360.0
+                return ay
+            except Exception:
+                pass  # fall back below if SwissEphem unavailable
+
+        # fallback to polynomial approximation
         base = self._lahiri_ayanamsa_deg_from_jd(jd)
-
-        # ✅ Match SwissEphem SIDM constants for 2025 epoch
         if mode == AyanamsaMode.krishnamurti:
-            return base - 0.1  # SIDM_KRISHNAMURTI ~ slightly less than Lahiri
-        elif mode == AyanamsaMode.raman:
-            return base - 1.446  # align precisely with SwissEphem SIDM_RAMAN
-        elif mode == AyanamsaMode.tropical:
-            return 0.0  # tropical = no ayanamsa correction
-        else:
-            return base
-
+            return base - 0.1
+        if mode == AyanamsaMode.raman:
+            return base - 1.446
+        return base
 
     # ---------------------
     # Mean lunar node (Meeus-like formula)

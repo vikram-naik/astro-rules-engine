@@ -376,8 +376,10 @@ class EphemerisService:
     ) -> Dict[str, Any]:
         when_l = datetime.combine(d, ref_t).replace(tzinfo=ZoneInfo(tz))
         when_u = when_l.astimezone(ZoneInfo("UTC"))
-        lon = provider.longitude(planet, when_u)
-        sp = estimate_speed(provider, planet, when_u, 1800 if planet == "moon" else 3600)
+        # lon = provider.longitude(planet, when_u)
+        # to fix the moon bug - we are passing the when_l
+        lon = provider.longitude(planet, when_l)
+        sp = estimate_speed(provider, planet, when_l, 1800 if planet == Planet.moon else 3600)
         isr = sp < -1e-6
         iss = abs(sp) < 1e-5
         s_idx, dms, rel = sign_and_dms(lon)

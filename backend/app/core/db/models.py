@@ -100,7 +100,8 @@ class Condition(Base):
     target = Column(String)
     orb = Column(Float)
     value = Column(Float)
-
+    order = Column(Integer, default=0)
+    
     group = relationship("ConditionGroup", back_populates="conditions")
 
 

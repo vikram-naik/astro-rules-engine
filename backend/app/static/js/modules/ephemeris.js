@@ -20,7 +20,17 @@ let currentStartDate = null;
  * ----------------------------- */
 async function loadEphemeris(forceRefresh = false) {
   const startDate = currentStartDate || new Date().toISOString().split("T")[0];
-  const payload = { start_date: startDate, force_refresh: !!forceRefresh };
+
+  // read reference time from UI (defaults to 00:00 if absent)
+  const refInput = document.getElementById("ephemerisReferenceTime");
+  const referenceTime = refInput?.value || "00:00:00";
+
+  const payload = {
+    start_date: startDate,
+    reference_time: referenceTime,
+    force_refresh: !!forceRefresh,
+  };
+
   const overlay = document.getElementById("ephemerisLoadingOverlay");
   showOverlay(overlay, true);
 
@@ -78,8 +88,8 @@ function ephemerisCellRenderer(params) {
   if (v.is_stationary) flags.push("S");
   if (!v.is_retrograde && !v.is_stationary) flags.push("D");
 
-const statusHtml = flags.length
-  ? `<span class="ephem-status">${flags
+  const statusHtml = flags.length
+    ? `<span class="ephem-status">${flags
       .map(f => {
         if (f === "Ex") return `<span data-flag="${f}" title="${safeT("ephemeris.legend.Ex") || "Exalted"}">\u2B06</span>`;
         if (f === "Db") return `<span data-flag="${f}" title="${safeT("ephemeris.legend.Db") || "Debilitated"}">\u2B07</span>`;
@@ -87,7 +97,7 @@ const statusHtml = flags.length
         return `<span data-flag="${f}">[${f}]</span>`;
       })
       .join("")}</span>`
-  : "";
+    : "";
 
   let transitionHtml = "";
   if (v.transition_from && v.transition_to && v.transition_time_local) {
@@ -344,6 +354,11 @@ export function initEphemeris() {
     currentStartDate = e.target.value;
     loadEphemeris(true);
   });
+
+  const refInput = document.getElementById("ephemerisReferenceTime");
+  if (refInput) {
+    refInput.addEventListener("change", () => loadEphemeris(true));
+  }
 
   loadEphemeris(false);
 

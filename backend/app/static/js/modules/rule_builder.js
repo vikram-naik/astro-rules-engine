@@ -136,17 +136,26 @@ export function createBuilder(rootEl, { REF, initialGroups = null } = {}) {
     return groupNode;
   }
 
-  // serialization: DOM group -> JSON group (with order tracking)
-  function serializeGroup(groupNode, groupIndex = 0) {
+  // serialization: DOM group -> JSON group (with true sibling order)
+  function serializeGroup(groupNode) {
     const opSel = groupNode.querySelector(".operator-select");
     const condListEl = groupNode.querySelector(".conditions-list");
     const condEls = Array.from(condListEl.children);
     const subgroupsEl = groupNode.querySelector(".subgroups-list");
     const subgroupEls = Array.from(subgroupsEl.children);
 
+    // determine this group's index within its parent (for proper order)
+    let groupIndex = 0;
+    if (groupNode.parentElement) {
+      const siblings = Array.from(groupNode.parentElement.children).filter(
+        (el) => el.classList.contains("group-card")
+      );
+      groupIndex = siblings.indexOf(groupNode);
+    }
+
     const groupObj = {
       operator: opSel.value || "AND",
-      order: groupIndex, // ✅ assign index-based order
+      order: groupIndex, // ✅ actual position among siblings
       conditions: [],
       subgroups: [],
     };
@@ -169,9 +178,9 @@ export function createBuilder(rootEl, { REF, initialGroups = null } = {}) {
       });
     });
 
-    // extract subgroups recursively with order
-    subgroupEls.forEach((sgEl, idx) => {
-      groupObj.subgroups.push(serializeGroup(sgEl, idx));
+    // recursively add subgroups with computed order
+    subgroupEls.forEach((sgEl) => {
+      groupObj.subgroups.push(serializeGroup(sgEl));
     });
 
     return groupObj;

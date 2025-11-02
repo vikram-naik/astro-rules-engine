@@ -64,7 +64,8 @@ class SwissEphemProvider(IAstroProvider, AstroTimeMixin):
 
         # Configure sidereal/tropical mode
         if self.ayanamsa_mode == AyanamsaMode.tropical:
-            swe.set_sid_mode(swe.SIDM_FAGAN_BRADLEY)  # no sidereal correction
+            # Tropical logic: do not request sidereal corrections
+            # (no need to set sidereal mode here; only set it for sidereal modes)
             self.is_sidereal = False
         elif self.ayanamsa_mode == AyanamsaMode.lahiri:
             swe.set_sid_mode(swe.SIDM_LAHIRI)

@@ -8,39 +8,51 @@ from app.core.db.models import Rule, ConditionGroup, Condition, Outcome, Sector
 router = APIRouter(prefix="/api/rules", tags=["rules"])
 
 
-# --------------------------------------------------------
-# Utility: Recursive creation of groups and conditions
-# --------------------------------------------------------
-def build_condition_group(group_data: dict, rule: Rule, parent_group=None):
-    """Recursively create a ConditionGroup with nested conditions and subgroups."""
+# ---------------------------------------------------------------------
+# Recursive group builder (trust frontend order)
+# ---------------------------------------------------------------------
+def build_condition_group(group_data: dict, rule: Rule, parent_group=None, group_index: int = 0):
+    """
+    Recursively create a ConditionGroup tree (preserving local order).
+    - Uses the frontend-provided 'order' value whenever present.
+    - Falls back to group_index only if 'order' is missing.
+    """
+    grp_order = group_data.get("order", group_index)
+
     group = ConditionGroup(
         rule=rule,
         parent_group=parent_group,
         operator=group_data.get("operator", "AND"),
-        order=group_data.get("order", 0),
+        order=grp_order,
     )
 
-    # Add conditions under this group
-    for cond_data in group_data.get("conditions", []):
+    # Add conditions (trust frontend order)
+    for idx, cond_data in enumerate(group_data.get("conditions", [])):
+        cond_order = cond_data.get("order", idx)
         cond = Condition(
             planet=cond_data.get("planet"),
             relation=cond_data.get("relation"),
             target=cond_data.get("target"),
             orb=cond_data.get("orb"),
             value=cond_data.get("value"),
+            order=cond_order,
         )
         group.conditions.append(cond)
 
-    # Recurse into subgroups
-    for sub_data in group_data.get("subgroups", []):
-        subgroup = build_condition_group(sub_data, rule, parent_group=group)
-        group.subgroups.append(subgroup)
+    # Recursively add subgroups (trust frontend order)
+    for idx, sub_data in enumerate(group_data.get("subgroups", [])):
+        build_condition_group(
+            sub_data, rule, parent_group=group, group_index=idx
+        )
 
     return group
 
 
+# ---------------------------------------------------------------------
+# Serialization helpers
+# ---------------------------------------------------------------------
 def serialize_condition_group(group: ConditionGroup):
-    """Recursively serialize a ConditionGroup tree into JSON."""
+    """Serialize a ConditionGroup tree sorted by 'order' for deterministic output."""
     return {
         "id": group.id,
         "operator": group.operator,
@@ -53,21 +65,24 @@ def serialize_condition_group(group: ConditionGroup):
                 "target": c.target,
                 "orb": c.orb,
                 "value": c.value,
+                "order": getattr(c, "order", 0),
             }
-            for c in group.conditions
+            for c in sorted(group.conditions, key=lambda x: getattr(x, "order", 0))
         ],
-        "subgroups": [serialize_condition_group(sg) for sg in group.subgroups],
+        "subgroups": [
+            serialize_condition_group(sg)
+            for sg in sorted(group.subgroups, key=lambda x: getattr(x, "order", 0))
+        ],
     }
 
 
-# --------------------------------------------------------
+# ---------------------------------------------------------------------
 # CREATE
-# --------------------------------------------------------
+# ---------------------------------------------------------------------
 @router.post("/")
 def create_rule(payload: dict, db: Session = Depends(get_db)):
-    """
-    Create a new rule with nested condition groups and outcomes.
-    """
+    """Create a new rule with nested condition groups and outcomes."""
+    print(f"Payload: {payload} ")
     rule = Rule(
         name=payload.get("name"),
         description=payload.get("description"),
@@ -75,12 +90,10 @@ def create_rule(payload: dict, db: Session = Depends(get_db)):
         enabled=payload.get("enabled", True),
     )
 
-    # --- Condition Groups ---
-    for group_data in payload.get("condition_groups", []):
-        group = build_condition_group(group_data, rule)
+    for idx, group_data in enumerate(payload.get("condition_groups", [])):
+        group = build_condition_group(group_data, rule, group_index=idx)
         rule.condition_groups.append(group)
 
-    # --- Outcomes ---
     for out_data in payload.get("outcomes", []):
         sector_id = out_data.get("sector_id")
         if sector_id:
@@ -96,12 +109,11 @@ def create_rule(payload: dict, db: Session = Depends(get_db)):
     return {"id": rule.id}
 
 
-# --------------------------------------------------------
+# ---------------------------------------------------------------------
 # READ ALL
-# --------------------------------------------------------
+# ---------------------------------------------------------------------
 @router.get("/")
 def list_rules(db: Session = Depends(get_db)):
-    """List all rules with nested condition groups and outcomes."""
     rules = db.execute(select(Rule)).unique().scalars().all()
     return [
         {
@@ -110,7 +122,10 @@ def list_rules(db: Session = Depends(get_db)):
             "description": r.description,
             "confidence": r.confidence,
             "enabled": r.enabled,
-            "condition_groups": [serialize_condition_group(g) for g in r.condition_groups],
+            "condition_groups": [
+                serialize_condition_group(g)
+                for g in sorted(r.condition_groups, key=lambda x: getattr(x, "order", 0))
+            ],
             "outcomes": [
                 {
                     "id": o.id,
@@ -125,9 +140,9 @@ def list_rules(db: Session = Depends(get_db)):
     ]
 
 
-# --------------------------------------------------------
+# ---------------------------------------------------------------------
 # READ ONE
-# --------------------------------------------------------
+# ---------------------------------------------------------------------
 @router.get("/{rule_id:int}")
 def get_rule(rule_id: int, db: Session = Depends(get_db)):
     r = db.scalar(select(Rule).where(Rule.id == rule_id))
@@ -139,7 +154,10 @@ def get_rule(rule_id: int, db: Session = Depends(get_db)):
         "description": r.description,
         "confidence": r.confidence,
         "enabled": r.enabled,
-        "condition_groups": [serialize_condition_group(g) for g in r.condition_groups],
+        "condition_groups": [
+            serialize_condition_group(g)
+            for g in sorted(r.condition_groups, key=lambda x: getattr(x, "order", 0))
+        ],
         "outcomes": [
             {
                 "id": o.id,
@@ -152,28 +170,25 @@ def get_rule(rule_id: int, db: Session = Depends(get_db)):
     }
 
 
-# --------------------------------------------------------
+# ---------------------------------------------------------------------
 # UPDATE
-# --------------------------------------------------------
+# ---------------------------------------------------------------------
 @router.put("/{rule_id:int}")
 def update_rule(rule_id: int, payload: dict, db: Session = Depends(get_db)):
     rule = db.scalar(select(Rule).where(Rule.id == rule_id))
     if not rule:
         raise HTTPException(status_code=404, detail="Rule not found")
 
-    # --- Update top-level fields ---
     for key, value in payload.items():
         if key in {"name", "description", "confidence", "enabled"}:
             setattr(rule, key, value)
 
-    # --- Replace condition groups if provided ---
     if "condition_groups" in payload:
         rule.condition_groups.clear()
-        for group_data in payload["condition_groups"]:
-            group = build_condition_group(group_data, rule)
+        for idx, group_data in enumerate(payload["condition_groups"]):
+            group = build_condition_group(group_data, rule, group_index=idx)
             rule.condition_groups.append(group)
 
-    # --- Replace outcomes if provided ---
     if "outcomes" in payload:
         rule.outcomes.clear()
         for out_data in payload["outcomes"]:
@@ -187,14 +202,16 @@ def update_rule(rule_id: int, payload: dict, db: Session = Depends(get_db)):
 
     db.commit()
     db.refresh(rule)
-
     return {
         "id": rule.id,
         "name": rule.name,
         "description": rule.description,
         "confidence": rule.confidence,
         "enabled": rule.enabled,
-        "condition_groups": [serialize_condition_group(g) for g in rule.condition_groups],
+        "condition_groups": [
+            serialize_condition_group(g)
+            for g in sorted(rule.condition_groups, key=lambda x: getattr(x, "order", 0))
+        ],
         "outcomes": [
             {
                 "id": o.id,
@@ -207,9 +224,9 @@ def update_rule(rule_id: int, payload: dict, db: Session = Depends(get_db)):
     }
 
 
-# --------------------------------------------------------
+# ---------------------------------------------------------------------
 # DELETE
-# --------------------------------------------------------
+# ---------------------------------------------------------------------
 @router.delete("/{rule_id:int}")
 def delete_rule(rule_id: int, db: Session = Depends(get_db)):
     rule = db.scalar(select(Rule).where(Rule.id == rule_id))
