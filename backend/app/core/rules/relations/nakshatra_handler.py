@@ -34,7 +34,7 @@ class NakshatraOwnedHandler(IRelationHandler):
 
     Example:
         # Check if Moon is in a Nakshatra owned by Venus
-        cond = ConditionRead(planet="moon", relation=Relation.in_nakshatra_owned_by, target="venus")
+        cond = Condition(planet="moon", relation=Relation.in_nakshatra_owned_by, target="venus")
         handler.check(provider, cond, datetime(2025, 1, 1), orb_default=2.0)
     """
 

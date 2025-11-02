@@ -15,8 +15,7 @@ import pytest
 from datetime import datetime
 from decimal import Decimal
 from app.core.rules.relations.house_relative_handler import HouseRelativeHandler
-from app.core.db.models import Condition
-
+from app.tests.rules import make_cond as shared_make_cond
 from app.core.db.enums import Relation
 from app.core.astro.providers.stub_provider import StubProvider
 
@@ -27,16 +26,8 @@ from app.core.astro.providers.stub_provider import StubProvider
 
 def make_cond(planet: str, relation: str, target: str, value=None, orb=None):
     """Helper to build a valid Condition object."""
-    rel_enum = Relation.in_house_relative_to
-    return Condition(
-        planet=planet,
-        relation=rel_enum,
-        target=target,
-        value=float(value) if value is not None else None,
-        orb=orb,
-        id=1,
-        rule_id=1,
-    )
+    value = int(value) if value is not None else None
+    return shared_make_cond(planet, Relation[relation], target, value=value, orb=orb)
 
 
 @pytest.fixture

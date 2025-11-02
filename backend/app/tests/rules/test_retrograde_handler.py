@@ -1,10 +1,14 @@
-from app.core.db.enums import Relation
 import pytest
 from datetime import datetime
 from app.core.rules.relations.retrograde_handler import RetrogradeHandler
-from app.core.db.models import Condition
 
 from app.core.astro.providers.stub_provider import StubProvider
+from app.tests.rules import make_cond as shared_make_cond
+
+
+def make_cond(planet):
+    return shared_make_cond(planet, "is_retrograde", target=None)
+
 
 
 @pytest.fixture
@@ -26,17 +30,6 @@ def provider():
 def when():
     return datetime(2025, 1, 1)
 
-
-def make_cond(planet):
-    return Condition(
-        id=1,
-        rule_id=1,
-        planet=planet,
-        relation=Relation.is_retrograde,
-        target=None,
-        orb=None,
-        value=None
-    )
 
 
 def test_retrograde_true(handler, provider, when):

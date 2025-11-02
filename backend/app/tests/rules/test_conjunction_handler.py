@@ -1,9 +1,14 @@
 import pytest
 from datetime import datetime
 from app.core.rules.relations.conjunction_handler import ConjunctionHandler
-from app.core.db.models import Condition
-from app.core.rules.relations.registry import Relation
 from app.core.astro.providers.stub_provider import StubProvider
+from app.tests.rules import make_cond as shared_make_cond
+from app.core.db.enums import Relation
+
+
+def make_cond(planet1, planet2, orb=None):  
+    return shared_make_cond(planet1, Relation.conjunct_with, planet2, orb)
+
 
 @pytest.fixture
 def handler():
@@ -16,17 +21,6 @@ def provider():
 @pytest.fixture
 def when():
     return datetime(2025, 1, 1)
-
-def make_cond(planet, target, orb=None):
-    return Condition(
-        id=1,
-        rule_id=1,
-        planet=planet,
-        relation=Relation.conjunct_with,
-        target=target,
-        orb=orb,
-        value=None,
-    )
 
 def test_exact_conjunction(handler, provider, when):
     """Planets with exactly same longitude should be conjunct."""

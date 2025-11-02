@@ -1,7 +1,7 @@
 /* modules/rules.js
  *
  * Handles Rules table listing, add/edit/delete actions.
- * Clean ES module version.
+ * Fixed to use numeric `id` instead of legacy `rule_id`.
  */
 
 import { toast, fetchJSON, escapeHtml, withSpinner, useTemplate } from "../core/utils.js";
@@ -13,7 +13,7 @@ let reloadBtn;
 async function loadRules() {
   if (!rulesTable) {
     rulesTable = document.getElementById("rulesTableBody");
-    if (!rulesTable) return; // element not found — safe exit
+    if (!rulesTable) return;
   }
 
   try {
@@ -52,8 +52,9 @@ function renderRules(rules = []) {
     const btnEdit = row.querySelector(".btn-edit-rule");
     const btnDel = row.querySelector(".btn-del-rule");
 
-    btnEdit.dataset.id = r.rule_id;
-    btnDel.dataset.id = r.rule_id;
+    // ✅ updated: use `id`
+    btnEdit.dataset.id = r.id;
+    btnDel.dataset.id = r.id;
 
     btnEdit.addEventListener("click", onEditRule);
     btnDel.addEventListener("click", onDeleteRule);
@@ -61,7 +62,6 @@ function renderRules(rules = []) {
     rulesTable.appendChild(row);
   });
 }
-
 
 /* ---------- CRUD handlers ---------- */
 function onEditRule(evt) {

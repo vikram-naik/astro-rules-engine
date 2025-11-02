@@ -35,7 +35,7 @@ class ConjunctionHandler(IRelationHandler):
 
     Example:
         # Venus and Sun are within 5° -> conjunction
-        cond = ConditionRead(planet="venus", target="sun", relation=Relation.conjunct_with, orb=5)
+        cond = Condition(planet="venus", target="sun", relation=Relation.conjunct_with, orb=5)
         handler.check(provider, cond, datetime(2025, 1, 1), orb_default=3.0)
     """
 

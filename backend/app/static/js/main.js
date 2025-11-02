@@ -1,7 +1,7 @@
 /* main.js  (ES module orchestrator)
- * 
+ *
  * Integrates all Workbench modules in deterministic order.
- * Removes legacy global glue.
+ * Adds DOM guards so each module only runs on its own page.
  */
 
 import { initSidebar }      from "./core/sidebar.js";
@@ -20,25 +20,34 @@ document.addEventListener("DOMContentLoaded", async () => {
   try {
     /* -------- Core modules -------- */
     console.time("core:init");
-    initI18n();          // must be first so translations exist before UI render
-    initSidebar();       // UI navigation + pane visibility
+    initI18n();          // translations before UI render
+    initSidebar();       // navigation + pane visibility
     initAstroConfig();   // location, timezone, ayanamsa
     console.timeEnd("core:init");
 
     /* -------- Domain modules -------- */
     console.time("domain:init");
-    initEphemeris();
-    initRules();
-    initSectors();
-    initEvents();
-    initRuleEditor();    // only active on /rule-editor page
-    console.timeEnd("domain:init");
 
+    if (document.querySelector("#ephemerisGrid"))
+      initEphemeris();
+
+    if (document.querySelector("#rulesTable"))
+      initRules();
+
+    if (document.querySelector("#sectorsTable"))
+      initSectors();
+
+    if (document.querySelector("#eventsTable"))
+      initEvents();
+
+    if (document.querySelector("#root-group-target"))
+      initRuleEditor();     // rule editor page only
+
+    console.timeEnd("domain:init");
     console.info("✅ All modules initialized successfully");
   } catch (err) {
     console.error("❌ Workbench initialization failed:", err);
-    import("./core/utils.js").then(({ toast }) =>
-      toast("Workbench initialization failed", "danger")
-    );
+    const { toast } = await import("./core/utils.js");
+    toast("Workbench initialization failed", "danger");
   }
 });

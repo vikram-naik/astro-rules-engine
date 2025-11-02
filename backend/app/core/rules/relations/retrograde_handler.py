@@ -23,7 +23,7 @@ Returns:
     bool → True if retrograde, else False.
 
 Example:
-    cond = ConditionRead(
+    cond = Condition(
         planet="Mars",
         relation=Relation.is_retrograde,
         target=None

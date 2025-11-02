@@ -5,6 +5,12 @@ from app.core.db.models import Condition
 
 from app.core.rules.relations.registry import Relation
 from app.core.astro.providers.stub_provider import StubProvider
+from app.tests.rules import make_cond as shared_make_cond
+
+
+def make_cond(planet, target):
+    return shared_make_cond(planet, Relation.in_nakshatra_owned_by, target)
+
 
 @pytest.fixture
 def handler():
@@ -41,16 +47,6 @@ def provider(monkeypatch):
 def when():
     return datetime(2025, 1, 1)
 
-def make_cond(planet, target):
-    return Condition(
-        id=1,
-        rule_id=1,
-        planet=planet,
-        relation=Relation.in_nakshatra_owned_by,
-        target=target,
-        orb=None,
-        value=None,
-    )
 
 def test_positive_match(handler, provider, when):
     """Planet is in Nakshatra owned by target planet (match expected)."""

@@ -4,8 +4,7 @@ from datetime import datetime
 
 from app.core.rules.relations.axis_handler import AxisHandler
 from app.core.astro.providers.stub_provider import StubProvider
-from app.core.db.models import Condition
-from app.core.db.enums import Relation
+from app.tests.rules import make_cond
 
 
 @pytest.fixture
@@ -13,16 +12,6 @@ def provider():
     return StubProvider()
 
 
-def make_cond(planet, relation, target, orb=None, value=None):
-    return Condition(
-        planet=planet,
-        relation=Relation[relation],
-        target=target,
-        orb=orb,
-        value=value,
-        id=1,
-        rule_id=1,
-    )
 
 
 def test_in_axis_true(provider):

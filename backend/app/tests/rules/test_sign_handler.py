@@ -2,21 +2,16 @@ import pytest
 from datetime import datetime
 from app.core.rules.relations.sign_handler import SignHandler
 from app.core.astro.providers.stub_provider import StubProvider
-from app.core.db.models import Condition
-from app.core.db.enums import Planet, Relation
+from app.tests.rules import make_cond as shared_make_cond
+from app.core.db.enums import Relation
 
+# -------------------------------------------------------------------------
+# Helper utilities
+# -------------------------------------------------------------------------
 
-def make_cond(planet: str, target: str):
-    planet_enum = Planet[planet]
-    return Condition(
-        id=1,
-        rule_id=1,
-        planet=planet_enum,
-        relation=Relation.in_sign,
-        target=target,
-        orb=None,
-        value=None,
-    )
+def make_cond(planet: str, target: str, value=None, orb=None):
+    """Helper to build a valid Condition object."""
+    return shared_make_cond(planet, Relation.in_sign, target, value, orb)
 
 
 @pytest.fixture

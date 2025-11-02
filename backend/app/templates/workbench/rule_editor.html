@@ -1,12 +1,10 @@
-<!-- ============================= -->
-<!-- workbench/rule_editor.html -->
-<!-- ============================= -->
 {% extends "base.html" %}
 {% block body %}
 <div class="container-fluid my-4">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h3 data-i18n="ruleEditor.title" id="ruleEditorTitle">Rule Authoring</h3>
-    <a href="/ui/workbench" data-i18n="ruleEditor.back" class="btn btn-outline-secondary btn-sm">← Back to Workbench</a>
+    <a href="/ui/workbench" data-i18n="ruleEditor.back"
+       class="btn btn-outline-secondary btn-sm">← Back to Workbench</a>
   </div>
 
   <!-- RULE INFO -->
@@ -21,11 +19,10 @@
           <label data-i18n="ruleEditor.info.description" class="form-label small">Description</label>
           <input id="rule_description" class="form-control form-control-sm">
         </div>
-
         <div class="col-md-2">
           <label data-i18n="ruleEditor.info.confidence" class="form-label small">Confidence</label>
-          <input id="rule_confidence" type="number" step="0.05" min="0" max="1" class="form-control form-control-sm"
-            value="0.8">
+          <input id="rule_confidence" type="number" step="0.05" min="0" max="1"
+                 class="form-control form-control-sm" value="0.8">
         </div>
         <div class="col-md-1 d-flex align-items-center justify-content-center">
           <div class="form-check mb-1">
@@ -37,48 +34,52 @@
     </div>
   </div>
 
-  <!-- CONDITIONS -->
+  <!-- CONDITIONS BUILDER -->
   <div class="card bg-secondary bg-opacity-10 border-secondary mb-4">
     <div class="card-header d-flex justify-content-between align-items-center">
       <span data-i18n="ruleEditor.conditions.title">Conditions</span>
-      <button id="btnAddCondition" class="btn btn-sm btn-light" data-i18n="ruleEditor.conditions.add">+ Add
-        Condition</button>
     </div>
-    <div class="card-body" id="conditionsContainer"></div>
-  </div>
-<!-- ============================= -->
-<!-- condition row template for dynamic row addition-->
-<!-- ============================= -->
+    <div class="card-body">
+      <div id="ruleBuilderContainer">
+        <!-- Templates -->
+        <template id="tpl-condition-row">
+          <div class="d-flex gap-2 align-items-center condition-row mb-1">
+            <select class="form-select form-select-sm planet-select" style="width:120px"></select>
+            <select class="form-select form-select-sm relation-select" style="width:180px"></select>
+            <select class="form-select form-select-sm target-select" style="width:140px"></select>
+            <input class="form-control form-control-sm orb-input" type="number" step="0.1"
+                   style="width:80px" placeholder="orb">
+            <input class="form-control form-control-sm value-input" type="number" step="1"
+                   style="width:80px" placeholder="val">
+            <button class="btn btn-sm btn-outline-danger btn-remove-cond">✕</button>
+          </div>
+        </template>
 
-<template id="condition-row-template">
-  <div class="row g-2 align-items-end mb-2 condition-row">
-    <div class="col-md-2">
-      <label class="form-label small" data-i18n="ruleEditor.conditions.planet">Planet</label>
-      <select class="form-select form-select-sm planet-select"></select>
-    </div>
-    <div class="col-md-3">
-      <label class="form-label small" data-i18n="ruleEditor.conditions.relation">Relation</label>
-      <select class="form-select form-select-sm relation-select"></select>
-    </div>
-    <div class="col-md-3">
-      <label class="form-label small" data-i18n="ruleEditor.conditions.target">Target</label>
-      <select class="form-select form-select-sm target-select"></select>
-    </div>
-    <div class="col-md-2">
-      <label class="form-label small" data-i18n="ruleEditor.conditions.value">Value</label>
-      <input type="number" step="0.1" class="form-control form-control-sm value-input" />
-    </div>
-    <div class="col-md-1">
-      <label class="form-label small" data-i18n="ruleEditor.conditions.orb">Orb</label>
-      <input type="number" step="0.1" class="form-control form-control-sm orb-input" />
-    </div>
-    <div class="col-md-1 text-center">
-      <label class="form-label small">&nbsp;</label>
-      <button class="btn btn-sm btn-outline-danger btn-remove" title="Remove">×</button>
+        <template id="tpl-group-card">
+          <div class="card group-card bg-secondary bg-opacity-10 mb-2" style="margin-left:0;">
+            <div class="card-body p-2">
+              <div class="d-flex align-items-center mb-2">
+                <label class="me-2 small">Operator</label>
+                <select class="form-select form-select-sm operator-select" style="width:100px">
+                  <option value="AND">AND</option>
+                  <option value="OR">OR</option>
+                </select>
+                <div class="ms-auto">
+                  <button class="btn btn-sm btn-outline-primary btn-add-cond me-1">+ Cond</button>
+                  <button class="btn btn-sm btn-outline-secondary btn-add-group me-1">+ Group</button>
+                  <button class="btn btn-sm btn-outline-danger btn-remove-group">Remove</button>
+                </div>
+              </div>
+              <div class="conditions-list"></div>
+              <div class="subgroups-list mt-2"></div>
+            </div>
+          </div>
+        </template>
+
+        <div id="root-group-target"></div>
+      </div>
     </div>
   </div>
-</template>
-
 
   <!-- OUTCOMES -->
   <div class="card bg-secondary bg-opacity-10 border-secondary mb-4">
@@ -107,5 +108,6 @@
 {% endblock %}
 
 {% block scripts %}
+<!-- 🪐 Main module entry -->
 <script type="module" src="/static/js/main.js"></script>
 {% endblock %}

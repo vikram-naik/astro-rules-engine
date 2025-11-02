@@ -111,6 +111,7 @@ class HouseRelativeHandler(IRelationHandler):
         try:
             planet_lon = provider.longitude(cond.planet.lower(), when)
             ref_lon = provider.longitude(cond.target.lower(), when)
+            logger.info(f"value = {cond.value}")
             target_house = int(cond.value)
 
             ref_dec = self._to_decimal_angle(ref_lon)

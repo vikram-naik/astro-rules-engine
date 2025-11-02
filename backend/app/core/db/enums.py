@@ -58,7 +58,7 @@ class Relation(Enum):
     sesquiquadrate_with = RelationData("Sesquiquadrate (135°)")
 
     # Special conditions
-    combust_by_sun = RelationData("Combust by Sun", target_source="planets", has_orb=True)
+    combust_by_sun = RelationData("Combust by Sun", requires_target=False, target_source="none", has_orb=True)
     is_retrograde = RelationData(
         "Is Retrograde",
         target_source="none",

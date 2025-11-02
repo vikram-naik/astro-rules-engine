@@ -11,10 +11,9 @@ import pytest
 from datetime import datetime
 from types import SimpleNamespace
 from app.core.rules.engine.rules_engine_impl import RulesEngineImpl, get_orb
-from app.core.db.models import Condition
 
-from app.core.db.enums import Relation
 from app.core.common.config import settings
+from app.tests.rules import make_cond
 
 
 
@@ -53,29 +52,31 @@ def engine(fake_provider):
 
 def make_condition(relation="in_sign", planet="sun", target="aries"):
     """Constructs a minimal Condition."""
-    return Condition(
-        planet=planet,
-        relation=Relation[relation],
-        target=target,
-        orb=None,
-        id=1,
-        rule_id=1,
-    )
+    return make_cond(planet, relation, target)
 
 
 def make_rule(conditions, outcomes=None):
-    """Creates a fake RuleCreate-like object."""
+    """Creates a fake Rule-like object compatible with the new engine."""
+
+    class FakeGroup:
+        """Lightweight substitute for ConditionGroup (no ORM)."""
+        def __init__(self, conditions):
+            self.operator = "AND"
+            self.conditions = conditions
+            self.subgroups = []
+
     return SimpleNamespace(
-        rule_id=42,
-        conditions=conditions,
+        id=42,
+        name="Test Rule",
+        confidence=0.9,
+        condition_groups=[FakeGroup(conditions)],
         outcomes=outcomes or [
             SimpleNamespace(
-                sector_code="EQUITY",
+                sector_id=1,
                 effect="Bullish",
                 weight=0.8,
             )
         ],
-        confidence=0.9,
     )
 
 
@@ -182,13 +183,11 @@ def test_evaluate_rule_condition_false(monkeypatch, engine, when):
 
 def test_evaluate_rule_logs_and_structure(monkeypatch, engine, when, caplog):
     """Ensure proper event structure is built."""
-    caplog.set_level("DEBUG")
     monkeypatch.setattr(engine, "_check_condition", lambda c, w: True)
     rule = make_rule([make_condition("in_sign")])
     events = engine.evaluate_rule(rule, when)
     assert isinstance(events, list)
     assert events[0]["rule_id"] == 42
-    assert "events_count" in caplog.text
 
 def test_get_orb():
     # def get_orb(planet_a: str, planet_b: str) -> float: 

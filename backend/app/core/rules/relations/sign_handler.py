@@ -25,7 +25,7 @@ Failure Safety:
         - Longitude invalid or out of range.
 
 Example:
-    cond = ConditionRead(
+    cond = Condition(
         planet="Sun",
         relation=Relation.in_sign,
         target="Leo"
@@ -36,8 +36,8 @@ Example:
 from datetime import datetime
 from typing import Optional
 
-from app.core.common.schemas import ConditionRead
 from app.core.db.enums import Sign
+from app.core.db.models import Condition
 from app.core.rules.relations.i_relation import IRelationHandler
 from app.core.astro.interfaces.i_astro_provider import IAstroProvider
 
@@ -82,7 +82,7 @@ class SignHandler(IRelationHandler):
     def check(
         self,
         provider: IAstroProvider,
-        condition: ConditionRead,
+        condition: Condition,
         when: datetime,
         orb_default: float,
     ) -> bool:

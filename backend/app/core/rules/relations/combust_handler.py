@@ -60,7 +60,7 @@ class CombustHandler(IRelationHandler):
     ## ✅ Example
     ```python
     # Rule: "Mars is combust by the Sun"
-    cond = ConditionRead(planet="Mars", relation=Relation.combust_by_sun)
+    cond = Condition(planet="Mars", relation=Relation.combust_by_sun)
     CombustHandler().check(provider, cond, datetime.utcnow(), orb_default=8.0)
     Returns True if Mars is within 8° of the Sun.
     """
