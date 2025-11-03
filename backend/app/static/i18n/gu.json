@@ -2,6 +2,65 @@
   "_meta": {
     "dir": "ltr"
   },
+  "planet": {
+    "sun": "સૂર્ય",
+    "moon": "ચંદ્ર",
+    "mars": "મંગળ",
+    "mercury": "બુધ",
+    "jupiter": "ગુરૂ",
+    "venus": "શુક્ર",
+    "saturn": "શનિ",
+    "rahu": "રાહુ",
+    "ketu": "કેતુ",
+    "uranus": "યુરેનસ",
+    "neptune": "નેપ્ચ્યુન",
+    "pluto": "પ્લુટો"
+  },
+  "sign": {
+    "aries": "મેષ",
+    "taurus": "વૃષભ",
+    "gemini": "મિથુન",
+    "cancer": "કર્ક",
+    "leo": "સિંહ",
+    "virgo": "કન્યા",
+    "libra": "તુલા",
+    "scorpio": "વૃશ્ચિક",
+    "sagittarius": "ધનુ",
+    "capricorn": "મકર",
+    "aquarius": "કુંભ",
+    "pisces": "મીન"
+  },
+  "relation": {
+    "in_nakshatra_owned_by": "નક્ષત્રમાં (માલિક દ્વારા)",
+    "conjunct_with": "યુતિમાં",
+    "in_axis": "અક્ષ પર",
+    "aspect_with": "દૃષ્ટિ ધરાવે છે",
+    "in_sign": "રાશિમાં",
+    "in_house_relative_to": "સંબંધિત ભાવે",
+    "opposition_with": "વિરોધ (180°)",
+    "trine_with": "ત્રિકોણ (120°)",
+    "square_with": "ચોરસ (90°)",
+    "sextile_with": "સહયોગી (60°)",
+    "quincunx_with": "ક્વિન્કન્ક્સ / ઇન્કનજંક્ટ (150°)",
+    "semisextile_with": "અર્ધ સહયોગી (30°)",
+    "semisquare_with": "અર્ધ ચોરસ (45°)",
+    "quintile_with": "ક્વિનટાઇલ (72°)",
+    "sesquiquadrate_with": "સેસ્કીક્વાડ્રેટ (135°)",
+    "combust_by_sun": "સૂર્યથી દગ્ધ",
+    "is_retrograde": "વક્ર ગતિમાં",
+    "melifics_in_kendra": "પાપગ્રહો કેન્દ્રમાં"
+  },
+  "outcomeeffect": {
+    "Bullish": "ઉત્સાહી",
+    "Bearish": "નકારાત્મક",
+    "Neutral": "તટસ્થ"
+  },
+  "ayanamsamode": {
+    "lahiri": "લાહિરી",
+    "raman": "રમણ",
+    "krishnamurti": "કૃષ્ણમૂર્તિ",
+    "tropical": "ટ્રોપિકલ"
+  },
   "nav": {
     "brand": "એસ્ટ્રો-માર્કેટ વર્કબેન્ચ",
     "astroConfig": "એસ્ટ્રો રૂપરેખાંકન",
@@ -71,7 +130,7 @@
   },
   "ephemeris": {
     "title": "ગ્રહસૂચિ",
-     "timeTooltip": "મૂળભૂત સમય સિસ્ટમ દ્વારા સેટ છે; તેમાં ફેરફાર કરવાથી ફક્ત આ મેટ્રિક્સ દૃશ્ય અપડેટ થશે.",
+    "timeTooltip": "મૂળભૂત સમય સિસ્ટમ દ્વારા સેટ છે; તેમાં ફેરફાર કરવાથી ફક્ત આ મેટ્રિક્સ દૃશ્ય અપડેટ થશે.",
     "columns": {
       "date": "તારીખ",
       "sun": "સૂર્ય",
@@ -136,13 +195,15 @@
       "relation": "સંબંધ",
       "value": "મૂલ્ય",
       "target": "લક્ષ્ય",
-      "orb": "અંશ છૂટછાટ"
+      "orb": "અંશ છૂટછાટ",
+      "operator": "ઓપરેટર"
     },
     "outcome": {
       "title": "પરિણામ",
       "sector": "સેક્ટર",
       "effect": "અસર",
-      "weight": "વજન"
+      "weight": "વજન",
+      "selectEffect": "-- અસર --"
     },
     "save": "નિયમ સાચવો"
   },
@@ -169,5 +230,14 @@
         "swisseph": "સ્વિસ એપીમેરિસ"
       }
     }
+  },
+  "operators": {
+    "and": "અને",
+    "or": "અથવા"
+  },
+  "buttons": {
+    "addCondition": "+ શરત",
+    "addGroup": "+ જૂથ",
+    "removeGroup": "દૂર કરો"
   }
 }

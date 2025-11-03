@@ -1,6 +1,8 @@
 // static/js/modules/rule_builder.js
 // Vanilla nested group builder for rule_editor
 // Maintains deterministic "order" fields for both groups and conditions.
+import { t, translateNewContent } from "../core/i18n.js";
+
 
 export function createBuilder(rootEl, { REF, initialGroups = null } = {}) {
   if (!rootEl) throw new Error("root element required");
@@ -24,16 +26,22 @@ export function createBuilder(rootEl, { REF, initialGroups = null } = {}) {
 
     // populate planets
     planetSel.innerHTML =
-      `<option value="">-- Planet --</option>` +
+      `<option value="">${t("ruleEditor.conditions.planet") || "-- Planet --"}</option>` +
       (REF.planets || [])
-        .map((p) => `<option value="${p.key}">${p.label}</option>`)
+        .map((p) => {
+          const lbl = t(p.i18n) || p.label;
+          return `<option value="${p.key}" data-i18n="${p.i18n}">${lbl}</option>`;
+        })
         .join("");
 
     // populate relations
     relationSel.innerHTML =
-      `<option value="">-- Relation --</option>` +
+      `<option value="">${t("ruleEditor.conditions.relation") || "-- Relation --"}</option>` +
       (REF.relations || [])
-        .map((r) => `<option value="${r.key}">${r.label}</option>`)
+        .map((r) => {
+          const lbl = t(r.i18n) || r.label;
+          return `<option value="${r.key}" data-i18n="${r.i18n}">${lbl}</option>`;
+        })
         .join("");
 
     // handler: when relation changes, adjust target/orb/value visibility & options
@@ -51,12 +59,14 @@ export function createBuilder(rootEl, { REF, initialGroups = null } = {}) {
 
       // Target source
       if (relMeta.requires_target && relMeta.target_source !== "none") {
-        const src =
-          relMeta.target_source === "signs" ? REF.signs : REF.planets;
+        const src = relMeta.target_source === "signs" ? REF.signs : REF.planets;
         targetSel.innerHTML =
-          `<option value="">-- Target --</option>` +
+          `<option value="">${t("ruleEditor.conditions.target") || "-- Target --"}</option>` +
           (src || [])
-            .map((t) => `<option value="${t.key}">${t.label}</option>`)
+            .map((tgt) => {
+              const lbl = t(tgt.i18n) || tgt.label;
+              return `<option value="${tgt.key}" data-i18n="${tgt.i18n}">${lbl}</option>`;
+            })
             .join("");
         targetSel.style.display = "";
       }
@@ -99,6 +109,8 @@ export function createBuilder(rootEl, { REF, initialGroups = null } = {}) {
     addCondBtn.addEventListener("click", () => {
       const condRow = createConditionRow({});
       condList.appendChild(condRow);
+      // 🔄 Translate newly added condition row (buttons, dropdowns, labels)
+      translateNewContent(condRow);
     });
 
     // wire add subgroup
@@ -106,6 +118,8 @@ export function createBuilder(rootEl, { REF, initialGroups = null } = {}) {
       const subCard = createGroupCard(groupNode, null);
       subCard.style.marginLeft = "20px";
       subgroupsList.appendChild(subCard);
+      // 🔄 Translate new group card (buttons, operator labels, etc.)
+      translateNewContent(subCard);
     });
 
     // remove group (if not root)

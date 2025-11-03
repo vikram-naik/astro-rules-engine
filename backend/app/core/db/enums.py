@@ -102,3 +102,39 @@ class AyanamsaMode(str, Enum):
     raman = "raman"
     krishnamurti = "krishnamurti"
     tropical = "tropical"
+
+
+# ---------------------------------------------------------------------
+# 🔤 i18n support helpers
+# ---------------------------------------------------------------------
+
+def enum_to_ref(enum_cls):
+    """
+    Convert an Enum class to a list of dicts usable by the frontend REF loader.
+    Each item includes a stable i18n translation key.
+    """
+    items = []
+    for e in enum_cls:
+        # Each enum entry may hold a RelationData or a simple str
+        label = getattr(e.value, "label", str(e.value))
+        items.append({
+            "key": e.name,
+            "label": label,
+            "i18n": f"{enum_cls.__name__.lower()}.{e.name}"
+        })
+    return items
+
+
+# Example (used in routes_reference_api.py or wherever REF is built):
+#
+# from app.core.db.enums import enum_to_ref, Planet, Relation, Sign
+#
+# REF = {
+#     "planets": enum_to_ref(Planet),
+#     "relations": enum_to_ref(Relation),
+#     "signs": enum_to_ref(Sign),
+#     ...
+# }
+#
+# Each dict now looks like:
+#   {"key": "sun", "label": "Sun", "i18n": "planet.sun"}

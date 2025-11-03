@@ -2,6 +2,65 @@
   "_meta": {
     "dir": "ltr"
   },
+  "planet": {
+    "sun": "Sun",
+    "moon": "Moon",
+    "mars": "Mars",
+    "mercury": "Mercury",
+    "jupiter": "Jupiter",
+    "venus": "Venus",
+    "saturn": "Saturn",
+    "rahu": "Rahu",
+    "ketu": "Ketu",
+    "uranus": "Uranus",
+    "neptune": "Neptune",
+    "pluto": "Pluto"
+  },
+  "sign": {
+    "aries": "Aries",
+    "taurus": "Taurus",
+    "gemini": "Gemini",
+    "cancer": "Cancer",
+    "leo": "Leo",
+    "virgo": "Virgo",
+    "libra": "Libra",
+    "scorpio": "Scorpio",
+    "sagittarius": "Sagittarius",
+    "capricorn": "Capricorn",
+    "aquarius": "Aquarius",
+    "pisces": "Pisces"
+  },
+  "relation": {
+    "in_nakshatra_owned_by": "In Nakshatra Owned By",
+    "conjunct_with": "Conjunct With",
+    "in_axis": "In Axis",
+    "aspect_with": "Aspect With",
+    "in_sign": "In Sign",
+    "in_house_relative_to": "In House Relative To",
+    "opposition_with": "Opposition (180°)",
+    "trine_with": "Trine (120°)",
+    "square_with": "Square (90°)",
+    "sextile_with": "Sextile (60°)",
+    "quincunx_with": "Quincunx / Inconjunct (150°)",
+    "semisextile_with": "Semisextile (30°)",
+    "semisquare_with": "Semisquare (45°)",
+    "quintile_with": "Quintile (72°)",
+    "sesquiquadrate_with": "Sesquiquadrate (135°)",
+    "combust_by_sun": "Combust by Sun",
+    "is_retrograde": "Is Retrograde",
+    "melifics_in_kendra": "Malefics in Kendra"
+  },
+  "outcomeeffect": {
+    "Bullish": "Bullish",
+    "Bearish": "Bearish",
+    "Neutral": "Neutral"
+  },
+  "ayanamsamode": {
+    "lahiri": "Lahiri",
+    "raman": "Raman",
+    "krishnamurti": "Krishnamurti",
+    "tropical": "Tropical"
+  },
   "nav": {
     "brand": "Astro-Market Workbench",
     "astroConfig": "Astro Configuration",
@@ -137,13 +196,15 @@
       "relation": "Relation",
       "value": "Value",
       "target": "Target",
-      "orb": "Orb"
+      "orb": "Orb",
+      "operator": "Operator"
     },
     "outcome": {
       "title": "Outcome",
       "sector": "Sector",
       "effect": "Effect",
-      "weight": "Weight"
+      "weight": "Weight",
+      "selectEffect": "-- Select Effect --"
     },
     "save": "Save Rule"
   },
@@ -170,5 +231,14 @@
         "swisseph": "Swiss Ephemeris"
       }
     }
+  },
+  "operators": {
+    "and": "AND",
+    "or": "OR"
+  },
+  "buttons": {
+    "addCondition": "+ Cond",
+    "addGroup": "+ Group",
+    "removeGroup": "Remove"
   }
 }

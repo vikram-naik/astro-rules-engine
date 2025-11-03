@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.core.db.enums import Planet, Relation, OutcomeEffect, Sign
+from app.core.db.enums import Planet, Relation, OutcomeEffect, Sign, enum_to_ref
 
 router = APIRouter(prefix="/api/reference", tags=["reference"])
 
@@ -7,8 +7,8 @@ router = APIRouter(prefix="/api/reference", tags=["reference"])
 def get_reference_data():
     """Returns all reference data for rule editor UI."""
     return {
-        "planets": [{"key": p.name, "label": p.value} for p in Planet],
-        "signs": [{"key": s.name, "label": s.value} for s in Sign],
+        "planets": enum_to_ref(Planet),
+        "signs": enum_to_ref(Sign),
         "relations": [
             {
                 "key": r.name,
@@ -18,13 +18,14 @@ def get_reference_data():
                 "has_value": r.value.has_value,
                 "requires_target": r.value.requires_target,
                 "requires_planet": r.value.requires_planet,
+                "i18n": f"relation.{r.name}"
             }
             for r in Relation
         ],
-        "effects": [{"key": e.name, "label": e.value} for e in OutcomeEffect]
+        "effects": enum_to_ref(OutcomeEffect),
     }
 
 @router.get("/signs")
 def get_signs():
     """Returns all zodiac signs for dropdown population."""
-    return [{"key": s.name, "label": s.value} for s in Sign]
+    return enum_to_ref(Sign)

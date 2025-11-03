@@ -3,8 +3,7 @@
 <div class="container-fluid my-4">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h3 data-i18n="ruleEditor.title" id="ruleEditorTitle">Rule Authoring</h3>
-    <a href="/ui/workbench" data-i18n="ruleEditor.back"
-       class="btn btn-outline-secondary btn-sm">← Back to Workbench</a>
+    <a href="/ui/workbench" data-i18n="ruleEditor.back" class="btn btn-outline-secondary btn-sm">← Back to Workbench</a>
   </div>
 
   <!-- RULE INFO -->
@@ -21,8 +20,8 @@
         </div>
         <div class="col-md-2">
           <label data-i18n="ruleEditor.info.confidence" class="form-label small">Confidence</label>
-          <input id="rule_confidence" type="number" step="0.05" min="0" max="1"
-                 class="form-control form-control-sm" value="0.8">
+          <input id="rule_confidence" type="number" step="0.05" min="0" max="1" class="form-control form-control-sm"
+            value="0.8">
         </div>
         <div class="col-md-1 d-flex align-items-center justify-content-center">
           <div class="form-check mb-1">
@@ -47,10 +46,10 @@
             <select class="form-select form-select-sm planet-select" style="width:120px"></select>
             <select class="form-select form-select-sm relation-select" style="width:180px"></select>
             <select class="form-select form-select-sm target-select" style="width:140px"></select>
-            <input class="form-control form-control-sm orb-input" type="number" step="0.1"
-                   style="width:80px" placeholder="orb">
-            <input class="form-control form-control-sm value-input" type="number" step="1"
-                   style="width:80px" placeholder="val">
+            <input class="form-control form-control-sm orb-input" type="number" step="0.1" style="width:80px"
+              placeholder="orb">
+            <input class="form-control form-control-sm value-input" type="number" step="1" style="width:80px"
+              placeholder="val">
             <button class="btn btn-sm btn-outline-danger btn-remove-cond">✕</button>
           </div>
         </template>
@@ -59,15 +58,20 @@
           <div class="card group-card bg-secondary bg-opacity-10 mb-2" style="margin-left:0;">
             <div class="card-body p-2">
               <div class="d-flex align-items-center mb-2">
-                <label class="me-2 small">Operator</label>
+                <!-- Operator label: more contrast + i18n -->
+                <label data-i18n="ruleEditor.conditions.operator"
+                  class="me-2 form-label small text-body">Operator</label>
                 <select class="form-select form-select-sm operator-select" style="width:100px">
-                  <option value="AND">AND</option>
-                  <option value="OR">OR</option>
+                  <option value="AND" data-i18n="operators.and">AND</option>
+                  <option value="OR" data-i18n="operators.or">OR</option>
                 </select>
                 <div class="ms-auto">
-                  <button class="btn btn-sm btn-outline-primary btn-add-cond me-1">+ Cond</button>
-                  <button class="btn btn-sm btn-outline-secondary btn-add-group me-1">+ Group</button>
-                  <button class="btn btn-sm btn-outline-danger btn-remove-group">Remove</button>
+                  <button class="btn btn-sm btn-outline-primary btn-add-cond me-1" data-i18n="buttons.addCondition">+
+                    Cond</button>
+                  <button class="btn btn-sm btn-outline-secondary btn-add-group me-1" data-i18n="buttons.addGroup">+
+                    Group</button>
+                  <button class="btn btn-sm btn-outline-danger btn-remove-group"
+                    data-i18n="buttons.removeGroup">Remove</button>
                 </div>
               </div>
               <div class="conditions-list"></div>

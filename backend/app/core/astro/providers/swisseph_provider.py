@@ -60,7 +60,7 @@ class SwissEphemPlanetMapper(IPlanetMapper):
 class SwissEphemProvider(IAstroProvider, AstroTimeMixin):
     def __init__(self, ayanamsa_mode: AyanamsaMode = AyanamsaMode.lahiri):
         self.ayanamsa_mode = ayanamsa_mode
-        self.planet_mappper = SwissEphemPlanetMapper()
+        self.planet_mapper = SwissEphemPlanetMapper()
 
         # Configure sidereal/tropical mode
         if self.ayanamsa_mode == AyanamsaMode.tropical:
@@ -111,6 +111,7 @@ class SwissEphemProvider(IAstroProvider, AstroTimeMixin):
     # -------------------------------------------------------
 
     def _normalize_when(self, when):
+        # _normalize_when_utc() already converts local → UTC using self.tz
         return self._normalize_when_utc(when)
     
     # -------------------------------------------------------
@@ -139,7 +140,7 @@ class SwissEphemProvider(IAstroProvider, AstroTimeMixin):
                 planet_enum = Planet.__members__[key]
             else:
                 raise NotImplementedError(f"Unsupported planet name: {planet}")
-        planet_id = self.planet_mappper.resolve(planet_enum)
+        planet_id = self.planet_mapper.resolve(planet_enum)
 
         # --- 3. Flags & Calculation ---
         flags = swe.FLG_SWIEPH
@@ -185,7 +186,7 @@ class SwissEphemProvider(IAstroProvider, AstroTimeMixin):
                 planet = planet.name 
             key = (planet or "").lower()
             logger.debug(f"is_retrograde: planet={key} when={when}")
-            body_code = self.planet_mappper.resolve(Planet[key.lower()])
+            body_code = self.planet_mapper.resolve(Planet[key.lower()])
             if body_code is None:
                 return False
 

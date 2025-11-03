@@ -4,7 +4,7 @@
 
 import { toast, fetchJSON, escapeHtml } from "../core/utils.js";
 import { loadSectors, loadReference } from "../core/ref_data.js";
-import { translateNewContent } from "../core/i18n.js";
+import { t, translateNewContent } from "../core/i18n.js";
 import { createBuilder } from "./rule_builder.js";
 
 export async function initRuleEditor() {
@@ -36,9 +36,12 @@ export async function initRuleEditor() {
 
     if (effectSel && REF.effects?.length) {
       effectSel.innerHTML =
-        '<option value="">-- Select Effect --</option>' +
+        `<option value="">${t("ruleEditor.outcome.selectEffect") || "-- Select Effect --"}</option>` +
         REF.effects
-          .map((e) => `<option value="${e.key}">${escapeHtml(e.label)}</option>`)
+          .map((e) => {
+            const lbl = t(e.i18n) || e.label;
+            return `<option value="${e.key}" data-i18n="${e.i18n}">${escapeHtml(lbl)}</option>`;
+          })
           .join("");
     }
 

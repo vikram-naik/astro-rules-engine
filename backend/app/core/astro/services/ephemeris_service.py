@@ -393,7 +393,7 @@ class EphemerisService:
         s_idx, dms, rel = sign_and_dms(lon)
         combust = False
         if planet in COMBUSTION_ORBS:
-            sun_lon = provider.longitude(Planet.sun, when_u)
+            sun_lon = provider.longitude(Planet.sun, when_l)
             ang = abs(normalize_angle(lon - sun_lon))
             ang = ang if ang <= 180 else 360 - ang
             combust = ang <= COMBUSTION_ORBS[planet]
