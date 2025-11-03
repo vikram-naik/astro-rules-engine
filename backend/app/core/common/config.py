@@ -58,6 +58,7 @@ class Settings(BaseSettings):
 
     model_config = ConfigDict(env_file=".env", env_file_encoding="utf-8", extra="allow")
 
+
     # --- Validators ---
     @field_validator("astro_combust_orbs", mode="before")
     def _parse_astro_combust_orbs(cls, v: Any) -> Dict[str, float]:
@@ -120,6 +121,9 @@ class Settings(BaseSettings):
 # --- Singleton instance and loader ---
 settings = Settings()
 
+# --- Astro default reference time ---
+DEFAULT_REFERENCE_TIME = getattr(settings, "ASTRO_DEFAULT_REFERENCE_TIME", "00:00:00")
+
 # Handle external orb JSON if defined
 if settings.orb_overrides_file:
     orb_path = Path(settings.orb_overrides_file).expanduser()
@@ -138,3 +142,4 @@ if settings.orb_overrides_file:
 # Fallback to defaults if nothing provided
 if not settings.orb_overrides:
     settings.orb_overrides = DEFAULT_ORB_OVERRIDES
+

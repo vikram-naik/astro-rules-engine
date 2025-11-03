@@ -6,6 +6,7 @@ from app.core.db.db import get_db
 from app.core.db.astro_config import AstroConfig
 from app.core.astro.factories.provider_factory import get_provider
 from app.core.common.config import settings
+from datetime import time as TimeType
 
 router = APIRouter(prefix="/api/astro", tags=["astro"])
 
@@ -47,7 +48,13 @@ def get_config(db: Session = Depends(get_db)):
         "ephemeris_provider": row.ephemeris_provider,
         "ephemeris_node_mode": row.ephemeris_node_mode,
         "ephemeris_max_workers": row.ephemeris_max_workers,
+        "default_reference_time": (
+            row.default_reference_time.strftime("%H:%M:%S")
+            if row.default_reference_time
+            else "00:00:00"
+        ),
     }
+
 
 
 @router.post("/config")
@@ -73,8 +80,13 @@ def update_config(payload: dict = Body(...), db: Session = Depends(get_db)):
         try:
             row.ephemeris_max_workers = int(payload["ephemeris_max_workers"])
         except ValueError:
+                pass
+    if "default_reference_time" in payload:
+        try:
+            h, m, s = (payload["default_reference_time"] or "00:00:00").split(":")
+            row.default_reference_time = TimeType(int(h), int(m), int(s))
+        except Exception:
             pass
-
     db.add(row)
     db.commit()
 
@@ -106,6 +118,7 @@ def reset_config(db: Session = Depends(get_db)):
     row.ephemeris_provider = "skyfield"
     row.ephemeris_node_mode = "mean"
     row.ephemeris_max_workers = 2
+    row.default_reference_time = TimeType(0, 0, 0)
 
     db.add(row)
     db.commit()

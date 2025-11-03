@@ -72,6 +72,7 @@
   },
   "ephemeris": {
     "title": "Ephemeris Matrix",
+    "timeTooltip": "Default time is system-configured; changing it updates this matrix view only.",
     "columns": {
       "date": "Date",
       "sun": "Sun",
@@ -162,6 +163,8 @@
       "provider": "Ephemeris Provider",
       "maxWorkers": "Max Workers",
       "nodeMode": "Node Mode (Mean/True)",
+      "defaultRefTime": "Default Reference Time (HH:MM:SS)",
+      "defaultRefTimeHint": "This time is used as the default reference for ephemeris calculations.",
       "providerOptions": {
         "skyfield": "Skyfield Ephemeris",
         "swisseph": "Swiss Ephemeris"

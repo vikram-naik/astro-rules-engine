@@ -47,12 +47,23 @@ function translateDom(dict, fb) {
     if (dict._meta?.dir) document.documentElement.dir = dict._meta.dir;
 }
 
+/** Apply localized titles (tooltips) for elements with data-i18n-title */
+function translateTitles(dict, fb) {
+  document.querySelectorAll("[data-i18n-title]").forEach((el) => {
+    const key = el.dataset.i18nTitle;
+    const txt = resolveKey(key, dict) ?? resolveKey(key, fb);
+    if (txt) el.title = txt;
+  });
+}
+
+
 /** Apply a given locale code */
 export async function applyLocale(locale) {
     const dict = (await fetchLocale(locale)) || {};
     const fb = fallbackDict || (await fetchLocale(FALLBACK_LOCALE)) || {};
     currentDict = dict;
     translateDom(dict, fb);
+    translateTitles(dict, fb);
     try {
         localStorage.setItem("wb:locale", locale);
     } catch (_) { }
@@ -108,6 +119,7 @@ export async function initI18n() {
 
     currentDict = dict;
     translateDom(dict, fallbackDict);
+    translateTitles(dict, fallbackDict);
 
     // --- Language selector handling ---
     const langSel = document.getElementById("langSelect");

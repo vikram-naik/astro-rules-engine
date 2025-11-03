@@ -160,7 +160,6 @@ function renderGrid(data) {
       minWidth: 70,
       cellClass: "text-light",
       cellStyle: { textAlign: "center", whiteSpace: "nowrap" },
-      headerClass: "ag-center-cell",
     },
     ...planets.map((p) => ({
       field: p,
@@ -216,8 +215,10 @@ function renderGrid(data) {
       resizable: true,
       sortable: false,
       filter: false,
+      autoHeaderHeight: true,
       // we want cells to appear as single-line with ellipsis by default
       cellStyle: { fontSize: "0.85rem", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" },
+      headerClass: "ephem-header-class",
     },
 
     /* compute row height (log each decision) */
@@ -332,6 +333,22 @@ function shiftWeek(days) {
   loadEphemeris(false);
 }
 
+async function fetchAstroConfigAndPrefillTime() {
+  try {
+    const res = await fetch("/api/astro/config");
+    if (!res.ok) return;
+    const data = await res.json();
+    const refInput = document.getElementById("ephemerisReferenceTime");
+    if (refInput && data.default_reference_time) {
+      refInput.value = data.default_reference_time.padEnd(8, ":00");
+      refInput.title = `Default reference time: ${data.default_reference_time} (from system config). Changing it affects only this view.`;
+    }
+  } catch (err) {
+    console.warn("⚠️ Failed to fetch AstroConfig for default time", err);
+  }
+}
+
+
 /* -----------------------------
  * Init
  * ----------------------------- */
@@ -360,9 +377,7 @@ export function initEphemeris() {
     refInput.addEventListener("change", () => loadEphemeris(true));
   }
 
-  loadEphemeris(false);
-
-
+  fetchAstroConfigAndPrefillTime().then(() => loadEphemeris(false));
 
   onLocaleChange(() => {
     try {

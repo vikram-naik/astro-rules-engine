@@ -204,9 +204,9 @@ label.form-label,
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.35);
 }
 
-.ag-header {
-  min-height: 35px !important;
-}
+/* .ag-header {
+  min-height: 50px !important;
+} */
 
 .ag-theme-alpine-dark .ag-tooltip {
   background: rgba(15, 15, 17, 0.95) !important;
@@ -495,6 +495,7 @@ label.form-label,
 .ag-theme-alpine-dark .ag-header-cell-text {
   color: rgba(235, 235, 235, 0.88) !important;
   font-weight: 600 !important;
+  text-align: center;
 }
 
 #sidebarToggle img {
@@ -533,4 +534,49 @@ label.form-label,
   transform: rotate(90deg);
 }
 
+.ephem-header-class {
+  text-align: center !important;
+}
 
+/* =======================================================
+   Ephemeris Header Alignment Fix – Nov 2025
+   ======================================================= */
+
+/* Force center alignment for header text in all nested wrappers */
+.ag-theme-alpine-dark .ephem-header-class,
+.ag-theme-alpine-dark .ephem-header-class .ag-header-cell-label,
+.ag-theme-alpine-dark .ephem-header-class .ag-header-cell-text {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  text-align: center !important;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Optional: reduce header padding to visually balance center alignment */
+.ag-theme-alpine-dark .ag-header-cell-label {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+/* =======================================================
+   Ephemeris Matrix – Column Separator Enhancement (Nov 2025)
+   ======================================================= */
+
+/* Light vertical line between all columns */
+.ag-theme-alpine-dark .ag-cell,
+.ag-theme-alpine-dark .ag-header-cell {
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Remove double border on the grid’s outer edge */
+.ag-theme-alpine-dark .ag-center-cols-container .ag-cell:last-child,
+.ag-theme-alpine-dark .ag-header-row .ag-header-cell:last-child {
+  border-right: none !important;
+}
+
+/* Make sure the pinned left column separator stays consistent */
+.ag-theme-alpine-dark .ag-pinned-left-cols-container .ag-cell,
+.ag-theme-alpine-dark .ag-pinned-left-header {
+  border-right: 1px solid rgba(255, 255, 255, 0.15) !important;
+}

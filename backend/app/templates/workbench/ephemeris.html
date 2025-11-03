@@ -11,8 +11,12 @@
         <input type="date" id="ephemerisStartDate"
           class="form-control form-control-sm bg-dark text-light border-secondary" />
         <!-- Time selector -->
-        <input type="time" id="ephemerisReferenceTime" value="00:00:00" step="1"
+        <input type="time" id="ephemerisReferenceTime" value="00:00:00" step="1" data-i18n-title="ephemeris.timeTooltip"
           class="form-control form-control-sm bg-dark text-light border-secondary" />
+        <button type="button" id="ephemRefTimeInfo" class="btn btn-sm btn-outline-secondary ms-1"
+          data-i18n-title="ephemeris.timeTooltip" title="">
+          <i class="bi bi-info-circle"></i>
+        </button>
         <!-- Navigation buttons -->
         <div class="btn-group">
           <button id="ephemerisPrev" class="btn btn-sm btn-outline-light" title="Previous Week">⟨</button>

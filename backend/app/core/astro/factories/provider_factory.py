@@ -45,11 +45,11 @@ def get_provider(
 
         # Configure with location + timezone defaults or overrides
         loc = location or {
-            "lon": float(getattr(settings, "astro_location_lon", 72.8777)),
-            "lat": float(getattr(settings, "astro_location_lat", 19.0760)),
-            "alt": float(getattr(settings, "astro_location_alt", 0.0)),
+            "lon": float(getattr(settings, "ASTRO_LOCATION_LON", 72.8777)),
+            "lat": float(getattr(settings, "ASTRO_LOCATION_LAT", 19.0760)),
+            "alt": float(getattr(settings, "ASTRO_LOCATION_ALT", 0.0)),
         }
-        tz = tz_name or getattr(settings, "astro_timezone", "Asia/Kolkata")
+        tz = tz_name or getattr(settings, "ASTRO_TIMEZONE", "Asia/Kolkata")
 
         if hasattr(instance, "configure"):
             instance.configure(location=loc, tz_name=tz)

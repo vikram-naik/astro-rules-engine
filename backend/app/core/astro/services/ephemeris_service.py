@@ -10,6 +10,7 @@ from app.core.db import SessionLocal
 from app.core.astro.factories.provider_factory import get_provider
 from app.core.db.astro_config import AstroConfig
 from app.core.db.enums import AyanamsaMode, Planet, Sign
+from app.core.common.config import DEFAULT_REFERENCE_TIME
 
 logger = logging.getLogger("astro.ephemeris")
 
@@ -217,6 +218,13 @@ class EphemerisService:
             location={"lon": lon, "lat": lat, "alt": alt},
             tz_name=tz_name,
         )
+
+        if not reference_time:
+            try:
+                h, m, s = [int(x) for x in DEFAULT_REFERENCE_TIME.split(":")]
+                reference_time = time(h, m, s)
+            except Exception:
+                reference_time = time(0, 0, 0)
 
         dates = [start_date + timedelta(days=i) for i in range(7)]
         ref_iso = reference_time.isoformat()

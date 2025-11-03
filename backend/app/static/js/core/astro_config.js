@@ -10,6 +10,8 @@
 import { toast, fetchJSON, withSpinner } from "./utils.js";
 
 export function initAstroConfig() {
+  const defaultRefTimeEl = document.getElementById("astroDefaultRefTime");
+
   const lonEl = document.getElementById("astroLon");
   const latEl = document.getElementById("astroLat");
   const altEl = document.getElementById("astroAlt");
@@ -29,6 +31,8 @@ export function initAstroConfig() {
   const autoBtn = document.getElementById("astroAutoDetect");
 
   const modalAyLbl = document.getElementById("astroAyanamsaModalLabel");
+
+
 
 
   if (!ayTopEl || !saveBtn || !resetBtn) {
@@ -58,6 +62,11 @@ export function initAstroConfig() {
         locLbl.textContent = `${(+data.lon).toFixed(2)} / ${(+data.lat).toFixed(2)}`;
       if (tzLbl)
         tzLbl.textContent = String(data.tz || "").replace("Asia/", "");
+
+      if (defaultRefTimeEl && data.default_reference_time) {
+        defaultRefTimeEl.value = data.default_reference_time;
+      }
+
     } catch (err) {
       toast("Failed to load Astro configuration", "danger");
       console.error("Astro config load failed:", err);
@@ -75,6 +84,7 @@ export function initAstroConfig() {
       provider: providerEl?.value || "skyfield",
       max_workers: safeNum(maxWorkersEl?.value, 1),
       node_mode: nodeModeEl?.value || "mean",
+      default_reference_time: defaultRefTimeEl?.value || "00:00:00",
     };
     await withSpinner(saveBtn, async () => {
       const res = await fetch("/api/astro/config", {
@@ -199,7 +209,7 @@ export function initAstroConfig() {
   // NEW event listeners for provider / node_mode: update immediately on change (matching your pattern)
   if (providerEl) providerEl.addEventListener("change", updateProvider);
   if (nodeModeEl) nodeModeEl.addEventListener("change", updateNodeMode);
-  
+
   const topProviderEl = document.getElementById("astroProviderTop");
   if (topProviderEl) {
     topProviderEl.addEventListener("change", async () => {

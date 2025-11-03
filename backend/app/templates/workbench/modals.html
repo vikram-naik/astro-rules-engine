@@ -44,6 +44,19 @@
               class="form-control form-control-sm bg-dark text-light border border-secondary">
               --
             </div>
+            <!-- Default Reference Time -->
+            <div class="mb-2">
+              <label data-i18n="modal.astro.defaultRefTime" class="form-label small" for="astroDefaultRefTime">
+                Default Reference Time (HH:MM:SS)
+              </label>
+              <input type="time" step="1" id="astroDefaultRefTime"
+                class="form-control form-control-sm bg-dark text-light border-secondary" value="00:00:00" />
+              <small data-i18n="modal.astro.defaultRefTimeHint" class="text-secondary">
+                This time is used as the default reference for ephemeris calculations.
+              </small>
+            </div>
+
+
             <!-- Ephemeris Provider -->
             <div class="mb-2">
               <label data-i18n="modal.astro.provider" for="astroProvider" class="form-label small">
