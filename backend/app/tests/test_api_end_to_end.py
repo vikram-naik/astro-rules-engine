@@ -15,7 +15,6 @@ def test_end_to_end_rules_and_sectors(client):
 
     # 2️⃣ Create rule linked to that sector
     rule_payload = {
-        "rule_id": "R001",
         "name": "Saturn in Capricorn",
         "description": "Commodities steady under Saturn in Capricorn",
         "confidence": 0.9,
@@ -25,14 +24,15 @@ def test_end_to_end_rules_and_sectors(client):
     }
     resp = client.post("/api/rules/", json=rule_payload)
     assert resp.status_code == 200, resp.text
-    assert resp.json()["rule_id"] == "R001"
+    print(resp.json())
+    assert resp.json()["id"] == 1
 
     # 3️⃣ Fetch rules
     resp = client.get("/api/rules/")
     assert resp.status_code == 200
     rules = resp.json()
     assert len(rules) == 1
-    assert rules[0]["rule_id"] == "R001"
+    assert rules[0]["id"] == 1
 
     # 4️⃣ Update rule
     update_payload = {
@@ -40,14 +40,14 @@ def test_end_to_end_rules_and_sectors(client):
         "conditions": [{"planet": "saturn", "relation": "retrograde"}],
         "outcomes": [{"effect": "Bearish", "weight": 0.5, "sector_id": 1}],
     }
-    resp = client.put("/api/rules/R001", json=update_payload)
+    resp = client.put("/api/rules/1", json=update_payload)
     assert resp.status_code == 200
     assert "Updated" in resp.text
 
     # 5️⃣ Delete rule
-    resp = client.delete("/api/rules/R001")
+    resp = client.delete("/api/rules/1")
     assert resp.status_code == 200
-    assert resp.json()["deleted"] == "R001"
+    assert resp.json()["deleted"] == 1
 
     # 6️⃣ Ensure sector still exists
     resp = client.get("/api/sectors/")

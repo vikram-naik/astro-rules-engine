@@ -59,7 +59,7 @@ def test_swissephprovider_unsupported_planet_and_ketu_adjustment(monkeypatch):
         p.longitude("notaplanet", datetime(2025,1,1))
 
     # patch mapper to ensure ketu offset logic
-    p.planet_mappper.resolve = lambda pl: 0
+    p.planet_mapper.resolve = lambda pl: 0
     monkeypatch.setattr("swisseph.calc_ut", lambda jd, pid, flags: ([180.0, 0, 0], 0))
     val = p.longitude(Planet.ketu, datetime(2025,1,1))
     assert 0 <= val < 360
@@ -140,7 +140,7 @@ def test_skyfield_is_retrograde_defensive(monkeypatch):
 # -------------------------------------------------------------------------
 
 def test_swiss_mapper_keyerror():
-    mapper = SwissEphemProvider().planet_mappper
+    mapper = SwissEphemProvider().planet_mapper
     with pytest.raises(KeyError):
         mapper.resolve("not_a_planet")
 
