@@ -133,6 +133,7 @@
     "title": "Ephemeris Matrix",
     "timeTooltip": "Default time is system-configured; changing it updates this matrix view only.",
     "columns": {
+      "planet": "Planets",
       "date": "Date",
       "sun": "Sun",
       "moon": "Moon",

@@ -127,6 +127,29 @@ function renderGrid(data) {
     return;
   }
 
+  // --- Data Transposition ---
+  // Original: rows are dates, columns are planets.
+  // New: rows are planets, columns are dates.
+  const dates = data.rows.map((r) => r.date);
+  const planets = data.planets;
+
+  // Create a map for quick lookup: date -> {planet -> cell}
+  const dateCellMap = new Map();
+  data.rows.forEach(row => {
+    dateCellMap.set(row.date, row.cells || {});
+  });
+
+  // Build transposed rowData: one row per planet
+  const rowData = planets.map(planet => {
+    const row = { planet: planet };
+    dates.forEach(date => {
+      const cellsForDate = dateCellMap.get(date);
+      row[date] = cellsForDate ? cellsForDate[planet] : null;
+    });
+    return row;
+  });
+  // --------------------------
+
   const gridDiv = document.getElementById("ephemerisGrid");
   if (!gridDiv) return;
 
@@ -145,60 +168,55 @@ function renderGrid(data) {
   // keep grid container height controlled in CSS; fallback here
   gridDiv.style.height = gridDiv.style.height || "520px";
 
-  const planets = data.planets;
-  // Date column (center aligned)
+  // --- Column Definitions for Transposed View ---
   const colDefs = [
     {
-      field: "date",
-      headerName: safeT("ephemeris.columns.date") || "Date",
-      valueFormatter: (p) => {
-        const d = new Date(p.value);
-        return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`;
-      },
+      field: "planet",
+      headerName: safeT("ephemeris.columns.planet") || "Planet",
+      valueFormatter: (p) => safeT(`ephemeris.columns.${p.value}`) || p.value,
       pinned: "left",
-      width: 90,
-      minWidth: 70,
+      width: 120,
+      minWidth: 100,
       cellClass: "text-light",
-      cellStyle: { textAlign: "center", whiteSpace: "nowrap" },
+      cellStyle: (params) => ({
+        fontWeight: params.value ? "700" : "normal", // make planet names bold only if non-empty
+        textAlign: "center",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center"
+      }),
     },
-    ...planets.map((p) => ({
-      field: p,
-      headerName: safeT(`ephemeris.columns.${p}`) || p,
+
+    ...dates.map((date) => ({
+      field: date,
+      headerName: new Date(date).toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+      }),
       cellRenderer: ephemerisCellRenderer,
       resizable: true,
       width: 180,
       minWidth: 160,
       maxWidth: 260,
       autoHeight: false,
-      cellStyle: {
-        whiteSpace: "nowrap",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        minWidth: "100%",
-      },
       tooltipValueGetter: (params) => {
         const v = params.value;
         if (!v) return "";
+        const planetName = safeT(`ephemeris.columns.${params.data.planet}`) || params.data.planet;
         const signKey = v.sign ? safeT(`ephemeris.signs.${v.sign}`) : "";
         const motion = v.is_retrograde
           ? safeT("ephemeris.motion.retrograde")
           : v.is_stationary
             ? safeT("ephemeris.motion.stationary")
             : safeT("ephemeris.motion.direct");
-        return `${safeT(`ephemeris.columns.${params.colDef.field}`)} ${v.longitude?.toFixed(2)}° ${signKey} — ${motion}`;
+        return `${planetName} on ${params.colDef.headerName}: ${v.longitude?.toFixed(2)}° ${signKey} — ${motion}`;
       },
       cellClass: "text-light",
       // prevent planet top line wrapping; transition line is allowed by renderer
       cellStyle: { whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" },
     })),
   ];
-
-  // row data mapping (planets are keys)
-  const rowData = data.rows.map((r) => {
-    const row = { date: r.date };
-    for (const [planet, cell] of Object.entries(r.cells || {})) row[planet] = cell;
-    return row;
-  });
+  // ---------------------------------------------
 
   const overlay = document.getElementById("ephemerisLoadingOverlay");
 
@@ -224,14 +242,14 @@ function renderGrid(data) {
     /* compute row height (log each decision) */
     getRowHeight: (params) => {
       const data = params.data || {};
-      const planetKeys = Object.keys(data).filter((k) => k !== "date");
-      const hasTransition = planetKeys.some((key) => {
+      const dateKeys = Object.keys(data).filter((k) => k !== "planet");
+      const hasTransition = dateKeys.some((key) => {
         const cell = data[key];
         return cell && cell.transition_from && cell.transition_to;
       });
       // base height for single-line row; second line when a transition exists
       const h = hasTransition ? 64 : 36;
-      console.debug(`🪐 RowHeight | date=${data.date || "?"} | hasTransition=${hasTransition} | height=${h}`);
+      console.debug(`🪐 RowHeight | planet=${data.planet || "?"} | hasTransition=${hasTransition} | height=${h}`);
       return h;
     },
 
@@ -386,10 +404,11 @@ export function initEphemeris() {
 
       // Update header names and tooltips for current columns
       const updatedCols = gridApi.getColumnDefs().map(col => {
-        if (col.field === "date") {
-          col.headerName = safeT("ephemeris.columns.date") || "Date";
+        if (col.field === "planet") {
+          col.headerName = safeT("ephemeris.columns.planet") || "Planet";
         } else {
-          col.headerName = safeT(`ephemeris.columns.${col.field}`) || col.field;
+          // Date columns don't need header translation, but we can re-format if needed
+          // For now, we rely on the initial render's toLocaleDateString
         }
         return col;
       });

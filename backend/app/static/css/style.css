@@ -569,14 +569,18 @@ label.form-label,
   border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
-/* Remove double border on the grid’s outer edge */
+/* Keep border line after last column for visual closure */
 .ag-theme-alpine-dark .ag-center-cols-container .ag-cell:last-child,
 .ag-theme-alpine-dark .ag-header-row .ag-header-cell:last-child {
-  border-right: none !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
 /* Make sure the pinned left column separator stays consistent */
 .ag-theme-alpine-dark .ag-pinned-left-cols-container .ag-cell,
 .ag-theme-alpine-dark .ag-pinned-left-header {
   border-right: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+#ephemerisGrid .ag-center-cols-viewport {
+  padding-right: 1px;
 }
