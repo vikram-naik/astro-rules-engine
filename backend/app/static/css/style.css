@@ -1,111 +1,82 @@
 /* ================================================================
-   Astro-Market Workbench – Clean Consolidated Stylesheet
+   Astro-Market Workbench – Cosmic Theme (Glassmorphism & Neon)
    ================================================================ */
 
-/* -------------------- CORE THEME -------------------- */
+/* -------------------- CORE THEME VARIABLES -------------------- */
 :root {
-  --bg-dark: #0b0b0c;
-  --bg-panel: #141416;
-  --text-light: #dfe6ee;
-  --border-faint: rgba(255, 255, 255, 0.08);
-}
+  /* Cosmic Palette */
+  --bg-deep-space: #050507;
+  --bg-nebula: #0b0b10;
+  --bg-glass: rgba(20, 20, 25, 0.65);
+  --bg-glass-hover: rgba(30, 30, 40, 0.75);
 
-/* =======================================================
-   THEME VARIABLES (Phase-4)
-   ======================================================= */
-:root {
-  --accent-gold: #ffd54f;
-  --accent-gold-soft: #fff8e1;
-  --accent-blue: #64b5f6;
-  --accent-teal: #80cbc4;
-  --accent-red: #ef9a9a;
-  --accent-text: #f1f3f6;
-  --bg-dark: #0b0b0c;
-  --bg-panel: #141416;
-  --text-light: #dfe6ee;
-  --border-faint: rgba(255, 255, 255, 0.08);
-}
+  /* Text Colors */
+  --text-primary: #f0f4f8;
+  --text-secondary: #b0b8c4;
+  --text-muted: #6c757d;
 
+  /* Accents */
+  --accent-primary: #6366f1;
+  /* Indigo Neon */
+  --accent-secondary: #8b5cf6;
+  /* Violet Neon */
+  --accent-success: #10b981;
+  /* Emerald */
+  --accent-warning: #f59e0b;
+  /* Amber */
+  --accent-danger: #ef4444;
+  /* Red */
+  --accent-info: #0ea5e9;
+  /* Sky Blue */
+
+  /* Astrological Accents */
+  --astro-gold: #fbbf24;
+  --astro-silver: #e2e8f0;
+
+  /* Borders & Glows */
+  --border-glass: rgba(255, 255, 255, 0.08);
+  --glow-primary: 0 0 15px rgba(99, 102, 241, 0.3);
+  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+
+  /* Transitions */
+  --transition-fast: 0.2s ease;
+  --transition-smooth: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
 body {
-  background-color: var(--bg-dark);
-  color: var(--text-light);
+  background-color: var(--bg-deep-space);
+  background-image:
+    radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 25%),
+    radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.08) 0%, transparent 25%);
+  color: var(--text-primary);
+  font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
-/* -------------------- BUTTONS & INPUTS -------------------- */
-.btn-primary {
-  background-color: #2b2b2f;
-  border-color: var(--border-faint);
+/* -------------------- TYPOGRAPHY -------------------- */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
 }
 
-.btn-outline-light {
-  border-color: var(--border-faint);
+.text-muted {
+  color: var(--text-secondary) !important;
 }
 
-input,
-select,
-textarea {
-  background-color: #1a1a1c;
-  color: var(--text-light);
-  border: 1px solid var(--border-faint);
-}
-
-.form-control:focus,
-.form-select:focus,
-textarea:focus,
-input[type="text"]:focus,
-input[type="number"]:focus,
-input[type="date"]:focus {
-  color: var(--text-light) !important;
-  background-color: rgba(255, 255, 255, 0.08) !important;
-  border-color: rgba(255, 255, 255, 0.25) !important;
-  box-shadow: 0 0 0 0.15rem rgba(255, 255, 255, 0.08) !important;
-}
-
-::placeholder {
-  color: #9ca3af;
-  opacity: 1;
-}
-
-/* -------------------- LABELS -------------------- */
-label.form-label,
-.form-check-label.small {
-  color: #e8eaed !important;
-  font-weight: 500;
-}
-
-/* -------------------- MODALS -------------------- */
-.modal-content {
-  background: rgba(25, 25, 27, 0.9);
+/* -------------------- GLASSMORPHISM COMPONENTS -------------------- */
+.glass-panel {
+  background: var(--bg-glass);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 0.75rem;
-  box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
-}
-
-.modal-header,
-.modal-footer {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(255, 255, 255, 0.06);
-}
-
-.modal-title {
-  color: #f5f7fa;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-}
-
-/* -------------------- CARDS & TABLES -------------------- */
-.card,
-.table {
-  background-color: var(--bg-panel);
-}
-
-.card-header,
-.card .card-header span,
-.card .card-header .btn {
-  color: var(--text-light) !important;
-  font-weight: 600;
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-glass);
+  box-shadow: var(--shadow-glass);
 }
 
 /* -------------------- SIDEBAR / NAV -------------------- */
@@ -113,474 +84,267 @@ label.form-label,
   position: fixed;
   top: 56px;
   left: 0;
-  width: 220px;
+  width: 240px;
   height: calc(100% - 56px);
-  background: var(--bg-panel);
-  border-right: 1px solid var(--border-faint);
-  transition: transform 0.3s ease-in-out;
+  background: rgba(11, 11, 16, 0.85);
+  backdrop-filter: blur(16px);
+  border-right: 1px solid var(--border-glass);
+  transition: transform var(--transition-smooth);
   z-index: 1030;
+  padding-top: 1rem;
 }
 
 #wbSidebar.collapsed {
   transform: translateX(-100%);
 }
 
+#wbSidebar .nav-link {
+  color: var(--text-secondary);
+  padding: 0.75rem 1.25rem;
+  margin: 0.25rem 0.75rem;
+  border-radius: 0.75rem;
+  transition: all var(--transition-fast);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#wbSidebar .nav-link:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateX(4px);
+}
+
+#wbSidebar .nav-link.active {
+  color: #fff;
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.1) 100%);
+  border-left: 3px solid var(--accent-primary);
+  box-shadow: var(--glow-primary);
+}
+
+#wbSidebar .nav-link i {
+  font-size: 1.1rem;
+  width: 24px;
+  text-align: center;
+}
+
+/* -------------------- CONTENT AREA -------------------- */
 #workbenchContent {
-  margin-left: 220px;
-  transition: margin-left 0.3s ease-in-out;
+  margin-left: 240px;
+  transition: margin-left var(--transition-smooth);
+  padding: 2rem;
 }
 
 #workbenchContent.expanded {
   margin-left: 0;
 }
 
+/* -------------------- CARDS -------------------- */
+.card {
+  background: var(--bg-glass);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-glass);
+  border-radius: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  margin-bottom: 1.5rem;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+.card-header {
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid var(--border-glass);
+  padding: 1rem 1.5rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+.card-footer {
+  background: transparent;
+  border-top: 1px solid var(--border-glass);
+  padding: 1rem 1.5rem;
+}
+
+/* -------------------- BUTTONS -------------------- */
+.btn {
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+  letter-spacing: 0.3px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+  border: none;
+  color: white;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #5558e6 0%, #7c4dff 100%);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+  transform: translateY(-1px);
+}
+
+.btn-outline-light {
+  border-color: var(--border-glass);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-secondary);
+}
+
+.btn-outline-light:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--text-secondary);
+  color: var(--text-primary);
+}
+
 /* -------------------- FORMS -------------------- */
 .form-control,
 .form-select {
-  background-color: #191a1d !important;
-  border: 1px solid rgba(255, 255, 255, 0.10) !important;
-  color: #e8eaee !important;
+  background-color: rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid var(--border-glass) !important;
+  color: var(--text-primary) !important;
+  border-radius: 0.5rem;
+  padding: 0.6rem 1rem;
+  transition: all var(--transition-fast);
 }
 
 .form-control:focus,
 .form-select:focus {
-  background-color: #1e1f22 !important;
-  border-color: rgba(255, 255, 255, 0.25) !important;
-  box-shadow: 0 0 0 0.15rem rgba(255, 255, 255, 0.05) !important;
+  background-color: rgba(0, 0, 0, 0.3) !important;
+  border-color: var(--accent-primary) !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15) !important;
 }
 
-.form-control:disabled,
-.form-select:disabled {
-  background-color: rgba(255, 255, 255, 0.04) !important;
-  border-color: rgba(255, 255, 255, 0.08) !important;
-  color: rgba(255, 255, 255, 0.5) !important;
+label.form-label {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
 }
 
-/* -------------------- LANGUAGE SELECTOR -------------------- */
-#langSelect {
-  background-color: #1a1a1c !important;
-  color: #f0f0f0 !important;
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+/* -------------------- MODALS -------------------- */
+.modal-content {
+  background: #13131a;
+  border: 1px solid var(--border-glass);
+  border-radius: 1rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
-#langSelect:focus {
-  background-color: #232326 !important;
-  border-color: rgba(255, 255, 255, 0.25) !important;
-  box-shadow: none !important;
+.modal-header {
+  border-bottom: 1px solid var(--border-glass);
+  padding: 1.5rem;
 }
 
-/* -------------------- MODAL CLOSE BUTTON -------------------- */
-.modal-header .btn-close {
-  filter: invert(1) grayscale(100%) brightness(180%);
-  opacity: 0.9;
+.modal-footer {
+  border-top: 1px solid var(--border-glass);
+  padding: 1.5rem;
 }
 
-.modal-header .btn-close:hover {
-  opacity: 1;
-  transform: scale(1.1);
+.modal-backdrop.show {
+  opacity: 0.7;
+  backdrop-filter: blur(4px);
 }
 
-/* =======================================================
-   AG Grid – Dark Theme & Ephemeris Integration
-   ======================================================= */
+/* -------------------- AG GRID CUSTOMIZATION -------------------- */
 .ag-theme-alpine-dark {
-  --ag-background-color: #141416;
-  --ag-foreground-color: #e2e6eb;
-  --ag-border-color: rgba(255, 255, 255, 0.08);
-  --ag-header-background-color: #1a1a1d;
-  --ag-header-foreground-color: #f1f3f6;
-  --ag-header-border-color: rgba(255, 255, 255, 0.1);
-  --ag-row-hover-color: rgba(255, 255, 255, 0.08);
-  --ag-font-size: 0.875rem;
-  --ag-font-family: "Inter", "Segoe UI", system-ui, sans-serif;
-  scrollbar-color: #444 #1b1b1e;
-  scrollbar-width: thin;
+  --ag-background-color: transparent;
+  --ag-foreground-color: var(--text-secondary);
+  --ag-border-color: var(--border-glass);
+  --ag-header-background-color: rgba(255, 255, 255, 0.03);
+  --ag-header-foreground-color: var(--text-primary);
+  --ag-row-hover-color: rgba(255, 255, 255, 0.04);
+  --ag-selected-row-background-color: rgba(99, 102, 241, 0.1);
+  --ag-font-family: 'Outfit', sans-serif;
+  --ag-font-size: 14px;
 }
 
 .ag-root-wrapper {
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 0.5rem;
-  background-color: var(--ag-background-color);
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--border-glass);
+  border-radius: 0.75rem;
+  background: rgba(15, 15, 20, 0.4);
+  backdrop-filter: blur(10px);
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
 }
 
-/* .ag-header {
-  min-height: 50px !important;
-} */
-
-.ag-theme-alpine-dark .ag-tooltip {
-  background: rgba(15, 15, 17, 0.95) !important;
-  color: #f8f9fa !important;
-  font-size: 0.85rem;
-  padding: 8px 10px;
-  border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
-  max-width: 320px;
-  white-space: normal;
-  line-height: 1.35;
+.ag-header-cell {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  font-size: 0.75rem;
 }
 
-/* =======================================================
-   Ephemeris Grid Cell Styling
-   ======================================================= */
-.ephem-cell {
-  padding-top: 2px;
-  padding-bottom: 4px;
-  white-space: normal;
-  word-break: keep-all;
-}
-
-.ephem-pos {
+.ag-cell {
   display: flex;
   align-items: center;
-  gap: 4px;
-  line-height: 1.4;
-  font-weight: 600;
-  color: #f1f3f6;
 }
 
-.ephem-status {
-  margin-left: 4px;
-  color: #ffc107;
-  font-size: 0.8em;
-  letter-spacing: 0.3px;
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
 
-/* Color-coded status tags for quick visual scan */
-.ephem-status span {
-  margin-left: 2px;
-  font-weight: 600;
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
 }
 
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* -------------------- EPHEMERIS SPECIFIC -------------------- */
 .ephem-status span[data-flag="Sg"] {
-  color: var(--accent-gold);
+  color: var(--astro-gold);
+  text-shadow: 0 0 10px rgba(251, 191, 36, 0.4);
 }
 
-/* Sign Change */
 .ephem-status span[data-flag="Ex"] {
-  color: var(--accent-teal);
+  color: var(--accent-info);
 }
 
-/* Exalted */
 .ephem-status span[data-flag="Db"] {
-  color: var(--accent-red);
+  color: var(--accent-danger);
 }
 
-/* Debilitated */
 .ephem-status span[data-flag="MT"] {
-  color: var(--accent-blue);
+  color: var(--accent-primary);
 }
 
-/* Moolatrikona */
-.ephem-status span[data-flag="C"] {
-  color: var(--accent-gold-soft);
-}
-
-/* Combust */
 .ephem-status span[data-flag="R"] {
-  color: #ffb347;
+  color: var(--accent-warning);
 }
 
-/* Retrograde */
-.ephem-status span[data-flag="S"] {
-  color: #9fa8da;
-}
-
-/* Stationary */
-.ephem-status span[data-flag="D"] {
-  color: #a5d6a7;
-}
-
-/* Direct */
-
-
-.ephem-transition {
-  white-space: normal !important;
-  overflow: visible;
-}
-
-.ephem-legend {
-  font-size: 0.9rem !important;
-  font-weight: 400;
-  color: #d0d0d0 !important;
-  text-align: center;
-  letter-spacing: 0.25px;
-  line-height: 1.4;
-  padding: 4px 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-/* =======================================================
-   ✅ Ephemeris Footer Legend – Improved Readability
-   ======================================================= */
-.ephem-legend {
-  font-size: 1rem !important;
-  font-weight: 500 !important;
-  color: rgba(230, 230, 230, 0.92) !important;
-  text-align: center;
-  letter-spacing: 0.3px;
-  line-height: 1.5;
-  padding: 6px 0;
-}
-
-.ephem-legend .ephem-status span[data-flag] {
-  font-weight: 600;
-  margin: 0 2px;
-  font-size: 0.95em;
-}
-
-.ephem-legend span[data-flag]+span:not([data-flag]) {
-  color: rgba(230, 230, 230, 0.8) !important;
-  /* text labels softer */
-}
-
-
-.card-footer {
-  min-height: 40px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-/* =======================================================
-   Overlay & Scrollbar
-   ======================================================= */
 .ephemeris-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: rgba(11, 11, 12, 0.72);
-  color: var(--text-light);
-  z-index: 800;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 180ms ease-in-out;
+  background: rgba(5, 5, 7, 0.8);
+  backdrop-filter: blur(5px);
 }
 
-.ephemeris-overlay.visible {
-  opacity: 1;
-  pointer-events: auto;
+/* -------------------- UTILITIES -------------------- */
+.text-gradient {
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-.ephemeris-overlay .spinner-border {
-  width: 3rem;
-  height: 3rem;
-}
-
-/* Dark scrollbar harmony */
-.ag-theme-alpine-dark ::-webkit-scrollbar {
-  height: 10px;
-  width: 10px;
-  background-color: #1b1b1e;
-}
-
-.ag-theme-alpine-dark ::-webkit-scrollbar-track {
-  background-color: #1b1b1e;
-}
-
-.ag-theme-alpine-dark ::-webkit-scrollbar-thumb {
-  background-color: #444;
-  border-radius: 6px;
-  border: 2px solid #1b1b1e;
-}
-
-.ag-theme-alpine-dark ::-webkit-scrollbar-thumb:hover {
-  background-color: #666;
-}
-
-/* =======================================================
-   🔧 Theme Restoration Fixes (Nov 2025)
-   ======================================================= */
-
-/* 1️⃣ Sidebar / Navigation active and hover states */
-#wbSidebar .nav-link {
-  color: rgba(255, 255, 255, 0.85);
-  background-color: transparent;
-  border-radius: 0.4rem;
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-#wbSidebar .nav-link:hover {
-  color: #ffd54f !important;
-  /* warm gold highlight */
-  background-color: rgba(255, 255, 255, 0.08) !important;
-}
-
-#wbSidebar .nav-link.active {
-  color: #fff8e1 !important;
-  /* softer gold-white */
-  background-color: rgba(255, 255, 255, 0.12) !important;
-  font-weight: 600;
-  border-left: 3px solid #ffb300;
-  /* subtle golden bar */
-  padding-left: calc(1rem - 3px);
-}
-
-/* 2️⃣ Ephemeris transition line contrast fix */
-.ephem-transition {
-  color: rgba(255, 255, 255, 0.92) !important;
-  /* stronger readability */
-  opacity: 1 !important;
-  font-style: italic;
-}
-
-/* =======================================================
-   Rule Editor – Button Theme Fix
-   ======================================================= */
-#btnAddCondition,
-#btnGenerateEvents {
-  background-color: rgba(255, 255, 255, 0.06) !important;
-  color: #f5f5f5 !important;
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
-  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-}
-
-#btnAddCondition:hover,
-#btnGenerateEvents:hover {
-  background-color: rgba(255, 255, 255, 0.12) !important;
-  color: #fff8e1 !important;
-  /* soft gold */
-  border-color: rgba(255, 255, 255, 0.25) !important;
-}
-
-#btnAddCondition:active,
-#btnGenerateEvents:active {
-  background-color: rgba(255, 255, 255, 0.18) !important;
-  border-color: rgba(255, 255, 255, 0.3) !important;
-}
-
-
-
-.ag-theme-alpine-dark .ephem-transition {
-  white-space: normal !important;
-  display: block !important;
-  line-height: 1.4 !important;
-  padding-top: 2px;
-  padding-bottom: 2px;
-}
-
-/* =======================================================
-   Ephemeris Final: Prevent planet line wrapping (Nov 2025)
-   ======================================================= */
-.ephem-pos {
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  display: flex !important;
-  align-items: center;
-}
-
-
-/* =======================================================
-   🌙 Ephemeris Table Text Subtle Contrast Adjustment
-   ======================================================= */
-
-/* Dim the main cell text for comfortable reading */
-.ag-theme-alpine-dark .ag-cell,
-.ag-theme-alpine-dark .ephem-cell,
-.ag-theme-alpine-dark .ephem-pos {
-  color: rgba(220, 220, 220, 0.82) !important; /* softer neutral gray */
-  font-weight: 500 !important;
-}
-
-/* Keep planetary highlights, retrograde markers, etc., vivid */
-.ag-theme-alpine-dark .ephem-status span[data-flag] {
-  filter: brightness(1.05); /* keeps accent colors slightly vivid */
-}
-
-/* Optional: slightly darker header text to balance grid contrast */
-.ag-theme-alpine-dark .ag-header-cell-text {
-  color: rgba(235, 235, 235, 0.88) !important;
-  font-weight: 600 !important;
-  text-align: center;
-}
-
-#sidebarToggle img {
-  filter: brightness(0.95);
-  transition: filter 0.2s ease;
-}
-
-#sidebarToggle:hover img {
-  filter: brightness(1.2);
-}
-
-#sidebarToggle:active img {
-  filter: brightness(0.8);
-}
-
-/* =======================================================
-   Sidebar Toggle Icon Animation (Final Polished)
-   ======================================================= */
-.sidebar-icon {
-  transition: transform 0.35s cubic-bezier(0.4, 0.0, 0.2, 1), filter 0.25s ease;
-  transform-origin: center center;
-  filter: brightness(0.95);
-  will-change: transform;
-}
-
-#sidebarToggle:hover .sidebar-icon {
-  filter: brightness(1.2);
-}
-
-#sidebarToggle:active .sidebar-icon {
-  filter: brightness(0.8);
-}
-
-/* Rotation animation when toggled */
-.sidebar-icon.rotated {
-  transform: rotate(90deg);
-}
-
-.ephem-header-class {
-  text-align: center !important;
-}
-
-/* =======================================================
-   Ephemeris Header Alignment Fix – Nov 2025
-   ======================================================= */
-
-/* Force center alignment for header text in all nested wrappers */
-.ag-theme-alpine-dark .ephem-header-class,
-.ag-theme-alpine-dark .ephem-header-class .ag-header-cell-label,
-.ag-theme-alpine-dark .ephem-header-class .ag-header-cell-text {
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-  text-align: center !important;
-  width: 100%;
-  margin: 0 auto;
-}
-
-/* Optional: reduce header padding to visually balance center alignment */
-.ag-theme-alpine-dark .ag-header-cell-label {
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-}
-/* =======================================================
-   Ephemeris Matrix – Column Separator Enhancement (Nov 2025)
-   ======================================================= */
-
-/* Light vertical line between all columns */
-.ag-theme-alpine-dark .ag-cell,
-.ag-theme-alpine-dark .ag-header-cell {
-  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
-}
-
-/* Keep border line after last column for visual closure */
-.ag-theme-alpine-dark .ag-center-cols-container .ag-cell:last-child,
-.ag-theme-alpine-dark .ag-header-row .ag-header-cell:last-child {
-  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
-}
-
-/* Make sure the pinned left column separator stays consistent */
-.ag-theme-alpine-dark .ag-pinned-left-cols-container .ag-cell,
-.ag-theme-alpine-dark .ag-pinned-left-header {
-  border-right: 1px solid rgba(255, 255, 255, 0.15) !important;
-}
-
-#ephemerisGrid .ag-center-cols-viewport {
-  padding-right: 1px;
+.glow-on-hover:hover {
+  box-shadow: var(--glow-primary);
 }
